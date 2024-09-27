@@ -20,10 +20,13 @@ const sanitisedEnvVars: Environment = sanitiseEnvVariable(process.env);
 
 const pd = api({token: sanitisedEnvVars.API_TOKEN});
 
-const sinceDate:string = "2024-08-01";
-const untilDate:string = "2024-08-31";
+const sinceDate:string = "2024-08-01T00:00:00+01:00";
+const untilDate:string = "2024-08-31T23:59:59+01:00";
+const kafkaScheduleId:string = "PSNB4LV";
+const incidentCommanderScheduleId = "PBV22PW";
+const infraPlatScheduleId = "PNMPHEA";
 
-pd.get('/schedules/PBV22PW', 
+pd.get(`/schedules/${infraPlatScheduleId}`, 
     {data: {
         overflow: false,
         since: sinceDate,
@@ -35,6 +38,10 @@ pd.get('/schedules/PBV22PW',
         ({data, resource, response, next}) => {
         console.log("Schedule name: %s", data.schedule.name);
         console.log("Schedule URL: %s", data.schedule.html_url);
+        console.log("%d users are on-call for this schedule between %s and %s", 
+            data.schedule.users.length,
+            sinceDate,
+            untilDate);
         displayFinalSchedule(data.schedule.final_schedule, sinceDate, untilDate);
     })
     .catch(console.error);
@@ -63,10 +70,6 @@ export function displayFinalSchedule(finalSchedule: FinalSchedule, sinceDate: st
         console.error("Could not render final schedule! It is undefined or null.");
     }
     if(finalSchedule.rendered_schedule_entries){
-        console.log("%d people were on-call for this schedule between %s and %s", 
-            finalSchedule.rendered_schedule_entries.length,
-            sinceDate,
-            untilDate);
         console.log("**********");
         finalSchedule.rendered_schedule_entries
         .forEach(element => {
