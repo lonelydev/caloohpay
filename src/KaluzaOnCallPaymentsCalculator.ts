@@ -12,7 +12,7 @@ function wasPersonOnCallOOH(dateToCheck: Date, onCallUntilDate: Date): boolean {
     // check if dateToCheck with time 1800 is within the range of dateToCheck and onCallUntilDate
     var dateToCheckEvening = new Date(dateToCheck);
     dateToCheckEvening.setHours(18);
-    if (dateToCheckEvening > dateToCheck && dateToCheckEvening < onCallUntilDate && onCallDurationInHours > 14) {
+    if (dateToCheckEvening > dateToCheck && dateToCheckEvening < onCallUntilDate){ //&& onCallDurationInHours > 14) {
         return true;
     }
     return false;
@@ -29,6 +29,10 @@ export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator
         this.onCallRates = onCallRates;
     }
 
+    /**
+     * The calculator works on the assumption that the request was made with full date time format
+     * i.e. since is YYYY-MM-DDT00:00:00+01:00 AND until is YYYY-MM-DDT23:59:59+01:00
+     */
     calculateOnCallPayment(onCallUser: OnCallUser): number {
         if (!onCallUser) {
             throw new Error("User undefined!");
@@ -79,5 +83,13 @@ export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator
             totalPayment += onCallDays[dayNum as Days] * this.onCallRates[dayNum as Days];
         }
         return totalPayment;
+    }
+
+    calculateOnCallPayments(onCallUsers: OnCallUser[]): Record<string, number> {
+        let payments: Record<string, number> = {};
+        for (let i = 0; i < onCallUsers.length; i++) {
+            payments[onCallUsers[i].id] = this.calculateOnCallPayment(onCallUsers[i]);
+        }
+        return payments;
     }
 }
