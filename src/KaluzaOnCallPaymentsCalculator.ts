@@ -3,19 +3,10 @@ import { Days } from "./Days";
 import { OnCallUser } from "./OnCallUser";
 
 function wasPersonOnCallOOH(dateToCheck: Date, onCallUntilDate: Date): boolean {
-    /**
-     * was the person OnCall after 6pm on dateToCheck
-     * was the diff between onCallUntilDate and dateToCheck > 12 hours
-     * then the person was on-call OOH for the night of dateToCheck
-     */
     const onCallDurationInHours = dateDiffInHours(onCallUntilDate, dateToCheck);
-    // check if dateToCheck with time 1800 is within the range of dateToCheck and onCallUntilDate
     var dateToCheckEvening = new Date(dateToCheck);
     dateToCheckEvening.setHours(18);
-    if (dateToCheckEvening > dateToCheck && dateToCheckEvening < onCallUntilDate){ //&& onCallDurationInHours > 14) {
-        return true;
-    }
-    return false;
+    return (dateToCheckEvening > dateToCheck && dateToCheckEvening < onCallUntilDate)
 }
 
 export function dateDiffInHours(until: Date, since: Date): number {
@@ -53,21 +44,6 @@ export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator
 
             let curDate = onCallUser.onCallPeriods[i].since;
             while (curDate < onCallUser.onCallPeriods[i].until) {
-                /**
-                 * for every date check if the person was on-call in the evenings after 6pm
-                 * and on-call for hours from 0-10am. Then the person was on-call OOH for 1 night
-                 *
-                 * https://stackoverflow.com/questions/2250036/how-to-determine-if-it-is-day-or-night-in-javascript
-                 */
-
-                /**
-                 * given a date range, calculate number of days where the shift started after 6pm
-                 * and was longer than 12 hours.
-                 * If true, then increment a counter corresponding to userOohDays[day] 
-                 * where day is the day of the week. This will be used to calculate the payment later.
-                 * For every key in userOohDays, onCallPayment += userOohDays[key] * onCallRates[key]  
-                 */
-                //console.log(curDate);
                 if (wasPersonOnCallOOH(curDate, onCallUser.onCallPeriods[i].until)) {
                     //console.log("curDate.getDay() as Days %s", curDate.getDay() as Days);
                     onCallDays[curDate.getDay() as Days] += 1;
@@ -75,7 +51,6 @@ export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator
                 curDate.setDate(curDate.getDate() + 1);
             }
         }
-        // Calculate payment based on onCallDays and onCallRates
         let totalPayment = 0;
         for (const day in onCallDays) {
             // convert string day to number
