@@ -3,6 +3,17 @@ import { KaluzaOnCallPaymentsCalculator } from "../src/KaluzaOnCallPaymentsCalcu
 import { Days } from '../src/Days';
 
 describe('should calculate the payment for an on call user', () => {
+    
+    const onCallRates: Record<Days, number> = {
+        [Days.SUNDAY]: 75,
+        [Days.MONDAY]: 50,
+        [Days.TUESDAY]: 50,
+        [Days.WEDNESDAY]: 50,
+        [Days.THURSDAY]: 50,
+        [Days.FRIDAY]: 75,
+        [Days.SATURDAY]: 75,
+    };
+
     test('- when person continues to be on-call from end of Month to 12th of subsequent month', () => {
         const onCallUser = {
             id: '1',
@@ -12,15 +23,7 @@ describe('should calculate the payment for an on call user', () => {
                     until: new Date('2024-08-12T10:00:00+01:00')}
             ]
         };
-        const onCallRates: Record<Days, number> = {
-            [Days.SUNDAY]: 75,
-            [Days.MONDAY]: 50,
-            [Days.TUESDAY]: 50,
-            [Days.WEDNESDAY]: 50,
-            [Days.THURSDAY]: 50,
-            [Days.FRIDAY]: 75,
-            [Days.SATURDAY]: 75,
-        };
+        
         const calculator = new KaluzaOnCallPaymentsCalculator(onCallRates);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(700);
     });
@@ -34,15 +37,7 @@ describe('should calculate the payment for an on call user', () => {
                     until: new Date('2024-08-12T10:00:00+01:00')}
             ]
         };
-        const onCallRates: Record<Days, number> = {
-            [Days.SUNDAY]: 75,
-            [Days.MONDAY]: 50,
-            [Days.TUESDAY]: 50,
-            [Days.WEDNESDAY]: 50,
-            [Days.THURSDAY]: 50,
-            [Days.FRIDAY]: 75,
-            [Days.SATURDAY]: 75,
-        };
+        
         const calculator = new KaluzaOnCallPaymentsCalculator(onCallRates);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(700);
     });
@@ -56,21 +51,12 @@ describe('should calculate the payment for an on call user', () => {
                     until: new Date('2024-08-31T23:59:59+01:00')}
             ]
         };
-        const onCallRates: Record<Days, number> = {
-            [Days.SUNDAY]: 75,
-            [Days.MONDAY]: 50,
-            [Days.TUESDAY]: 50,
-            [Days.WEDNESDAY]: 50,
-            [Days.THURSDAY]: 50,
-            [Days.FRIDAY]: 75,
-            [Days.SATURDAY]: 75,
-        };
+        
         const calculator = new KaluzaOnCallPaymentsCalculator(onCallRates);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(250);
     });
 
     test('- when multiple people are on-call from start of Month 10am to end of that month', () => {
-
         const onCallUsers = [
             {
                 id: '1PF7DNAV',
@@ -109,15 +95,7 @@ describe('should calculate the payment for an on call user', () => {
                 ]
             }
         ];
-        const onCallRates: Record<Days, number> = {
-            [Days.SUNDAY]: 75,
-            [Days.MONDAY]: 50,
-            [Days.TUESDAY]: 50,
-            [Days.WEDNESDAY]: 50,
-            [Days.THURSDAY]: 50,
-            [Days.FRIDAY]: 75,
-            [Days.SATURDAY]: 75,
-        };
+        
         const calculator = new KaluzaOnCallPaymentsCalculator(onCallRates);
         expect(calculator.calculateOnCallPayments(onCallUsers)).toStrictEqual({
             "1PF7DNAV": 575,
