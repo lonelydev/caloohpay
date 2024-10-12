@@ -2,6 +2,7 @@ import {api} from '@pagerduty/pdjs';
 import * as dotenv from 'dotenv';
 import { OnCallUser } from './OnCallUser';
 import { OnCallPeriod } from './OnCallPeriod';
+import { KaluzaOnCallPaymentsCalculator } from './KaluzaOnCallPaymentsCalculator';
 
 dotenv.config();
 
@@ -60,66 +61,75 @@ pd.get(`/schedules/${incidentCommanderScheduleId}`,
         console.log("Schedule URL: %s", data.schedule.html_url);
 
         let onCallUsers = getOnCallUsersInDateRange(data.schedule.final_schedule, sinceDate, untilDate);
-        displayOnCallUsers(onCallUsers);
-        //displayFinalSchedule(data.schedule.final_schedule, sinceDate, untilDate);
+        let kOnCallPaymentsCalculator = new KaluzaOnCallPaymentsCalculator();
+        let listOfOnCallUsers = Object.values(onCallUsers);
+        
+        let auditableRecords = kOnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
+        console.log("User, TotalComp, Mon-Thu, Fri-Sun");
+
+        for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
+            console.log("%s, %d, %d, %d", 
+                onCallCompensation.OnCallUser.name, 
+                onCallCompensation.totalCompensation,
+                onCallCompensation.OnCallUser.getTotalOohWeekDays(),
+                onCallCompensation.OnCallUser.getTotalOohWeekendDays());
+        }
     })
     .catch(console.error);
 
-
-
-export function displayFinalSchedule(finalSchedule: FinalSchedule, sinceDate: string, untilDate: string){
-    if(finalSchedule == null || typeof finalSchedule == 'undefined'){
-        console.error("Could not render final schedule! It is undefined or null.");
+    function getOnCallUsersInDateRange(finalSchedule: FinalSchedule, sinceDate: string, untilDate: string): Record<string,OnCallUser> {
+        let onCallUsers: Record<string,OnCallUser> = {};
+        if(finalSchedule.rendered_schedule_entries){
+            finalSchedule.rendered_schedule_entries.forEach(scheduleEntry => {
+                let onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry);
+                if(onCallUser.id in onCallUsers){
+                    onCallUsers[onCallUser.id].addOnCallPeriods(onCallUser.onCallPeriods);
+                } else {
+                    onCallUsers[onCallUser.id] = onCallUser;
+                }
+            });
+        }
+        return onCallUsers;
     }
-    if(finalSchedule.rendered_schedule_entries){
-        console.log("**********");
-        finalSchedule.rendered_schedule_entries
-        .forEach(element => {
-            console.log("%s (%s) was on call from %s to %s", element.user?.summary, element.user?.id, element.start, element.end);
-        });
-        console.log("**********");
-
+    
+    interface ScheduleEntry {
+        user?: User,
+        start: Date,
+        end: Date   
     }
-}
-
-function getOnCallUsersInDateRange(finalSchedule: FinalSchedule, sinceDate: string, untilDate: string): Record<string,OnCallUser> {
-    let onCallUsers: Record<string,OnCallUser> = {};
-    if(finalSchedule.rendered_schedule_entries){
-        finalSchedule.rendered_schedule_entries.forEach(scheduleEntry => {
-            let onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry);
-            if(onCallUsers[onCallUser.id]){
-                onCallUsers[onCallUser.id].onCallPeriods.push(onCallUser.onCallPeriods[0]);
-            } else {
-                onCallUsers[onCallUser.id] = onCallUser;
-            }
-        });
+    
+    function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry): OnCallUser {
+        let onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end);
+        let onCallUser = new OnCallUser(
+            scheduleEntry.user?.id || "", 
+            scheduleEntry.user?.summary || "", [onCallPeriod]);
+        return onCallUser
     }
-    return onCallUsers;
-}
 
-interface ScheduleEntry {
-    user?: User,
-    start: Date,
-    end: Date   
-}
 
-function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry): OnCallUser {
-    return {
-        id: scheduleEntry.user?.id || "",
-        name: scheduleEntry.user?.summary || "",
-        onCallPeriods: [
-            new OnCallPeriod(scheduleEntry.start, scheduleEntry.end)
-        ]
-    };
-}
+// export function displayFinalSchedule(finalSchedule: FinalSchedule, sinceDate: string, untilDate: string){
+//     if(finalSchedule == null || typeof finalSchedule == 'undefined'){
+//         console.error("Could not render final schedule! It is undefined or null.");
+//     }
+//     if(finalSchedule.rendered_schedule_entries){
+//         console.log("**********");
+//         finalSchedule.rendered_schedule_entries
+//         .forEach(element => {
+//             console.log("%s (%s) was on call from %s to %s", element.user?.summary, element.user?.id, element.start, element.end);
+//         });
+//         console.log("**********");
 
-function displayOnCallUsers(onCallUsers: Record<string,OnCallUser>){
-    console.log("On call users: ");
-    for (const [userId, onCallUser] of Object.entries(onCallUsers)) {
-        console.log("%s was on call for the following periods:", onCallUser.name);
-        onCallUser.onCallPeriods.forEach(ocp => {
-            console.log("From %s to %s", ocp.since, ocp.until);
-        });
-    }
-}
+//     }
+// }
+
+
+// function displayOnCallUsers(onCallUsers: Record<string,OnCallUser>){
+//     console.log("On call users: ");
+//     for (const [userId, onCallUser] of Object.entries(onCallUsers)) {
+//         console.log("%s was on call for the following periods:", onCallUser.name);
+//         onCallUser.onCallPeriods.forEach(ocp => {
+//             console.log("From %s to %s", ocp.since, ocp.until);
+//         });
+//     }
+// }
 
