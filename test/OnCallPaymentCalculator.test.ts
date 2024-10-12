@@ -1,6 +1,15 @@
 import {describe, expect, test} from '@jest/globals';
 import { KaluzaOnCallPaymentsCalculator } from "../src/KaluzaOnCallPaymentsCalculator";
 import { Days } from '../src/Days';
+import { OnCallPeriod } from '../src/OnCallPeriod';
+
+describe('should be able to initialise OnCallPeriod', () => {
+    test('- when OnCallPeriod is initialised', () => {
+        const onCallPeriod = new OnCallPeriod(new Date('2024-08-01T00:00:00+01:00'), new Date('2024-08-12T10:00:00+01:00'));
+        expect(onCallPeriod.since).toStrictEqual(new Date('2024-08-01T00:00:00+01:00'));
+        expect(onCallPeriod.until).toStrictEqual(new Date('2024-08-12T10:00:00+01:00'));
+    });
+})
 
 describe('should calculate the payment for an on call user', () => {
     
@@ -18,8 +27,7 @@ describe('should calculate the payment for an on call user', () => {
             id: '1',
             name: 'John Doe',
             onCallPeriods: [
-                {since: new Date('2024-08-01T00:00:00+01:00'), 
-                    until: new Date('2024-08-12T10:00:00+01:00')}
+                new OnCallPeriod(new Date('2024-08-01T00:00:00+01:00'), new Date('2024-08-12T10:00:00+01:00'))
             ]
         };
         
@@ -32,8 +40,8 @@ describe('should calculate the payment for an on call user', () => {
             id: '1',
             name: 'John Doe',
             onCallPeriods: [
-                {since: new Date('2024-08-01T10:00:00+01:00'), 
-                    until: new Date('2024-08-12T10:00:00+01:00')}
+                new OnCallPeriod(new Date('2024-08-01T10:00:00+01:00'), 
+                        new Date('2024-08-12T10:00:00+01:00'))
             ]
         };
         
@@ -46,8 +54,7 @@ describe('should calculate the payment for an on call user', () => {
             id: '1',
             name: 'John Doe',
             onCallPeriods: [
-                {since: new Date('2024-08-28T10:00:00+01:00'), 
-                    until: new Date('2024-08-31T23:59:59+01:00')}
+                new OnCallPeriod(new Date('2024-08-28T10:00:00+01:00'), new Date('2024-08-31T23:59:59+01:00'))
             ]
         };
         
@@ -61,36 +68,33 @@ describe('should calculate the payment for an on call user', () => {
                 id: '1PF7DNAV',
                 name: 'YW Oncall',
                 onCallPeriods: [
-                    {since: new Date('2024-08-01T00:00:00+01:00'), 
-                        until: new Date('2024-08-06T10:00:00+01:00')},
-                    {since: new Date('2024-08-28T10:00:00+01:00'), 
-                        until: new Date('2024-09-01T00:00:00+01:00')}
+                    new OnCallPeriod(new Date('2024-08-01T00:00:00+01:00'), new Date('2024-08-06T10:00:00+01:00')),
+                    new OnCallPeriod(new Date('2024-08-28T10:00:00+01:00'), new Date('2024-09-01T00:00:00+01:00'))
                 ]
             },
             {
                 id: 'PGO3DTM',
                 name: 'SK Oncall',
                 onCallPeriods: [
-                    {since: new Date('2024-08-06T10:00:00+01:00'), 
-                        until: new Date('2024-08-15T10:00:00+01:00')},
-                    {since: new Date('2024-08-16T10:00:00+01:00'), 
-                        until: new Date('2024-08-21T10:00:00+01:00')}
+                    new OnCallPeriod(new Date('2024-08-06T10:00:00+01:00'), 
+                            new Date('2024-08-15T10:00:00+01:00')),
+                        new OnCallPeriod(new Date('2024-08-16T10:00:00+01:00'), 
+                            new Date('2024-08-21T10:00:00+01:00'))
                 ]
             },
             {
                 id: 'PINI77A',
                 name: 'EG Oncall',
                 onCallPeriods: [
-                    {since: new Date('2024-08-15T00:00:00+01:00'), 
-                        until: new Date('2024-08-16T10:00:00+01:00')}
+                    new OnCallPeriod(new Date('2024-08-15T00:00:00+01:00'), 
+                        new Date('2024-08-16T10:00:00+01:00'))
                 ]
             },
             {
                 id: 'PJXZDBT',
                 name: 'CE Oncall',
                 onCallPeriods: [
-                    {since: new Date('2024-08-21T10:00:00+01:00'), 
-                        until: new Date('2024-08-28T10:00:00+01:00')}
+                    new OnCallPeriod(new Date('2024-08-21T10:00:00+01:00'), new Date('2024-08-28T10:00:00+01:00'))
                 ]
             }
         ];

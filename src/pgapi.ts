@@ -1,6 +1,7 @@
 import {api} from '@pagerduty/pdjs';
 import * as dotenv from 'dotenv';
 import { OnCallUser } from './OnCallUser';
+import { OnCallPeriod } from './OnCallPeriod';
 
 dotenv.config();
 
@@ -116,7 +117,7 @@ function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry): OnCallUse
         id: scheduleEntry.user?.id || "",
         name: scheduleEntry.user?.summary || "",
         onCallPeriods: [
-            {since: scheduleEntry.start, until: scheduleEntry.end}
+            new OnCallPeriod(scheduleEntry.start, scheduleEntry.end)
         ]
     };
 }

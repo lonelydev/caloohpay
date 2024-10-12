@@ -1,13 +1,4 @@
-
-export class OnCallPeriod {
-    since: Date;
-    until: Date;
-
-    constructor(s = new Date(), u = new Date((new Date()).getDate() + 1)) {
-        this.since = s;
-        this.until = u;
-    }
-}
+import { OnCallPeriod } from "./OnCallPeriod";
 
 export class OnCallUser {
     id: string;
