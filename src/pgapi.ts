@@ -58,16 +58,7 @@ pd.get(`/schedules/${incidentCommanderScheduleId}`,
         ({data, resource, response, next}) => {
         console.log("Schedule name: %s", data.schedule.name);
         console.log("Schedule URL: %s", data.schedule.html_url);
-        // this is the list of all the users that might have been originally on-call for this schedule
-        // this is not the final on-call schedule users
-        // console.log("%d users are on-call for this schedule between %s and %s", 
-        //     data.schedule.users.length,
-        //     sinceDate,
-        //     untilDate);
-        // console.log("On-call users: ");    
-        // data.schedule.users.forEach((user: User) => {
-        //     console.log("%s (%s)", user.summary, user.id);
-        // });
+
         let onCallUsers = getOnCallUsersInDateRange(data.schedule.final_schedule, sinceDate, untilDate);
         displayOnCallUsers(onCallUsers);
         //displayFinalSchedule(data.schedule.final_schedule, sinceDate, untilDate);
