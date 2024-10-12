@@ -1,6 +1,5 @@
 import {describe, expect, test} from '@jest/globals';
 import { KaluzaOnCallPaymentsCalculator } from "../src/KaluzaOnCallPaymentsCalculator";
-import { Days } from '../src/Days';
 import { OnCallPeriod } from '../src/OnCallPeriod';
 
 describe('should be able to initialise OnCallPeriod', () => {
