@@ -1,46 +1,53 @@
 export class OnCallPeriod {
 
-    public readonly since: Date;
-    public readonly until: Date;
-
-    private _numberOfWeekDays: number = 0;
-    private _numberOfWeekendDays: number = 0;
+    readonly since: Date;
+    readonly until: Date;
+    
+    private _numberOfOohWeekDays: number = 0;
+    private _numberOfOohWeekendDays: number = 0;
 
     constructor (s:Date, u:Date) {
-        this.since = s;
-        this.until = u;
-        this.initializeWeekDayAndWeekendDayCount();
+        this.since = new Date(s);
+        this.until = new Date(u);
+        this.initializeOohWeekDayAndWeekendDayCount();
     }
 
-    private initializeWeekDayAndWeekendDayCount() {
+    private initializeOohWeekDayAndWeekendDayCount() {
         let curDate = new Date(this.since);
         while (curDate < this.until) {
-            if (this.isWeekDay(curDate.getDay())) {
-                this._numberOfWeekDays++;
-            } else {
-                this._numberOfWeekendDays++;
+            if (OnCallPeriod.wasPersonOnCallOOH(curDate, this.until)) {
+                if (OnCallPeriod.isWeekDay(curDate.getDay())) {
+                    this._numberOfOohWeekDays++;
+                } else {
+                    this._numberOfOohWeekendDays++;
+                }
             }
+            
             curDate.setDate(curDate.getDate() + 1);
         }
     }
 
-    public get numberOfWeekDays(): number {
-        return this._numberOfWeekDays;
+    public get numberOfOOhWeekDays(): number {
+        return this._numberOfOohWeekDays;
     }
 
-    private set numberOfWeekDays(value: number) {
-        this._numberOfWeekDays = value;
+    public get numberOfOohWeekendDays(): number {
+        return this._numberOfOohWeekendDays;
     }
 
-    public get numberOfWeekendDays(): number {
-        return this._numberOfWeekendDays;
-    }
-
-    public set numberOfWeekendDays(value: number) {
-        this._numberOfWeekendDays = value;
-    }
-
-    private isWeekDay(dayNum: number): boolean {
+    private static isWeekDay(dayNum: number): boolean {
         return dayNum > 0 && dayNum < 5;
+    }
+    
+    private static wasPersonOnCallOOH(dateToCheck: Date, onCallUntilDate: Date): boolean {
+        var dateToCheckEvening = new Date(dateToCheck);
+        dateToCheckEvening.setHours(18);
+        return (dateToCheckEvening > dateToCheck && dateToCheckEvening < onCallUntilDate)
+    }
+
+    toString() {
+        console.log("On call period from %s to %s", this.since, this.until);
+        console.log("Number of OOH Weekdays (Mon-Thu): %d", this.numberOfOOhWeekDays);
+        console.log("Number of OOH Weekends (Fri-Sun): %d", this.numberOfOohWeekendDays);
     }
 }

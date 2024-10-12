@@ -1,7 +1,6 @@
+import { OnCallUser } from "./OnCallUser";
+
 export interface OnCallCompensation {
-    //personId: string;
-    personName: string;
+    OnCallUser: OnCallUser
     totalCompensation: number;
-    numberOfWeekdays: number;
-    numberOfWeekends: number;
 }
