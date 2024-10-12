@@ -1,14 +1,6 @@
 import { IOnCallPaymentsCalculator } from "./IOnCallPaymentsCalculator";
+import { OnCallCompensation } from "./OnCallCompensation";
 import { OnCallUser } from "./OnCallUser";
-
-interface OnCallCompensation {
-    //personId: string;
-    personName: string;
-    totalCompensation: number;
-    numberOfWeekdays: number;
-    numberOfWeekends: number;
-}
-
 
 function wasPersonOnCallOOH(dateToCheck: Date, onCallUntilDate: Date): boolean {
     const onCallDurationInHours = dateDiffInHours(onCallUntilDate, dateToCheck);
@@ -54,7 +46,7 @@ export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator
                 throw new Error("Invalid date range!");
             }
 
-            let curDate = onCallUser.onCallPeriods[i].since;
+            let curDate = new Date(onCallUser.onCallPeriods[i].since);
             while (curDate < onCallUser.onCallPeriods[i].until) {
                 if (wasPersonOnCallOOH(curDate, onCallUser.onCallPeriods[i].until)) {
                     onCallDays[curDate.getDay()] += 1;
@@ -94,7 +86,7 @@ export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator
                 if (onCallUser.onCallPeriods[i].since > onCallUser.onCallPeriods[i].until) {
                     throw new Error("Invalid date range!");
                 }
-                let curDate = onCallUser.onCallPeriods[i].since;
+                let curDate = new Date(onCallUser.onCallPeriods[i].since);
                 while (curDate < onCallUser.onCallPeriods[i].until) {
                     if (wasPersonOnCallOOH(curDate, onCallUser.onCallPeriods[i].until)) {
                         if (isWeekDay(curDate.getDay())) {
