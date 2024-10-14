@@ -122,29 +122,13 @@ describe('should be able to audit the payment for an on call user', () => {
                         new OnCallPeriod(new Date('2024-08-16T10:00:00+01:00'), 
                             new Date('2024-08-21T10:00:00+01:00'))
                 ]
-            ),
-            // new OnCallUser(
-            //     'PINI77A',
-            //     'EG Oncall',
-            //     [
-            //         new OnCallPeriod(new Date('2024-08-15T00:00:00+01:00'), 
-            //             new Date('2024-08-16T10:00:00+01:00'))
-            //     ]
-            // ),
-            // new OnCallUser(
-            //     'PJXZDBT',
-            //     'CE Oncall',
-            //     [
-            //         new OnCallPeriod(new Date('2024-08-21T10:00:00+01:00'), new Date('2024-08-28T10:00:00+01:00'))
-            //     ]
-            // )
+            )
         ];
         
-        const calculator = new KaluzaOnCallPaymentsCalculator();
         expect(onCallUsers.length).toBe(2);
         expect(onCallUsers[0].id).toBe('1PF7DNAV');
         expect(onCallUsers[0].getTotalOohWeekDays()).toBe(4);
-        const audit = calculator.getAuditableOnCallPaymentRecords(onCallUsers);
+        const audit = KaluzaOnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(onCallUsers);
         expect(audit['1PF7DNAV'].OnCallUser.getTotalOohWeekDays()).toBe(4);
         expect(audit['1PF7DNAV'].OnCallUser.getTotalOohWeekendDays()).toBe(5);
         expect(audit['1PF7DNAV'].totalCompensation).toBe(575);

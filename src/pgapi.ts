@@ -45,10 +45,9 @@ pd.get(`/schedules/${incidentCommanderScheduleId}`,
         console.log("Schedule URL: %s", data.schedule.html_url);
 
         let onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule);
-        let kOnCallPaymentsCalculator = new KaluzaOnCallPaymentsCalculator();
         let listOfOnCallUsers = Object.values(onCallUsers);
         
-        let auditableRecords = kOnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
+        let auditableRecords = KaluzaOnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
         console.log("User, TotalComp, Mon-Thu, Fri-Sun");
 
         for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {

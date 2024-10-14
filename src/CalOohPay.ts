@@ -3,6 +3,11 @@ import { api } from '@pagerduty/pdjs';
 import * as dotenv from 'dotenv';
 import { hideBin } from 'yargs/helpers';
 import yargs, { Argv, ArgumentsCamelCase } from "yargs";
+import { OnCallUser } from './OnCallUser';
+import { OnCallPeriod } from './OnCallPeriod';
+import { FinalSchedule } from './FinalSchedule';
+import { KaluzaOnCallPaymentsCalculator } from './KaluzaOnCallPaymentsCalculator';
+import { ScheduleEntry } from './ScheduleEntry';
 
 dotenv.config();
 
@@ -87,7 +92,7 @@ const argv: CommandLineOptions = yargsInstance
         return true;
     }).argv as CommandLineOptions;
 
-    calOohPay(argv);
+calOohPay(argv);
 
 
 interface CommandLineOptions {
@@ -99,14 +104,36 @@ interface CommandLineOptions {
     help: boolean;
 }
 
+function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry): OnCallUser {
+    let onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end);
+    let onCallUser = new OnCallUser(
+        scheduleEntry.user?.id || "", 
+        scheduleEntry.user?.summary || "", [onCallPeriod]);
+    return onCallUser
+}
+
+function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule): Record<string,OnCallUser> {
+    let onCallUsers: Record<string,OnCallUser> = {};
+    if(finalSchedule.rendered_schedule_entries){
+        finalSchedule.rendered_schedule_entries.forEach(scheduleEntry => {
+            let onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry);
+            if(onCallUser.id in onCallUsers){
+                onCallUsers[onCallUser.id].addOnCallPeriods(onCallUser.onCallPeriods);
+            } else {
+                onCallUsers[onCallUser.id] = onCallUser;
+            }
+        });
+    }
+    return onCallUsers;
+}
 
 function calOohPay(cliOptions: CommandLineOptions) {
     const pagerDutyApi = api({ token: sanitisedEnvVars.API_TOKEN });
     console.log("CLI Options: %s", JSON.stringify(cliOptions));
-// invoke the pd api to get schedule data
+    // invoke the pd api to get schedule data
     for (let rotaId of cliOptions.rotaIds.split(',')) {
-        console.log(`fetching schedule data for rotaId: ${rotaId}`);
-         pagerDutyApi
+        console.log(`Fetching schedule data for rotaId: ${rotaId} between ${cliOptions.since} and ${cliOptions.until}`);
+        pagerDutyApi
             .get(`/schedules/${rotaId}`,
                 {
                     data: {
@@ -120,6 +147,19 @@ function calOohPay(cliOptions: CommandLineOptions) {
                 ({ data, resource, response, next }) => {
                     console.log("Schedule name: %s", data.schedule.name);
                     console.log("Schedule URL: %s", data.schedule.html_url);
+                    let onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule);
+                    let listOfOnCallUsers = Object.values(onCallUsers);
+
+                    let auditableRecords = KaluzaOnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
+                    console.log("User, TotalComp, Mon-Thu, Fri-Sun");
+
+                    for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
+                        console.log("%s, %d, %d, %d",
+                            onCallCompensation.OnCallUser.name,
+                            onCallCompensation.totalCompensation,
+                            onCallCompensation.OnCallUser.getTotalOohWeekDays(),
+                            onCallCompensation.OnCallUser.getTotalOohWeekendDays());
+                    }
                 }
             ).catch(
                 (error) => {
