@@ -5,5 +5,4 @@ import { OnCallUser } from "./OnCallUser";
 export interface IOnCallPaymentsCalculator {
     calculateOnCallPayment(onCallUser: OnCallUser): number;
     calculateOnCallPayments(onCallUsers: OnCallUser[]): Record<string, number>;
-    getAuditableOnCallPaymentRecords(onCallUsers: OnCallUser[]): Record<string, OnCallCompensation>;
 }
