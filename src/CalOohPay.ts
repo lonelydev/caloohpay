@@ -2,12 +2,13 @@
 import { api } from '@pagerduty/pdjs';
 import * as dotenv from 'dotenv';
 import { hideBin } from 'yargs/helpers';
-import yargs, { Argv, ArgumentsCamelCase } from "yargs";
+import yargs from "yargs";
 import { OnCallUser } from './OnCallUser';
 import { OnCallPeriod } from './OnCallPeriod';
 import { FinalSchedule } from './FinalSchedule';
 import { KaluzaOnCallPaymentsCalculator } from './KaluzaOnCallPaymentsCalculator';
 import { ScheduleEntry } from './ScheduleEntry';
+import { CommandLineOptions } from './CommandLineOptions.js';
 
 dotenv.config();
 
@@ -24,6 +25,17 @@ function sanitiseEnvVariable(envVars: NodeJS.ProcessEnv): Environment {
     };
 }
 
+function toLocalIsoStringWithOffset(date: Date): string {
+    var timezoneOffsetInMilliseconds = date.getTimezoneOffset() * 60000;
+    var localISOTime = (new Date(date.getTime() - timezoneOffsetInMilliseconds)).toISOString().slice(0, -5);
+    let timezoneOffsetInHours = - (timezoneOffsetInMilliseconds / 3600000);
+    let localISOTimeWithOffset =
+        localISOTime +
+        (timezoneOffsetInHours >= 0 ? '+' : '-') +
+        (Math.abs(timezoneOffsetInHours) < 10 ? '0' : '') +
+        timezoneOffsetInHours + ':00';
+    return localISOTimeWithOffset;
+}
 const sanitisedEnvVars: Environment = sanitiseEnvVariable(process.env);
 
 const yargsInstance = yargs(hideBin(process.argv));
@@ -38,37 +50,48 @@ const argv: CommandLineOptions = yargsInstance
         demandOption: true,
         example: 'R1234567,R7654321'
     })
+    .option('timeZoneId', {
+        type: 'string',
+        demandOption: false,
+        alias: 't',
+        description: 'the timezone id of the schedule. Refer https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone for details.'
+    })
+    .default('t', function defaultTimeZoneId(): string {
+        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+    })
     .option('since', {
         type: 'string',
         alias: 's',
-        description: 'start of the schedule period',
+        description: 'start of the schedule period (inclusive) in https://en.wikipedia.org/wiki/ISO_8601 format',
+        example: '2021-08-01T00:00:00+01:00'
     })
     .default('s', function firstDayOfPreviousMonth(): string {
         let today = new Date();
-        return new Date(Date.UTC(today.getUTCFullYear(), (today.getUTCMonth() - 1), 1)).toISOString();
-    })
+        return toLocalIsoStringWithOffset(new Date(new Date(today.getFullYear(), (today.getMonth() - 1), 1)));
+    }, 'the first day of the previous month')
     .option('until', {
         type: 'string',
         alias: 'u',
-        description: 'end of the schedule period',
+        description: 'end of the schedule period (inclusive) in https://en.wikipedia.org/wiki/ISO_8601 format',
+        example: '2021-08-01T00:00:00+01:00'
     })
     .default('u', function lastDayOfPreviousMonth(): string {
         let today = new Date();
-        return new Date(
-            Date.UTC(
-                today.getUTCFullYear(),
-                today.getUTCMonth(),
-                0,
-                23,
-                59,
-                59)
-        ).toISOString();
-    })
+        return toLocalIsoStringWithOffset(new Date(
+            new Date(
+                today.getFullYear(),
+                today.getMonth(),
+                1,
+                10)
+        ));
+    }, 'the first day of the this month')
     .option('key', {
         type: 'string',
         demandOption: false,
         alias: 'k',
-        description: 'this command line argument API_TOKEN to override environment variable API_TOKEN'
+        description: 'API_TOKEN to override environment variable API_TOKEN.\n' + 
+        'Get your API User token from \n' + 
+        'My Profile -> User Settings -> API Access -> Create New API User Token'
     })
     .option('output-file', {
         type: 'string',
@@ -81,6 +104,12 @@ const argv: CommandLineOptions = yargsInstance
         alias: 'h',
         description: 'Show help'
     })
+    .example([
+        ['caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"', 
+            'Calculates on-call payments for the comma separated pagerduty scheduleIds. The default timezone is the local timezone. The default period is the previous month.'],
+        ['caloohpay -r "PQRSTUV" -s "2021-08-01T00:00:00+01:00" -u "2021-09-01T10:00:00+01:00"', 
+            'Calculates on-call payments for the schedules with the given scheduleIds for the month of August 2021.'],
+    ])
     .help()
     .check((argv) => {
         if (argv.since && !Date.parse(argv.since)) {
@@ -94,30 +123,20 @@ const argv: CommandLineOptions = yargsInstance
 
 calOohPay(argv);
 
-
-interface CommandLineOptions {
-    rotaIds: string;
-    since: string;
-    until: string;
-    key: string;
-    outputFile: string;
-    help: boolean;
-}
-
 function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry): OnCallUser {
     let onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end);
     let onCallUser = new OnCallUser(
-        scheduleEntry.user?.id || "", 
+        scheduleEntry.user?.id || "",
         scheduleEntry.user?.summary || "", [onCallPeriod]);
     return onCallUser
 }
 
-function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule): Record<string,OnCallUser> {
-    let onCallUsers: Record<string,OnCallUser> = {};
-    if(finalSchedule.rendered_schedule_entries){
+function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule): Record<string, OnCallUser> {
+    let onCallUsers: Record<string, OnCallUser> = {};
+    if (finalSchedule.rendered_schedule_entries) {
         finalSchedule.rendered_schedule_entries.forEach(scheduleEntry => {
             let onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry);
-            if(onCallUser.id in onCallUsers){
+            if (onCallUser.id in onCallUsers) {
                 onCallUsers[onCallUser.id].addOnCallPeriods(onCallUser.onCallPeriods);
             } else {
                 onCallUsers[onCallUser.id] = onCallUser;
@@ -129,22 +148,20 @@ function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule): Reco
 
 function calOohPay(cliOptions: CommandLineOptions) {
     const pagerDutyApi = api({ token: sanitisedEnvVars.API_TOKEN });
-    console.log("CLI Options: %s", JSON.stringify(cliOptions));
-    // invoke the pd api to get schedule data
     for (let rotaId of cliOptions.rotaIds.split(',')) {
-        console.log(`Fetching schedule data for rotaId: ${rotaId} between ${cliOptions.since} and ${cliOptions.until}`);
         pagerDutyApi
             .get(`/schedules/${rotaId}`,
                 {
                     data: {
                         overflow: false,
                         since: cliOptions.since,
-                        time_zone: "Europe/London",
+                        time_zone: cliOptions.timeZoneId,
                         until: cliOptions.until
                     }
                 }
             ).then(
                 ({ data, resource, response, next }) => {
+                    console.log('-'.repeat(process.stdout.columns || 80));
                     console.log("Schedule name: %s", data.schedule.name);
                     console.log("Schedule URL: %s", data.schedule.html_url);
                     let onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule);

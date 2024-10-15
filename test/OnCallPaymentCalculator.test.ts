@@ -9,50 +9,130 @@ describe('should be able to initialise OnCallPeriod', () => {
         expect(onCallPeriod.since).toStrictEqual(new Date('2024-08-01T00:00:00+01:00'));
         expect(onCallPeriod.until).toStrictEqual(new Date('2024-08-12T10:00:00+01:00'));
     });
+
+    test('- same day, 2 hours in the evening on call period', () => {
+        const onCallPeriod = new OnCallPeriod(
+            new Date('2024-09-20T16:30:00+01:00'), 
+            new Date('2024-09-20T18:30:00+01:00'), 
+        );
+        expect(onCallPeriod.since).toStrictEqual(new Date('2024-09-20T16:30:00+01:00'));
+        expect(onCallPeriod.until).toStrictEqual(new Date('2024-09-20T18:30:00+01:00'));
+        expect(onCallPeriod.numberOfOOhWeekDays).toBe(0);
+        expect(onCallPeriod.numberOfOohWeekendDays).toBe(0);
+    });
+
+    test('- from Friday 8pm to Monday morning, numberOfOohWeekendDays must be 3', () => {
+        const since = new Date('2024-09-20T20:00:00+01:00');
+        const until = new Date('2024-09-23T10:00:00+01:00');
+        const onCallPeriod = new OnCallPeriod(
+            since, 
+            until, 
+        );
+        expect(onCallPeriod.since).toStrictEqual(since);
+        expect(onCallPeriod.until).toStrictEqual(until);
+        expect(onCallPeriod.numberOfOOhWeekDays).toBe(0);
+        expect(onCallPeriod.numberOfOohWeekendDays).toBe(3);
+    });
+
+    test('- from on-call from 28th of Month 10am to 2nd of next month', () => {
+        const since = new Date('2024-08-28T10:00:00+01:00');
+        const until = new Date('2024-09-02T10:00:00+01:00');
+        const onCallPeriod = new OnCallPeriod(
+            since, 
+            until, 
+        );
+        expect(onCallPeriod.since).toStrictEqual(since);
+        expect(onCallPeriod.until).toStrictEqual(until);
+        expect(onCallPeriod.numberOfOOhWeekDays).toBe(2);
+        expect(onCallPeriod.numberOfOohWeekendDays).toBe(3);
+    });
 })
 
 describe('should calculate the payment for an on call user', () => {
     
     test('- when person continues to be on-call from end of Month to 12th of subsequent month', () => {
+        const since = new Date('2024-08-01T00:00:00+01:00');
+        const until = new Date('2024-08-12T10:00:00+01:00');
+
         const onCallUser = new OnCallUser(
             '1',
             'John Doe',
             [
-                new OnCallPeriod(new Date('2024-08-01T00:00:00+01:00'), new Date('2024-08-12T10:00:00+01:00'))
+                new OnCallPeriod(since, until)
             ]
         );
         
         const calculator = new KaluzaOnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
+        expect(onCallUser.onCallPeriods[0].since).toEqual(since);
+        expect(onCallUser.onCallPeriods[0].until).toEqual(until);
+        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(5);
+        expect(onCallUser.onCallPeriods[0].numberOfOohWeekendDays).toBe(6);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(700);
     });
 
     test('- when person starts to be on-call from start of Month 10am to 12th of that month', () => {
+        const since = new Date('2024-08-01T10:00:00+01:00');
+        const until = new Date('2024-08-12T10:00:00+01:00');
         const onCallUser = new OnCallUser(
             '1',
             'John Doe',
             [
-                new OnCallPeriod(new Date('2024-08-01T10:00:00+01:00'), 
-                        new Date('2024-08-12T10:00:00+01:00'))
+                new OnCallPeriod(since, until)
             ]
         );
         
         const calculator = new KaluzaOnCallPaymentsCalculator();
+        expect(onCallUser.onCallPeriods).toBeDefined();
+        expect(onCallUser.onCallPeriods.length).toBe(1);
+        expect(onCallUser.onCallPeriods[0].since).toEqual(since);
+        expect(onCallUser.onCallPeriods[0].until).toEqual(until);
+        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(5);
+        expect(onCallUser.onCallPeriods[0].numberOfOohWeekendDays).toBe(6);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(700);
     });
 
-    test('- when person starts to be on-call from middle of Month 10am to end of that month', () => {
+    test('- when person starts to be on-call from 28th of August 10am to end of August', () => {
+        const since = new Date('2024-08-28T10:00:00+01:00');
+        const until = new Date('2024-08-31T23:59:59+01:00');
         const onCallUser = new OnCallUser(
             '1',
             'John Doe',
             [
-                new OnCallPeriod(new Date('2024-08-28T10:00:00+01:00'), new Date('2024-08-31T23:59:59+01:00'))
+                new OnCallPeriod(since, until)
             ]
         );
         
         const calculator = new KaluzaOnCallPaymentsCalculator();
-        expect(calculator.calculateOnCallPayment(onCallUser)).toBe(250);
+        expect(onCallUser.onCallPeriods).toBeDefined();
+        expect(onCallUser.onCallPeriods.length).toBe(1);
+        expect(onCallUser.onCallPeriods[0].since).toEqual(since);
+        expect(onCallUser.onCallPeriods[0].until).toEqual(until);
+        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(2);
+        expect(onCallUser.onCallPeriods[0].numberOfOohWeekendDays).toBe(1);
+        expect(calculator.calculateOnCallPayment(onCallUser)).toBe(175);
+    });
+
+    test('- when person starts to be on-call from 28th of Month 10am to 2nd of next month', () => {
+        const since = new Date('2024-08-28T10:00:00+01:00');
+        const until = new Date('2024-09-02T10:00:00+01:00');
+        const onCallUser = new OnCallUser(
+            '1',
+            'John Doe',
+            [
+                new OnCallPeriod(since, until)
+            ]
+        );
+        
+        const calculator = new KaluzaOnCallPaymentsCalculator();
+        expect(onCallUser.onCallPeriods).toBeDefined();
+        expect(onCallUser.onCallPeriods.length).toBe(1);
+        expect(onCallUser.onCallPeriods[0].since).toEqual(since);
+        expect(onCallUser.onCallPeriods[0].until).toEqual(until);
+        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(2);
+        expect(onCallUser.onCallPeriods[0].numberOfOohWeekendDays).toBe(3);
+        expect(calculator.calculateOnCallPayment(onCallUser)).toBe(325);
     });
 
     test('- when multiple people are on-call from start of Month 10am to end of that month', () => {
