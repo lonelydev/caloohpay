@@ -1,5 +1,5 @@
 import {describe, expect, test} from '@jest/globals';
-import { KaluzaOnCallPaymentsCalculator } from "../src/KaluzaOnCallPaymentsCalculator";
+import { OnCallPaymentsCalculator } from "../src/OnCallPaymentsCalculator";
 import { OnCallPeriod } from '../src/OnCallPeriod';
 import { OnCallUser } from '../src/OnCallUser';
 
@@ -62,7 +62,7 @@ describe('should calculate the payment for an on call user', () => {
             ]
         );
         
-        const calculator = new KaluzaOnCallPaymentsCalculator();
+        const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
         expect(onCallUser.onCallPeriods[0].since).toEqual(since);
@@ -83,7 +83,7 @@ describe('should calculate the payment for an on call user', () => {
             ]
         );
         
-        const calculator = new KaluzaOnCallPaymentsCalculator();
+        const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
         expect(onCallUser.onCallPeriods[0].since).toEqual(since);
@@ -104,7 +104,7 @@ describe('should calculate the payment for an on call user', () => {
             ]
         );
         
-        const calculator = new KaluzaOnCallPaymentsCalculator();
+        const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
         expect(onCallUser.onCallPeriods[0].since).toEqual(since);
@@ -125,7 +125,7 @@ describe('should calculate the payment for an on call user', () => {
             ]
         );
         
-        const calculator = new KaluzaOnCallPaymentsCalculator();
+        const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
         expect(onCallUser.onCallPeriods[0].since).toEqual(since);
@@ -172,7 +172,7 @@ describe('should calculate the payment for an on call user', () => {
             )
         ];
         
-        const calculator = new KaluzaOnCallPaymentsCalculator();
+        const calculator = new OnCallPaymentsCalculator();
         expect(calculator.calculateOnCallPayments(onCallUsers)).toStrictEqual({
             "1PF7DNAV": 575,
             "PGO3DTM": 850,
@@ -208,7 +208,7 @@ describe('should be able to audit the payment for an on call user', () => {
         expect(onCallUsers.length).toBe(2);
         expect(onCallUsers[0].id).toBe('1PF7DNAV');
         expect(onCallUsers[0].getTotalOohWeekDays()).toBe(4);
-        const audit = KaluzaOnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(onCallUsers);
+        const audit = OnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(onCallUsers);
         expect(audit['1PF7DNAV'].OnCallUser.getTotalOohWeekDays()).toBe(4);
         expect(audit['1PF7DNAV'].OnCallUser.getTotalOohWeekendDays()).toBe(5);
         expect(audit['1PF7DNAV'].totalCompensation).toBe(575);

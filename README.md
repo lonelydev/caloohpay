@@ -2,7 +2,7 @@
 
 In some organisations, engineers get compensated for going *on-call outside of working hours*.
 
-I have a couple of teams at Kaluza that I look after. Both with at least 4 people on the rota. Similarly, we have an *incident commander* rota. And every month, managers have to fill in a spreadsheet for payroll to account for our OOH (out of hours) on-call so that we all get compensated at the end of the month for on-call. This sounds like a simple thing, and it is. Just that it takes about 5 minutes of reconciliation per team's on-call rota. 
+I have a couple of teams at my current workplace that I look after. Both with at least 4 people on the rota. Similarly, we have an *incident commander* rota. And every month, managers have to fill in a spreadsheet for payroll to account for our OOH (out of hours) on-call so that we all get compensated at the end of the month for on-call. This sounds like a simple thing, and it is. Just that it takes about 5 minutes of reconciliation per team's on-call rota. 
 And if your team is geographically distributed, then you probably have more than one sheet to fill as each location might have a different payroll and could even have different on-call rates and maybe they even get compensated an additional amount every time they respond to an actual incident by the hour! Who knows?!
 
 That is a lot of productive minutes lost doing the same thing every month. 1 manager with two teams, could take 10 minutes. So imagine having 24 of them do this monthly! 240 minutes of doing mundane things for the company when that could have been invested in more useful, creative work, like building the next big thing!
