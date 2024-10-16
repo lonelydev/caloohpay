@@ -2,7 +2,7 @@ import {api} from '@pagerduty/pdjs';
 import * as dotenv from 'dotenv';
 import { OnCallUser } from './OnCallUser';
 import { OnCallPeriod } from './OnCallPeriod';
-import { KaluzaOnCallPaymentsCalculator } from './KaluzaOnCallPaymentsCalculator';
+import { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
 import { ScheduleEntry } from './ScheduleEntry';
 import { FinalSchedule } from './FinalSchedule';
 
@@ -47,7 +47,7 @@ pd.get(`/schedules/${incidentCommanderScheduleId}`,
         let onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule);
         let listOfOnCallUsers = Object.values(onCallUsers);
         
-        let auditableRecords = KaluzaOnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
+        let auditableRecords = OnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
         console.log("User, TotalComp, Mon-Thu, Fri-Sun");
 
         for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {

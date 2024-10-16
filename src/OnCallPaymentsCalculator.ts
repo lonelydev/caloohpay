@@ -2,7 +2,7 @@ import { IOnCallPaymentsCalculator } from "./IOnCallPaymentsCalculator";
 import { OnCallCompensation } from "./OnCallCompensation";
 import { OnCallUser } from "./OnCallUser";
 
-export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator {
+export class OnCallPaymentsCalculator implements IOnCallPaymentsCalculator {
     public static WeekDayRate: number = 50;
     public static WeekEndRate: number = 75;
 
@@ -19,9 +19,9 @@ export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator
      * i.e. since is YYYY-MM-DDT00:00:00+01:00 AND until is YYYY-MM-DDT23:59:59+01:00
      */
     calculateOnCallPayment(onCallUser: OnCallUser): number {
-        KaluzaOnCallPaymentsCalculator.validateOnCallUser(onCallUser);
-        return (onCallUser.getTotalOohWeekDays() * KaluzaOnCallPaymentsCalculator.WeekDayRate) + 
-            (onCallUser.getTotalOohWeekendDays() * KaluzaOnCallPaymentsCalculator.WeekEndRate);
+        OnCallPaymentsCalculator.validateOnCallUser(onCallUser);
+        return (onCallUser.getTotalOohWeekDays() * OnCallPaymentsCalculator.WeekDayRate) + 
+            (onCallUser.getTotalOohWeekendDays() * OnCallPaymentsCalculator.WeekEndRate);
     }
 
     calculateOnCallPayments(onCallUsers: OnCallUser[]): Record<string, number> {
@@ -39,12 +39,12 @@ export class KaluzaOnCallPaymentsCalculator implements IOnCallPaymentsCalculator
          */
         let onCallCompensations: Record<string, OnCallCompensation> = {};
         for (let onCallUser of onCallUsers) {
-            KaluzaOnCallPaymentsCalculator.validateOnCallUser(onCallUser);
+            OnCallPaymentsCalculator.validateOnCallUser(onCallUser);
             onCallCompensations[onCallUser.id] = {
                 OnCallUser: onCallUser,
                 totalCompensation: 
-                    (onCallUser.getTotalOohWeekDays() * KaluzaOnCallPaymentsCalculator.WeekDayRate) + 
-                    (onCallUser.getTotalOohWeekendDays() * KaluzaOnCallPaymentsCalculator.WeekEndRate)
+                    (onCallUser.getTotalOohWeekDays() * OnCallPaymentsCalculator.WeekDayRate) + 
+                    (onCallUser.getTotalOohWeekendDays() * OnCallPaymentsCalculator.WeekEndRate)
             }
         }
         
