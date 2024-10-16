@@ -26,8 +26,8 @@ export function toLocaTzIsoStringWithOffset(date: Date): string {
  * @param timeZoneId - The IANA timezone identifier (e.g., "America/New_York", "Europe/London").
  * @returns A new Date object representing the same moment in time in the specified timezone.
  */
-export function convertTimezone(date: Date, timeZoneId: string): Date {
+export function convertTimezone(date: Date, timeZoneId: string, localeString: string = "en-GB"): Date {
     return new Date(
         (typeof date === "string" ? new Date(date) : date)
-        .toLocaleString("en-GB", {timeZone: timeZoneId}));   
+        .toLocaleString(localeString, {timeZone: timeZoneId}));   
 }
