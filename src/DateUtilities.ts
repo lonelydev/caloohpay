@@ -31,3 +31,28 @@ export function convertTimezone(date: Date, timeZoneId: string, localeString: st
         (typeof date === "string" ? new Date(date) : date)
         .toLocaleString(localeString, {timeZone: timeZoneId}));   
 }
+
+/**
+ * Coerces a given date string to a local date with time set to midnight and returns it as an ISO string with timezone offset.
+ *
+ * @param value - The date string to be coerced.
+ * @returns The coerced date as an ISO string with timezone offset.
+ */
+export function coerceSince(value: string): string {
+    let localSinceDate = new Date(value);
+    localSinceDate.setHours(0, 0, 0, 0);
+    return toLocaTzIsoStringWithOffset(localSinceDate);
+}
+
+/**
+ * Adjusts the given date string to the end of the day (23:59:59.999) in the local timezone
+ * and returns it as an ISO string with timezone offset.
+ *
+ * @param value - The date string to be adjusted.
+ * @returns The adjusted date string in ISO format with timezone offset.
+ */
+export function coerceUntil(value: string): string {
+    let localUntilDate = new Date(value);
+    localUntilDate.setHours(23, 59, 59, 999);
+    return toLocaTzIsoStringWithOffset(localUntilDate);
+}

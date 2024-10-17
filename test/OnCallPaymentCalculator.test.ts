@@ -2,12 +2,16 @@ import {describe, expect, test} from '@jest/globals';
 import { OnCallPaymentsCalculator } from "../src/OnCallPaymentsCalculator";
 import { OnCallPeriod } from '../src/OnCallPeriod';
 import { OnCallUser } from '../src/OnCallUser';
+import { convertTimezone } from '../src/DateUtilities';
 
 describe('should calculate the payment for an on call user', () => {
+
+    var runtimeEnvTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
     
     test('- when person continues to be on-call from end of Month to 12th of subsequent month', () => {
-        const since = new Date('2024-08-01T00:00:00+01:00');
+        const since = new Date('2024-07-31T23:00:00Z');
         const until = new Date('2024-08-12T10:00:00+01:00');
+        const testDateConvertedToEnvTz = convertTimezone(since, runtimeEnvTimezone, "en-US");
 
         const onCallUser = new OnCallUser(
             '1',
