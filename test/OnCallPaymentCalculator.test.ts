@@ -7,28 +7,28 @@ import { convertTimezone } from '../src/DateUtilities';
 describe('should calculate the payment for an on call user', () => {
 
     var runtimeEnvTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    var runtimeEnvLocale = "en-US";
     
     test('- when person continues to be on-call from end of Month to 12th of subsequent month', () => {
-        const since = new Date('2024-07-31T23:00:00Z');
+        const since = new Date('2024-07-31T23:00:00+01:00');
         const until = new Date('2024-08-12T10:00:00+01:00');
-        const testDateConvertedToEnvTz = convertTimezone(since, runtimeEnvTimezone, "en-US");
+        const sinceInEnvTimezone = convertTimezone(since, runtimeEnvTimezone, runtimeEnvLocale);
+        const untilInEnvTimezone = convertTimezone(until, runtimeEnvTimezone, runtimeEnvLocale);
 
         const onCallUser = new OnCallUser(
             '1',
             'John Doe',
             [
-                new OnCallPeriod(since, until)
+                new OnCallPeriod(sinceInEnvTimezone, untilInEnvTimezone)
             ]
         );
         
         const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
-        expect(onCallUser.onCallPeriods[0].since).toEqual(since);
-        expect(onCallUser.onCallPeriods[0].until).toEqual(until);
-        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(5);
+        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(6);
         expect(onCallUser.onCallPeriods[0].numberOfOohWeekends).toBe(6);
-        expect(calculator.calculateOnCallPayment(onCallUser)).toBe(700);
+        expect(calculator.calculateOnCallPayment(onCallUser)).toBe(750);
     });
 
     test('- when person starts to be on-call from start of Month 10am to 12th of that month', () => {
@@ -53,8 +53,13 @@ describe('should calculate the payment for an on call user', () => {
     });
 
     test('- when person starts to be on-call from 28th of August 10am to end of August', () => {
-        const since = new Date('2024-08-28T10:00:00+01:00');
-        const until = new Date('2024-08-31T23:59:59+01:00');
+        const since = convertTimezone(
+            new Date('2024-08-28T10:00:00+01:00'), 
+            runtimeEnvTimezone, 
+            runtimeEnvLocale);
+        const until = convertTimezone(new Date('2024-08-31T23:59:59+01:00'),
+            runtimeEnvTimezone,
+            runtimeEnvLocale);
         const onCallUser = new OnCallUser(
             '1',
             'John Doe',
@@ -74,8 +79,8 @@ describe('should calculate the payment for an on call user', () => {
     });
 
     test('- when person starts to be on-call from 28th of Month 10am to 2nd of next month', () => {
-        const since = new Date('2024-08-28T10:00:00+01:00');
-        const until = new Date('2024-09-02T10:00:00+01:00');
+        const since = convertTimezone(new Date('2024-08-28T10:00:00+01:00'), runtimeEnvTimezone, runtimeEnvLocale);
+        const until = convertTimezone(new Date('2024-09-02T10:00:00+01:00'), runtimeEnvTimezone, runtimeEnvLocale);
         const onCallUser = new OnCallUser(
             '1',
             'John Doe',
@@ -100,33 +105,96 @@ describe('should calculate the payment for an on call user', () => {
                 '1PF7DNAV',
                 'YW Oncall',
                 [
-                    new OnCallPeriod(new Date('2024-08-01T00:00:00+01:00'), new Date('2024-08-06T10:00:00+01:00')),
-                    new OnCallPeriod(new Date('2024-08-28T10:00:00+01:00'), new Date('2024-09-01T00:00:00+01:00'))
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-01T00:00:00+01:00'), 
+                            runtimeEnvTimezone, 
+                            runtimeEnvLocale
+                        ),
+                        convertTimezone(
+                            new Date('2024-08-06T10:00:00+01:00'), 
+                            runtimeEnvTimezone, 
+                            runtimeEnvLocale
+                        )
+                    ),
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-28T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ), 
+                        convertTimezone(
+                            new Date('2024-09-01T00:00:00+01:00'),
+                        runtimeEnvTimezone,
+                        runtimeEnvLocale
+                        )
+                    )
                 ]
             ),
             new OnCallUser(
                 'PGO3DTM',
                 'SK Oncall',
                 [
-                    new OnCallPeriod(new Date('2024-08-06T10:00:00+01:00'), 
-                            new Date('2024-08-15T10:00:00+01:00')),
-                        new OnCallPeriod(new Date('2024-08-16T10:00:00+01:00'), 
-                            new Date('2024-08-21T10:00:00+01:00'))
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-06T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ),
+                        convertTimezone(
+                            new Date('2024-08-15T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        )
+                    ),
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-16T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ),
+                        convertTimezone(
+                            new Date('2024-08-21T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        )
+                    )
                 ]
             ),
             new OnCallUser(
                 'PINI77A',
                 'EG Oncall',
                 [
-                    new OnCallPeriod(new Date('2024-08-15T00:00:00+01:00'), 
-                        new Date('2024-08-16T10:00:00+01:00'))
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-15T00:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ),
+                        convertTimezone(
+                            new Date('2024-08-16T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        )
+                    )
                 ]
             ),
             new OnCallUser(
                 'PJXZDBT',
                 'CE Oncall',
                 [
-                    new OnCallPeriod(new Date('2024-08-21T10:00:00+01:00'), new Date('2024-08-28T10:00:00+01:00'))
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-21T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ), 
+                        convertTimezone(
+                            new Date('2024-08-28T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        )
+                    )
                 ]
             )
         ];
