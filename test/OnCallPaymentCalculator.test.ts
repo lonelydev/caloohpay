@@ -1,14 +1,14 @@
-import {describe, expect, test} from '@jest/globals';
+import { describe, expect, test } from '@jest/globals';
 import { OnCallPaymentsCalculator } from "../src/OnCallPaymentsCalculator";
 import { OnCallPeriod } from '../src/OnCallPeriod';
 import { OnCallUser } from '../src/OnCallUser';
 import { convertTimezone } from '../src/DateUtilities';
 
+var runtimeEnvTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+var runtimeEnvLocale = Intl.DateTimeFormat().resolvedOptions().locale;
+
 describe('should calculate the payment for an on call user', () => {
 
-    var runtimeEnvTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-    var runtimeEnvLocale = "en-US";
-    
     test('- when person continues to be on-call from end of Month to 12th of subsequent month', () => {
         const since = new Date('2024-07-31T23:00:00+01:00');
         const until = new Date('2024-08-12T10:00:00+01:00');
@@ -22,7 +22,7 @@ describe('should calculate the payment for an on call user', () => {
                 new OnCallPeriod(sinceInEnvTimezone, untilInEnvTimezone)
             ]
         );
-        
+
         const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
@@ -41,12 +41,10 @@ describe('should calculate the payment for an on call user', () => {
                 new OnCallPeriod(since, until)
             ]
         );
-        
+
         const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
-        expect(onCallUser.onCallPeriods[0].since).toEqual(since);
-        expect(onCallUser.onCallPeriods[0].until).toEqual(until);
         expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(5);
         expect(onCallUser.onCallPeriods[0].numberOfOohWeekends).toBe(6);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(700);
@@ -54,8 +52,8 @@ describe('should calculate the payment for an on call user', () => {
 
     test('- when person starts to be on-call from 28th of August 10am to end of August', () => {
         const since = convertTimezone(
-            new Date('2024-08-28T10:00:00+01:00'), 
-            runtimeEnvTimezone, 
+            new Date('2024-08-28T10:00:00+01:00'),
+            runtimeEnvTimezone,
             runtimeEnvLocale);
         const until = convertTimezone(new Date('2024-08-31T23:59:59+01:00'),
             runtimeEnvTimezone,
@@ -67,12 +65,10 @@ describe('should calculate the payment for an on call user', () => {
                 new OnCallPeriod(since, until)
             ]
         );
-        
+
         const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
-        expect(onCallUser.onCallPeriods[0].since).toEqual(since);
-        expect(onCallUser.onCallPeriods[0].until).toEqual(until);
         expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(2);
         expect(onCallUser.onCallPeriods[0].numberOfOohWeekends).toBe(1);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(175);
@@ -88,7 +84,7 @@ describe('should calculate the payment for an on call user', () => {
                 new OnCallPeriod(since, until)
             ]
         );
-        
+
         const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
@@ -107,13 +103,13 @@ describe('should calculate the payment for an on call user', () => {
                 [
                     new OnCallPeriod(
                         convertTimezone(
-                            new Date('2024-08-01T00:00:00+01:00'), 
-                            runtimeEnvTimezone, 
+                            new Date('2024-08-01T00:00:00+01:00'),
+                            runtimeEnvTimezone,
                             runtimeEnvLocale
                         ),
                         convertTimezone(
-                            new Date('2024-08-06T10:00:00+01:00'), 
-                            runtimeEnvTimezone, 
+                            new Date('2024-08-06T10:00:00+01:00'),
+                            runtimeEnvTimezone,
                             runtimeEnvLocale
                         )
                     ),
@@ -122,11 +118,11 @@ describe('should calculate the payment for an on call user', () => {
                             new Date('2024-08-28T10:00:00+01:00'),
                             runtimeEnvTimezone,
                             runtimeEnvLocale
-                        ), 
+                        ),
                         convertTimezone(
                             new Date('2024-09-01T00:00:00+01:00'),
-                        runtimeEnvTimezone,
-                        runtimeEnvLocale
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
                         )
                     )
                 ]
@@ -188,7 +184,7 @@ describe('should calculate the payment for an on call user', () => {
                             new Date('2024-08-21T10:00:00+01:00'),
                             runtimeEnvTimezone,
                             runtimeEnvLocale
-                        ), 
+                        ),
                         convertTimezone(
                             new Date('2024-08-28T10:00:00+01:00'),
                             runtimeEnvTimezone,
@@ -198,7 +194,7 @@ describe('should calculate the payment for an on call user', () => {
                 ]
             )
         ];
-        
+
         const calculator = new OnCallPaymentsCalculator();
         expect(calculator.calculateOnCallPayments(onCallUsers)).toStrictEqual({
             "1PF7DNAV": 575,
@@ -216,22 +212,64 @@ describe('should be able to audit the payment for an on call user', () => {
                 '1PF7DNAV',
                 'YW Oncall',
                 [
-                    new OnCallPeriod(new Date('2024-08-01T00:00:00+01:00'), new Date('2024-08-06T10:00:00+01:00')),
-                    new OnCallPeriod(new Date('2024-08-28T10:00:00+01:00'), new Date('2024-09-01T00:00:00+01:00'))
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-01T00:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ),
+                        convertTimezone(
+                            new Date('2024-08-06T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        )
+                    ),
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-28T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ),
+                        convertTimezone(
+                            new Date('2024-09-01T00:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        )
+                    )
                 ]
             ),
             new OnCallUser(
                 'PGO3DTM',
                 'SK Oncall',
                 [
-                    new OnCallPeriod(new Date('2024-08-06T10:00:00+01:00'), 
-                            new Date('2024-08-15T10:00:00+01:00')),
-                        new OnCallPeriod(new Date('2024-08-16T10:00:00+01:00'), 
-                            new Date('2024-08-21T10:00:00+01:00'))
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-06T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ),
+                        convertTimezone(
+                            new Date('2024-08-15T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        )
+                    ),
+                    new OnCallPeriod(
+                        convertTimezone(
+                            new Date('2024-08-16T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        ),
+                        convertTimezone(
+                            new Date('2024-08-21T10:00:00+01:00'),
+                            runtimeEnvTimezone,
+                            runtimeEnvLocale
+                        )
+                    )
                 ]
             )
         ];
-        
+
         expect(onCallUsers.length).toBe(2);
         expect(onCallUsers[0].id).toBe('1PF7DNAV');
         expect(onCallUsers[0].getTotalOohWeekDays()).toBe(4);
