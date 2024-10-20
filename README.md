@@ -27,7 +27,7 @@ API_TOKEN=u+IrTEYvqbPOc4dMNLyR
 
 3. Run `npm install`.
 4. Run `npm link`. You may need admin permissions for this one. `sudo` is your friend if you are on *nix or MacOs. If you are on Windows, please search online for a solution. If you find one, create a PR to this repo.
-5. Run `caloohpay help` - if the command doesn't work, you need to restart your terminal - as you just ran `npm link`. 
+5. Run `caloohpay help` - if the command doesn't work, you need to restart your terminal - as you just ran `npm link`.
 
 I'll script these steps to make it more usable and probably package it up. But that will take another 20 years. So you might as well follow along.
 
@@ -64,18 +64,23 @@ Options:
   -k, --key          API_TOKEN to override environment variable API_TOKEN.
                      Get your API User token from
                      My Profile -> User Settings -> API Access -> Create New API User Token  [string]
-  -o, --output-file  the path to the file where you want the on-call payments table printed  [string]
       --help         Show help  [boolean]
 
 Examples:
-  caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"                                                Calculates on-call payments for the comma separated pagerduty scheduleIds. The default timezone is the local timezone. The default period is the previous month.
-  caloohpay -r "PQRSTUV" -s "2021-08-01T00:00:00+01:00" -u "2021-09-01T10:00:00+01:00"  Calculates on-call payments for the schedules with the given scheduleIds for the month of August 2021.
+  caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"    Calculates on-call payments for the comma separated pagerduty scheduleIds.\nThe default timezone is the local timezone. The default period is the previous month.
+  caloohpay -r "PQRSTUV" -s "2021-08-01" -u "2021-09-01"    Calculates on-call payments for the schedules with the given scheduleIds for the month of August 2021.
 
 ```
 
 ## What works?
 
-The solution currently accepts `rotaIds` and since and until dates in string format - `YYYY-MM-DD` format. It assigns default time strings to the *since* and *until* dates if it isn't provided:
+The solution currently accepts `rotaIds` and since and until dates in string format - `YYYY-MM-DD` format. It assigns default time strings to the *since* and *until* dates if it isn't provided. The solution works and is tested on Europe/London timezone for schedules that are also on that timezone.
+
+For the app to take in timezone and work with it, you could use Luxon.js and replace all the JS Dates to Luxon's DateTime and initialise the instances in the right timezone. I didn't budget for this work as this was a hackathon/firebreak week project. This is a good future addition though. So the command line feature `--timeZoneId` is a no-op at the moment.
+
+The feature command line option `--key`isn't implemented yet.
+
+For generating an output file, you could run the cli and redirect output to a file.
 
 ### What are the default values of the *date and time* strings?
 
@@ -86,6 +91,9 @@ The latter is set to the value it is to ensure the calculator includes the eveni
 
 ## What is to come?
 
+- ❌ allow api key override from cli option
+- ❌ respect different timezoneIds from cli
+- ❌ allow output file generation - like a csv
 - ❌ allow weekday and weekends to be configurable via file input or CLI option
 - ❌ allow weekday rates and weekend rates to be configurable
 - ❌ add some colour to console output
