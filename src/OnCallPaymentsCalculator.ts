@@ -1,8 +1,7 @@
-import { IOnCallPaymentsCalculator } from "./IOnCallPaymentsCalculator";
 import { OnCallCompensation } from "./OnCallCompensation";
 import { OnCallUser } from "./OnCallUser";
 
-export class OnCallPaymentsCalculator implements IOnCallPaymentsCalculator {
+export class OnCallPaymentsCalculator {
     public static WeekDayRate: number = 50;
     public static WeekEndRate: number = 75;
 
@@ -26,8 +25,8 @@ export class OnCallPaymentsCalculator implements IOnCallPaymentsCalculator {
 
     calculateOnCallPayments(onCallUsers: OnCallUser[]): Record<string, number> {
         let payments: Record<string, number> = {};
-        for (let i = 0; i < onCallUsers.length; i++) {
-            payments[onCallUsers[i].id] = this.calculateOnCallPayment(onCallUsers[i]);
+        for (const onCallUser of onCallUsers) {
+            payments[onCallUser.id] = this.calculateOnCallPayment(onCallUser);
         }
         return payments;
     }
