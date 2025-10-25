@@ -4,18 +4,17 @@ import { OnCallPeriod } from '../src/OnCallPeriod';
 import { OnCallUser } from '../src/OnCallUser';
 import { DateTime } from "luxon";
 
-const runtimeEnvTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 const testTimeZone = 'Europe/London';
 
 describe('understanding luxon', () => {
-    test('should be able to use luxon to convert date to local timezone', () => {
+    test('should be able to use luxon to convert date to specific timezone', () => {
         const luxonDate = DateTime.fromISO('2023-10-01T12:00:00+01:00', { zone: 'Europe/London' });
         const timezone = luxonDate.zoneName;
-        const localDate = luxonDate.setZone(runtimeEnvTimezone);
+        const utcDate = luxonDate.setZone('UTC');
         const offset = luxonDate.offset;
         expect(offset).toBe(60);
         expect(timezone).toBe('Europe/London');
-        expect(localDate.toISO()).toBe('2023-10-01T12:00:00.000+01:00');
+        expect(utcDate.toISO()).toBe('2023-10-01T11:00:00.000Z');
     });
 });
 

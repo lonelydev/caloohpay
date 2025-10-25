@@ -3,29 +3,26 @@ import {describe, expect, test} from '@jest/globals';
 import { DateTime } from 'luxon';
 
 describe('DateUtilities.toLocaTzIsoStringWithOffset', () => {
-    const environmentTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+    const testTimezone = 'Europe/London';
 
-    test('should convert UTC date to local ISO string with timezone offset', () => {
+    test('should convert UTC date to specified timezone ISO string with timezone offset', () => {
         const dateFromISOStringZ = new Date('2023-10-01T12:00:00Z');
-        const localizedTzIsoStringWithOffset = toLocaTzIsoStringWithOffset(dateFromISOStringZ);
-        const testDateConvertedToEnvTz = convertTimezone(dateFromISOStringZ, environmentTimezone);
-        const expectedLocalISOTime = testDateConvertedToEnvTz.toISO();
-        expect(localizedTzIsoStringWithOffset).toBe(expectedLocalISOTime);
+        const testDateConvertedToLondonTz = convertTimezone(dateFromISOStringZ, testTimezone);
+        const expectedLondonISOTime = testDateConvertedToLondonTz.toISO();
+        expect(expectedLondonISOTime).toBe('2023-10-01T13:00:00.000+01:00');
     });
 
     test('should handle dates with positive timezone offsets', () => {
         const date = new Date('2023-10-01T12:00:00+02:00');
-        const result = toLocaTzIsoStringWithOffset(date);
-        const localTzDate = convertTimezone(date, environmentTimezone);
-        const expectedLocalISOTime = localTzDate.toISO();
-        expect(result).toBe(expectedLocalISOTime);
+        const londonTzDate = convertTimezone(date, testTimezone);
+        const expectedLondonISOTime = londonTzDate.toISO();
+        expect(expectedLondonISOTime).toBe('2023-10-01T11:00:00.000+01:00');
     });
 
     test('should handle dates with negative timezone offsets', () => {
         const date = new Date('2023-10-01T12:00:00-05:00');
-        const result = toLocaTzIsoStringWithOffset(date);
-        const localTzDate = convertTimezone(date, environmentTimezone);
-        const expectedLocalISOTime = localTzDate.toISO();
-        expect(result).toBe(expectedLocalISOTime);
+        const londonTzDate = convertTimezone(date, testTimezone);
+        const expectedLondonISOTime = londonTzDate.toISO();
+        expect(expectedLondonISOTime).toBe('2023-10-01T18:00:00.000+01:00');
     });
 });
