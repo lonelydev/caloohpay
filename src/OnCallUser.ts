@@ -22,13 +22,15 @@ export class OnCallUser {
         this._onCallPeriods = this._onCallPeriods.concat(periods);
     }
 
-    toString() {
-        console.log("(%s) %s was on call during: ", this.id, this.name);
-        this._onCallPeriods.forEach(ocp => console.log(ocp.toString()));
+    toString(): string {
+        const periodsInfo = this._onCallPeriods
+            .map(ocp => ocp.toString())
+            .join('\n');
+        return `(${this.id}) ${this.name} was on call during:\n${periodsInfo}`;
     }
 
     public getTotalOohWeekDays(): number {
-        return this._onCallPeriods.reduce((acc, ocp) => acc + ocp.numberOfOOhWeekDays, 0);
+        return this._onCallPeriods.reduce((acc, ocp) => acc + ocp.numberOfOohWeekDays, 0);
     }
 
     public getTotalOohWeekendDays(): number {
