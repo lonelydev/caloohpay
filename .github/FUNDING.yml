@@ -1,0 +1,7 @@
+# Funding configuration for GitHub Sponsors
+# This enables the "Sponsor" button on your repository
+
+github: [lonelydev]
+# Buy Me a Coffee username
+buy_me_a_coffee: swcraftsperson
+custom: ["https://paypal.me/eakangk?locale.x=en_GB&country.x=GB"]

@@ -13,10 +13,26 @@
     "prepare": "husky",
     "commitlint": "commitlint --edit"
   },
-  "keywords": [],
-  "author": "",
+  "keywords": [
+    "pagerduty",
+    "on-call",
+    "payroll",
+    "compensation",
+    "cli",
+    "typescript",
+    "automation"
+  ],
+  "author": "lonelydev",
   "license": "ISC",
-  "description": "",
+  "description": "A CLI tool to calculate out-of-hours on-call compensation for engineering teams using PagerDuty schedules",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/lonelydev/caloohpay.git"
+  },
+  "bugs": {
+    "url": "https://github.com/lonelydev/caloohpay/issues"
+  },
+  "homepage": "https://github.com/lonelydev/caloohpay#readme",
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
