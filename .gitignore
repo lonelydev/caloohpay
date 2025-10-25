@@ -128,3 +128,9 @@ dist
 .yarn/build-state.yml
 .yarn/install-state.gz
 .pnp.*
+
+# TypeDoc generated documentation
+docs/api/
+
+# Test output
+test/test-output/

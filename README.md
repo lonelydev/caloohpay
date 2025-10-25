@@ -106,6 +106,23 @@ npm run build
 npm run dev
 ```
 
+### Documentation
+
+Generate and view API documentation:
+
+```bash
+# Generate documentation
+npm run docs
+
+# Generate and serve locally (opens browser at http://localhost:8080)
+npm run docs:serve
+
+# Watch mode (regenerates on file changes)
+npm run docs:watch
+```
+
+View the latest API documentation online at: https://lonelydev.github.io/caloohpay/
+
 ### Contributing
 
 1. Fork the repository
@@ -345,6 +362,7 @@ Refer to [PagerDuty's timezone documentation](https://developer.pagerduty.com/do
 
 ## 📚 Technical References
 
+- **[API Documentation](https://lonelydev.github.io/caloohpay/)** - Auto-generated API docs (GitHub Pages)
 - [PagerDuty API Documentation](https://developer.pagerduty.com/api-reference/)
 - [PagerDuty Time Zones](https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone)
 - [Luxon.js Documentation](https://moment.github.io/luxon/)

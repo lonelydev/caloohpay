@@ -11,7 +11,10 @@
     "build": "tsc",
     "test": "jest",
     "prepare": "husky",
-    "commitlint": "commitlint --edit"
+    "commitlint": "commitlint --edit",
+    "docs": "typedoc",
+    "docs:watch": "typedoc --watch",
+    "docs:serve": "npm run docs && npx http-server docs/api -p 8080 -o"
   },
   "keywords": [
     "pagerduty",
@@ -44,6 +47,8 @@
     "husky": "^9.1.6",
     "jest": "^29.7.0",
     "ts-jest": "^29.2.4",
+    "typedoc": "^0.28.14",
+    "typedoc-plugin-markdown": "^4.9.0",
     "typescript": "^5.5.4"
   },
   "dependencies": {
