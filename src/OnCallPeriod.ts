@@ -6,6 +6,10 @@ export class OnCallPeriod {
     private _numberOfOohWeekDays: number = 0;
     private _numberOfOohWeekends: number = 0;
 
+    // TODO: Refactor to use Luxon timezone-aware operations throughout
+    // Current implementation uses native Date methods which depend on system timezone
+    // This works with TZ=Europe/London in CI but needs proper multi-timezone support
+    // See: https://github.com/lonelydev/caloohpay/issues - create issue for proper timezone handling
     constructor(s: Date, u: Date) {
         this.since = new Date(s);
         this.until = new Date(u);
