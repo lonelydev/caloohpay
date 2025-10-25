@@ -2,11 +2,9 @@ import { describe, expect, test } from '@jest/globals';
 import { OnCallPaymentsCalculator } from "../src/OnCallPaymentsCalculator";
 import { OnCallPeriod } from '../src/OnCallPeriod';
 import { OnCallUser } from '../src/OnCallUser';
-import { convertTimezone } from '../src/DateUtilities';
 import { DateTime } from "luxon";
 
-var runtimeEnvTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
-var runtimeEnvLocale = Intl.DateTimeFormat().resolvedOptions().locale;
+const runtimeEnvTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
 
 describe('understanding luxon', () => {
     test('should be able to use luxon to convert date to local timezone', () => {
