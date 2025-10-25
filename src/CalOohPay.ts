@@ -31,11 +31,8 @@ const argv: CommandLineOptions = yargsInstance
         type: 'string',
         demandOption: false,
         alias: 't',
-        description: 'the timezone id of the schedule. Refer https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone for details.\n' + 
-        'By default, this takes your local Timezone returned by the runtime environment',
-    })
-    .default('t', function defaultTimeZoneId(): string {
-        return Intl.DateTimeFormat().resolvedOptions().timeZone;
+        description: 'Override the timezone for OOH calculations. If not specified, uses the schedule\'s timezone from PagerDuty.\n' + 
+        'Refer https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone for valid timezone IDs.',
     })
     .option('since', {
         type: 'string',
@@ -87,9 +84,11 @@ const argv: CommandLineOptions = yargsInstance
     .example([
         ['caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"', 
             'Calculates on-call payments for the comma separated pagerduty scheduleIds.\n'+ 
-            'The default timezone is the local timezone. The default period is the previous month.'],
+            'Uses each schedule\'s timezone from PagerDuty. The default period is the previous month.'],
         ['caloohpay -r "PQRSTUV" -s "2021-08-01" -u "2021-09-01"', 
             'Calculates on-call payments for the schedules with the given scheduleIds for the month of August 2021.'],
+        ['caloohpay -r "PQRSTUV" -t "America/New_York"', 
+            'Overrides the schedule timezone and calculates OOH using America/New_York timezone.'],
     ])
     .help()
     .check((argv) => {
@@ -110,19 +109,19 @@ const argv: CommandLineOptions = yargsInstance
 
 calOohPay(argv);
 
-function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry): OnCallUser {
-    const onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end);
+function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry, timeZone: string): OnCallUser {
+    const onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end, timeZone);
     const onCallUser = new OnCallUser(
         scheduleEntry.user?.id || "",
         scheduleEntry.user?.summary || "", [onCallPeriod]);
     return onCallUser
 }
 
-function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule): Record<string, OnCallUser> {
+function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule, timeZone: string): Record<string, OnCallUser> {
     const onCallUsers: Record<string, OnCallUser> = {};
     if (finalSchedule.rendered_schedule_entries) {
         finalSchedule.rendered_schedule_entries.forEach(scheduleEntry => {
-            const onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry);
+            const onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry, timeZone);
             if (onCallUser.id in onCallUsers) {
                 onCallUsers[onCallUser.id].addOnCallPeriods(onCallUser.onCallPeriods);
             } else {
@@ -156,7 +155,16 @@ function calOohPay(cliOptions: CommandLineOptions) {
                     console.log('-'.repeat(process.stdout.columns || 80));
                     console.log("Schedule name: %s", data.schedule.name);
                     console.log("Schedule URL: %s", data.schedule.html_url);
-                    const onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule);
+                    
+                    // Use CLI timezone if provided, otherwise use schedule's timezone from API
+                    const effectiveTimeZone = cliOptions.timeZoneId || data.schedule.time_zone || 'UTC';
+                    console.log("Using timezone: %s", effectiveTimeZone);
+                    if (cliOptions.timeZoneId && data.schedule.time_zone && cliOptions.timeZoneId !== data.schedule.time_zone) {
+                        console.log("Note: CLI timezone (%s) overrides schedule timezone (%s)", 
+                            cliOptions.timeZoneId, data.schedule.time_zone);
+                    }
+                    
+                    const onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule, effectiveTimeZone);
                     const listOfOnCallUsers = Object.values(onCallUsers);
 
                     const calculator = new OnCallPaymentsCalculator();
