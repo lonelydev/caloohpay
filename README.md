@@ -217,6 +217,7 @@ Bob Wilson, 150, 3, 0
 ## ✅ Current Features
 
 ### What Works
+
 - ✅ **Schedule Fetching**: Retrieves data from PagerDuty API
 - ✅ **Multi-Schedule Support**: Process multiple schedules simultaneously
 - ✅ **Date Range Flexibility**: Custom or automatic date ranges
@@ -226,6 +227,7 @@ Bob Wilson, 150, 3, 0
 - ✅ **Comprehensive Testing**: Unit tests with Jest
 
 ### Default Behavior
+
 - **Since Date**: First day of previous month at `00:00:00` (local time)
 - **Until Date**: First day of current month at `10:00:00` (local time)
 - **Timezone**: Your system's local timezone
@@ -236,6 +238,7 @@ Bob Wilson, 150, 3, 0
 ## 🚧 Development Roadmap
 
 ### Planned Features
+
 - [ ] **API Key Override**: CLI option `--key` implementation
 - [ ] **Multiple Timezone Support**: Full timezone handling for distributed teams
 - [ ] **CSV Output**: File generation for payroll systems
@@ -245,6 +248,7 @@ Bob Wilson, 150, 3, 0
 - [ ] **Automation**: Scheduled monthly runs with automated reporting
 
 ### Long-term Vision
+
 - [ ] **Multi-platform Payroll**: Support different payroll systems
 - [ ] **Incident Response Bonus**: Additional compensation for actual incident responses
 - [ ] **Web Interface**: Simple web UI for non-technical users
