@@ -47,7 +47,7 @@ const argv: CommandLineOptions = yargsInstance
         example: '2021-08-01'
     })
     .default('s', function firstDayOfPreviousMonth(): string {
-        let today = new Date();
+        const today = new Date();
         return toLocaTzIsoStringWithOffset(new Date(new Date(today.getFullYear(), (today.getMonth() - 1), 1)));
     }, 'the first day of the previous month')
     .option('until', {
@@ -58,7 +58,7 @@ const argv: CommandLineOptions = yargsInstance
         example: '2021-08-31'
     })
     .default('u', function lastDayOfPreviousMonth(): string {
-        let today = new Date();
+        const today = new Date();
         return toLocaTzIsoStringWithOffset(new Date(
             new Date(
                 today.getFullYear(),
@@ -113,18 +113,18 @@ const argv: CommandLineOptions = yargsInstance
 calOohPay(argv);
 
 function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry): OnCallUser {
-    let onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end);
-    let onCallUser = new OnCallUser(
+    const onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end);
+    const onCallUser = new OnCallUser(
         scheduleEntry.user?.id || "",
         scheduleEntry.user?.summary || "", [onCallPeriod]);
     return onCallUser
 }
 
 function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule): Record<string, OnCallUser> {
-    let onCallUsers: Record<string, OnCallUser> = {};
+    const onCallUsers: Record<string, OnCallUser> = {};
     if (finalSchedule.rendered_schedule_entries) {
         finalSchedule.rendered_schedule_entries.forEach(scheduleEntry => {
-            let onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry);
+            const onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry);
             if (onCallUser.id in onCallUsers) {
                 onCallUsers[onCallUser.id].addOnCallPeriods(onCallUser.onCallPeriods);
             } else {
@@ -138,7 +138,7 @@ function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule): Reco
 function calOohPay(cliOptions: CommandLineOptions) {
     console.table(cliOptions);
     const pagerDutyApi = api({ token: sanitisedEnvVars.API_TOKEN });
-    for (let rotaId of cliOptions.rotaIds.split(',')) {
+    for (const rotaId of cliOptions.rotaIds.split(',')) {
         pagerDutyApi
             .get(`/schedules/${rotaId}`,
                 {
@@ -154,10 +154,11 @@ function calOohPay(cliOptions: CommandLineOptions) {
                     console.log('-'.repeat(process.stdout.columns || 80));
                     console.log("Schedule name: %s", data.schedule.name);
                     console.log("Schedule URL: %s", data.schedule.html_url);
-                    let onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule);
-                    let listOfOnCallUsers = Object.values(onCallUsers);
+                    const onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule);
+                    const listOfOnCallUsers = Object.values(onCallUsers);
 
-                    let auditableRecords = OnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
+                    const calculator = new OnCallPaymentsCalculator();
+                    const auditableRecords = calculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
                     console.log("User, TotalComp, Mon-Thu, Fri-Sun");
 
                     for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
@@ -171,6 +172,7 @@ function calOohPay(cliOptions: CommandLineOptions) {
             ).catch(
                 (error) => {
                     console.error("Error: %s", error);
+                    process.exit(1);
                 }
             );
     }
