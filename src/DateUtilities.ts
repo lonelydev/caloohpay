@@ -9,10 +9,10 @@
  * @returns A string representing the local ISO time with timezone offset.
  */
 export function toLocaTzIsoStringWithOffset(date: Date): string {
-    var timezoneOffsetInMilliseconds = date.getTimezoneOffset() * 60000;
-    var localISOTime = (new Date(date.getTime() - timezoneOffsetInMilliseconds)).toISOString().slice(0, -5);
-    let timezoneOffsetInHours = -(timezoneOffsetInMilliseconds / 3600000);
-    let localISOTimeWithOffset = localISOTime +
+    const timezoneOffsetInMilliseconds = date.getTimezoneOffset() * 60000;
+    const localISOTime = (new Date(date.getTime() - timezoneOffsetInMilliseconds)).toISOString().slice(0, -5);
+    const timezoneOffsetInHours = -(timezoneOffsetInMilliseconds / 3600000);
+    const localISOTimeWithOffset = localISOTime +
         (timezoneOffsetInHours >= 0 ? '+' : '-') +
         (Math.abs(timezoneOffsetInHours) < 10 ? '0' : '') +
         timezoneOffsetInHours + ':00';
@@ -39,7 +39,7 @@ export function convertTimezone(date: Date, timeZoneId: string, localeString: st
  * @returns The coerced date as an ISO string with timezone offset.
  */
 export function coerceSince(value: string): string {
-    let localSinceDate = new Date(value);
+    const localSinceDate = new Date(value);
     localSinceDate.setHours(0, 0, 0, 0);
     return toLocaTzIsoStringWithOffset(localSinceDate);
 }
@@ -52,7 +52,7 @@ export function coerceSince(value: string): string {
  * @returns The adjusted date string in ISO format with timezone offset.
  */
 export function coerceUntil(value: string): string {
-    let localUntilDate = new Date(value);
+    const localUntilDate = new Date(value);
     localUntilDate.setHours(23, 59, 59, 999);
     return toLocaTzIsoStringWithOffset(localUntilDate);
 }

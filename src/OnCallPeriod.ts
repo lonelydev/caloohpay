@@ -26,7 +26,7 @@ export class OnCallPeriod {
     }
 
     private initializeOohWeekDayAndWeekendDayCount() {
-        let curDate = new Date(this.since);
+        const curDate = new Date(this.since);
         while (curDate < this.until) {
             if (OnCallPeriod.wasPersonOnCallOOH(curDate, this.until)) {
                 if (OnCallPeriod.isWeekDay(curDate.getDay())) {
@@ -74,7 +74,7 @@ export class OnCallPeriod {
          * a shift could start during working hours and end after the working hours
          * a shift could start after working hours and end after the working hours
          */
-        let endOfWorkingHours = new Date(since);
+        const endOfWorkingHours = new Date(since);
         endOfWorkingHours.setHours(OnCallPeriod.END_OF_WORK_HOUR, OnCallPeriod.END_OF_WORK_MINUTE);
         return (endOfWorkingHours < until) && 
             OnCallPeriod.doesShiftSpanDays(since, until);

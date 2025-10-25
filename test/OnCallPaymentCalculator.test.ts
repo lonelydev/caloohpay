@@ -202,7 +202,8 @@ describe('should be able to audit the payment for an on call user', () => {
         expect(onCallUsers.length).toBe(2);
         expect(onCallUsers[0].id).toBe('1PF7DNAV');
         expect(onCallUsers[0].getTotalOohWeekDays()).toBe(4);
-        const audit = OnCallPaymentsCalculator.getAuditableOnCallPaymentRecords(onCallUsers);
+        const calculator = new OnCallPaymentsCalculator();
+        const audit = calculator.getAuditableOnCallPaymentRecords(onCallUsers);
         expect(audit['1PF7DNAV'].OnCallUser.getTotalOohWeekDays()).toBe(4);
         expect(audit['1PF7DNAV'].OnCallUser.getTotalOohWeekendDays()).toBe(5);
         expect(audit['1PF7DNAV'].totalCompensation).toBe(575);
