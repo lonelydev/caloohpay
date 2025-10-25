@@ -2,16 +2,24 @@ import {describe, expect, test} from '@jest/globals';
 import { OnCallPeriod } from '../src/OnCallPeriod';
 
 describe('should initialise OnCallPeriod with the right number of weekdays and weekends', () => {
+    const testTimeZone = 'Europe/London';
+
     test('- when the shift starts 1st of month and is until the 12th of the month', () => {
-        const onCallPeriod = new OnCallPeriod(new Date('2024-08-01T00:00:00+01:00'), new Date('2024-08-12T10:00:00+01:00'));
+        const onCallPeriod = new OnCallPeriod(
+            new Date('2024-08-01T00:00:00+01:00'), 
+            new Date('2024-08-12T10:00:00+01:00'),
+            testTimeZone
+        );
         expect(onCallPeriod.since).toStrictEqual(new Date('2024-08-01T00:00:00+01:00'));
         expect(onCallPeriod.until).toStrictEqual(new Date('2024-08-12T10:00:00+01:00'));
+        expect(onCallPeriod.timeZone).toBe(testTimeZone);
     });
 
     test('- when the shift starts and ends on the same day, just 2 hours in the evening', () => {
         const onCallPeriod = new OnCallPeriod(
             new Date('2024-09-20T16:30:00+01:00'), 
-            new Date('2024-09-20T18:30:00+01:00'), 
+            new Date('2024-09-20T18:30:00+01:00'),
+            testTimeZone
         );
         expect(onCallPeriod.since).toStrictEqual(new Date('2024-09-20T16:30:00+01:00'));
         expect(onCallPeriod.until).toStrictEqual(new Date('2024-09-20T18:30:00+01:00'));
@@ -24,7 +32,8 @@ describe('should initialise OnCallPeriod with the right number of weekdays and w
         const until = new Date('2024-09-23T10:00:00+01:00');
         const onCallPeriod = new OnCallPeriod(
             since, 
-            until, 
+            until,
+            testTimeZone
         );
         expect(onCallPeriod.since).toStrictEqual(since);
         expect(onCallPeriod.until).toStrictEqual(until);
@@ -37,7 +46,8 @@ describe('should initialise OnCallPeriod with the right number of weekdays and w
         const until = new Date('2024-09-02T10:00:00+01:00');
         const onCallPeriod = new OnCallPeriod(
             since, 
-            until, 
+            until,
+            testTimeZone
         );
         expect(onCallPeriod.since).toStrictEqual(since);
         expect(onCallPeriod.until).toStrictEqual(until);

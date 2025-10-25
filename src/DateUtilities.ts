@@ -1,22 +1,18 @@
+import { DateTime } from 'luxon';
+
 /**
  * Converts a given date to a local ISO string with timezone offset.
  *
  * This function takes a `Date` object and returns a string in the ISO 8601 format
  * with the local timezone offset included. The resulting string will be in the format
- * `YYYY-MM-DDTHH:mm:ss±HH:00`.
+ * `YYYY-MM-DDTHH:mm:ss±HH:MM`.
  *
  * @param date - The `Date` object to be converted.
  * @returns A string representing the local ISO time with timezone offset.
  */
 export function toLocaTzIsoStringWithOffset(date: Date): string {
-    const timezoneOffsetInMilliseconds = date.getTimezoneOffset() * 60000;
-    const localISOTime = (new Date(date.getTime() - timezoneOffsetInMilliseconds)).toISOString().slice(0, -5);
-    const timezoneOffsetInHours = -(timezoneOffsetInMilliseconds / 3600000);
-    const localISOTimeWithOffset = localISOTime +
-        (timezoneOffsetInHours >= 0 ? '+' : '-') +
-        (Math.abs(timezoneOffsetInHours) < 10 ? '0' : '') +
-        timezoneOffsetInHours + ':00';
-    return localISOTimeWithOffset;
+    const dt = DateTime.fromJSDate(date);
+    return dt.toISO() || date.toISOString();
 }
 
 /**
@@ -26,10 +22,9 @@ export function toLocaTzIsoStringWithOffset(date: Date): string {
  * @param timeZoneId - The IANA timezone identifier (e.g., "America/New_York", "Europe/London").
  * @returns A new Date object representing the same moment in time in the specified timezone.
  */
-export function convertTimezone(date: Date, timeZoneId: string, localeString: string = "en-GB"): Date {
-    return new Date(
-        (typeof date === "string" ? new Date(date) : date)
-        .toLocaleString(localeString, {timeZone: timeZoneId}));   
+export function convertTimezone(date: Date | string, timeZoneId: string): DateTime {
+    const sourceDate = typeof date === "string" ? DateTime.fromISO(date) : DateTime.fromJSDate(date);
+    return sourceDate.setZone(timeZoneId);
 }
 
 /**
@@ -39,9 +34,8 @@ export function convertTimezone(date: Date, timeZoneId: string, localeString: st
  * @returns The coerced date as an ISO string with timezone offset.
  */
 export function coerceSince(value: string): string {
-    const localSinceDate = new Date(value);
-    localSinceDate.setHours(0, 0, 0, 0);
-    return toLocaTzIsoStringWithOffset(localSinceDate);
+    const dt = DateTime.fromISO(value).startOf('day');
+    return dt.toISO() || value;
 }
 
 /**
@@ -52,7 +46,6 @@ export function coerceSince(value: string): string {
  * @returns The adjusted date string in ISO format with timezone offset.
  */
 export function coerceUntil(value: string): string {
-    const localUntilDate = new Date(value);
-    localUntilDate.setHours(23, 59, 59, 999);
-    return toLocaTzIsoStringWithOffset(localUntilDate);
+    const dt = DateTime.fromISO(value).endOf('day');
+    return dt.toISO() || value;
 }

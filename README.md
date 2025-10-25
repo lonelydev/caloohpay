@@ -170,7 +170,7 @@ caloohpay [options] <args>
 | Option | Short | Description | Required | Default |
 |--------|-------|-------------|----------|---------|
 | `--rota-ids` | `-r` | PagerDuty schedule ID(s), comma-separated | ✅ | - |
-| `--timeZoneId` | `-t` | Schedule timezone ID | ❌ | Local timezone |
+| `--timeZoneId` | `-t` | Override schedule timezone for OOH calculations | ❌ | Schedule's timezone from PagerDuty |
 | `--since` | `-s` | Start date (YYYY-MM-DD format) | ❌ | First day of previous month |
 | `--until` | `-u` | End date (YYYY-MM-DD format) | ❌ | First day of current month |
 | `--key` | `-k` | API token override | ❌ | From `.env` file |
@@ -189,7 +189,7 @@ caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"
 # Custom date range
 caloohpay -r "PQRSTUV" -s "2024-01-01" -u "2024-01-31"
 
-# Specific timezone
+# Override timezone (useful for distributed teams or testing)
 caloohpay -r "PQRSTUV" -t "America/New_York"
 
 # Override API token (useful for CI/CD or multiple accounts)
@@ -211,6 +211,7 @@ caloohpay -r "PQRSTUV" -o "./payroll-report.csv"
 ────────────────────────────────────────
 Schedule name: Engineering Team Alpha
 Schedule URL: https://company.pagerduty.com/schedules/PQRSTUV
+Using timezone: Europe/London
 User, TotalComp, Mon-Thu, Fri-Sun
 John Smith, 275, 3, 2
 Jane Doe, 200, 4, 0
@@ -224,26 +225,68 @@ Bob Wilson, 150, 3, 0
 - ✅ **Schedule Fetching**: Retrieves data from PagerDuty API
 - ✅ **Multi-Schedule Support**: Process multiple schedules simultaneously
 - ✅ **Date Range Flexibility**: Custom or automatic date ranges
-- ✅ **Timezone Handling**: Uses Luxon.js for timezone calculations
+- ✅ **Full Timezone Support**: Uses schedule timezone from PagerDuty with optional CLI override
+- ✅ **Distributed Teams**: Accurate OOH calculations across different timezones
 - ✅ **Payment Calculation**: Separate rates for weekdays/weekends
 - ✅ **Auditable Output**: User names, total compensation, and day breakdowns
-- ✅ **Comprehensive Testing**: Unit tests with Jest
+- ✅ **Comprehensive Testing**: 27 unit tests including timezone handling
 
 ### Default Behavior
 
 - **Since Date**: First day of previous month at `00:00:00` (local time)
 - **Until Date**: First day of current month at `10:00:00` (local time)
-- **Timezone**: Your system's local timezone
+- **Timezone**: Uses schedule's timezone from PagerDuty API (can be overridden with `--timeZoneId`)
 - **Output**: Console table format
 
 > The `until` time is set to 10:00:00 to ensure evening shifts from the last day of the previous month are included.
 
+### Timezone Handling for Distributed Teams
+
+CalOohPay now provides full support for distributed teams working across different timezones:
+
+#### How It Works
+
+1. **Automatic Timezone Detection**: The tool automatically retrieves each schedule's timezone from the PagerDuty API
+2. **Accurate OOH Calculations**: All out-of-hours calculations are performed in the schedule's timezone, ensuring correct day/night classification
+3. **Optional Override**: Use `--timeZoneId` to override the schedule timezone for testing or special cases
+
+#### Examples
+
+```bash
+# Let the tool use the schedule's timezone from PagerDuty (recommended)
+caloohpay -r "SCHEDULE_ID"
+
+# Override for a team in New York
+caloohpay -r "SCHEDULE_ID" -t "America/New_York"
+
+# Override for a team in Tokyo
+caloohpay -r "SCHEDULE_ID" -t "Asia/Tokyo"
+
+# Override for UTC calculations
+caloohpay -r "SCHEDULE_ID" -t "UTC"
+```
+
+#### Supported Timezones
+
+All IANA timezone identifiers are supported, including:
+
+- `America/New_York`, `America/Los_Angeles`, `America/Chicago`
+- `Europe/London`, `Europe/Paris`, `Europe/Berlin`
+- `Asia/Tokyo`, `Asia/Singapore`, `Asia/Kolkata`
+- `Australia/Sydney`, `Pacific/Auckland`
+- And many more...
+
+Refer to [PagerDuty's timezone documentation](https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone) for the complete list.
+
 ## 🚧 Development Roadmap
+
+### Completed Features
+
+- [x] **API Key Override**: CLI option `--key` to override API token ✅
+- [x] **Full Timezone Support**: Uses schedule timezone from PagerDuty with optional override ✅
 
 ### Planned Features
 
-- [x] **API Key Override**: CLI option `--key` implementation ✅
-- [ ] **Multiple Timezone Support**: Full timezone handling for distributed teams
 - [ ] **CSV Output**: File generation for payroll systems
 - [ ] **Configurable Rates**: Custom weekday/weekend rates via config file
 - [ ] **Enhanced Output**: Colored console output and better formatting

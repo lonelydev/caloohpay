@@ -5,6 +5,7 @@ import { OnCallUser } from '../src/OnCallUser';
 import { DateTime } from "luxon";
 
 const runtimeEnvTimezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+const testTimeZone = 'Europe/London';
 
 describe('understanding luxon', () => {
     test('should be able to use luxon to convert date to local timezone', () => {
@@ -29,7 +30,7 @@ describe('should calculate the payment for an on call user', () => {
             '1',
             'John Doe',
             [
-                new OnCallPeriod(since, until)
+                new OnCallPeriod(since, until, testTimeZone)
             ]
         );
 
@@ -50,7 +51,7 @@ describe('should calculate the payment for an on call user', () => {
             '1',
             'John Doe',
             [
-                new OnCallPeriod(since, until)
+                new OnCallPeriod(since, until, testTimeZone)
             ]
         );
 
@@ -70,7 +71,7 @@ describe('should calculate the payment for an on call user', () => {
             '1',
             'John Doe',
             [
-                new OnCallPeriod(since, until)
+                new OnCallPeriod(since, until, testTimeZone)
             ]
         );
 
@@ -89,7 +90,7 @@ describe('should calculate the payment for an on call user', () => {
             '1',
             'John Doe',
             [
-                new OnCallPeriod(since, until)
+                new OnCallPeriod(since, until, testTimeZone)
             ]
         );
 
@@ -111,11 +112,13 @@ describe('should calculate the payment for an on call user', () => {
                 [
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-01T00:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-08-06T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-08-06T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     ),
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-28T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-09-01T00:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-09-01T00:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     )
                 ]
             ),
@@ -125,12 +128,14 @@ describe('should calculate the payment for an on call user', () => {
                 [
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-06T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-08-15T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-08-15T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                         )
                     ,
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-16T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-08-21T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-08-21T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     )
                 ]
             ),
@@ -140,7 +145,8 @@ describe('should calculate the payment for an on call user', () => {
                 [
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-15T00:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-08-16T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-08-16T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     )
                 ]
             ),
@@ -150,7 +156,8 @@ describe('should calculate the payment for an on call user', () => {
                 [
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-21T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-08-28T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-08-28T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     )
                 ]
             )
@@ -175,11 +182,13 @@ describe('should be able to audit the payment for an on call user', () => {
                 [
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-01T00:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-08-06T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-08-06T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     ),
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-28T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-09-01T00:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-09-01T00:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     )
                 ]
             ),
@@ -189,11 +198,13 @@ describe('should be able to audit the payment for an on call user', () => {
                 [
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-06T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-08-15T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-08-15T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     ),
                     new OnCallPeriod(
                         DateTime.fromISO('2024-08-16T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
-                        DateTime.fromISO('2024-08-21T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate()
+                        DateTime.fromISO('2024-08-21T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        testTimeZone
                     )
                 ]
             )
