@@ -15,8 +15,6 @@ import { DateTime } from "luxon";
 
 dotenv.config();
 
-const sanitisedEnvVars: Environment = sanitiseEnvVariable(process.env);
-
 const yargsInstance = yargs(hideBin(process.argv));
 
 const argv: CommandLineOptions = yargsInstance
@@ -137,7 +135,11 @@ function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule): Reco
 
 function calOohPay(cliOptions: CommandLineOptions) {
     console.table(cliOptions);
+    
+    // Get API token from CLI option or environment variable
+    const sanitisedEnvVars: Environment = sanitiseEnvVariable(process.env, cliOptions.key);
     const pagerDutyApi = api({ token: sanitisedEnvVars.API_TOKEN });
+    
     for (const rotaId of cliOptions.rotaIds.split(',')) {
         pagerDutyApi
             .get(`/schedules/${rotaId}`,

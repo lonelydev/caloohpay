@@ -192,6 +192,9 @@ caloohpay -r "PQRSTUV" -s "2024-01-01" -u "2024-01-31"
 # Specific timezone
 caloohpay -r "PQRSTUV" -t "America/New_York"
 
+# Override API token (useful for CI/CD or multiple accounts)
+caloohpay -r "PQRSTUV" -k "your_api_token_here"
+
 # Save to file
 caloohpay -r "PQRSTUV" -o "./payroll-report.csv"
 ```
@@ -239,7 +242,7 @@ Bob Wilson, 150, 3, 0
 
 ### Planned Features
 
-- [ ] **API Key Override**: CLI option `--key` implementation
+- [x] **API Key Override**: CLI option `--key` implementation ✅
 - [ ] **Multiple Timezone Support**: Full timezone handling for distributed teams
 - [ ] **CSV Output**: File generation for payroll systems
 - [ ] **Configurable Rates**: Custom weekday/weekend rates via config file
