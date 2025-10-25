@@ -38,7 +38,7 @@ describe('should calculate the payment for an on call user', () => {
         const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
-        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(6);
+        expect(onCallUser.onCallPeriods[0].numberOfOohWeekDays).toBe(6);
         expect(onCallUser.onCallPeriods[0].numberOfOohWeekends).toBe(6);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(750);
     });
@@ -59,7 +59,7 @@ describe('should calculate the payment for an on call user', () => {
         const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
-        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(5);
+        expect(onCallUser.onCallPeriods[0].numberOfOohWeekDays).toBe(5);
         expect(onCallUser.onCallPeriods[0].numberOfOohWeekends).toBe(6);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(700);
     });
@@ -79,7 +79,7 @@ describe('should calculate the payment for an on call user', () => {
         const calculator = new OnCallPaymentsCalculator();
         expect(onCallUser.onCallPeriods).toBeDefined();
         expect(onCallUser.onCallPeriods.length).toBe(1);
-        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(2);
+        expect(onCallUser.onCallPeriods[0].numberOfOohWeekDays).toBe(2);
         expect(onCallUser.onCallPeriods[0].numberOfOohWeekends).toBe(1);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(175);
     });
@@ -100,7 +100,7 @@ describe('should calculate the payment for an on call user', () => {
         expect(onCallUser.onCallPeriods.length).toBe(1);
         expect(onCallUser.onCallPeriods[0].since).toEqual(since);
         expect(onCallUser.onCallPeriods[0].until).toEqual(until);
-        expect(onCallUser.onCallPeriods[0].numberOfOOhWeekDays).toBe(2);
+        expect(onCallUser.onCallPeriods[0].numberOfOohWeekDays).toBe(2);
         expect(onCallUser.onCallPeriods[0].numberOfOohWeekends).toBe(3);
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(325);
     });

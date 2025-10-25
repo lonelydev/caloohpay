@@ -15,7 +15,7 @@ describe('should initialise OnCallPeriod with the right number of weekdays and w
         );
         expect(onCallPeriod.since).toStrictEqual(new Date('2024-09-20T16:30:00+01:00'));
         expect(onCallPeriod.until).toStrictEqual(new Date('2024-09-20T18:30:00+01:00'));
-        expect(onCallPeriod.numberOfOOhWeekDays).toBe(0);
+        expect(onCallPeriod.numberOfOohWeekDays).toBe(0);
         expect(onCallPeriod.numberOfOohWeekends).toBe(0);
     });
 
@@ -28,7 +28,7 @@ describe('should initialise OnCallPeriod with the right number of weekdays and w
         );
         expect(onCallPeriod.since).toStrictEqual(since);
         expect(onCallPeriod.until).toStrictEqual(until);
-        expect(onCallPeriod.numberOfOOhWeekDays).toBe(0);
+        expect(onCallPeriod.numberOfOohWeekDays).toBe(0);
         expect(onCallPeriod.numberOfOohWeekends).toBe(3);
     });
 
@@ -41,7 +41,7 @@ describe('should initialise OnCallPeriod with the right number of weekdays and w
         );
         expect(onCallPeriod.since).toStrictEqual(since);
         expect(onCallPeriod.until).toStrictEqual(until);
-        expect(onCallPeriod.numberOfOOhWeekDays).toBe(2);
+        expect(onCallPeriod.numberOfOohWeekDays).toBe(2);
         expect(onCallPeriod.numberOfOohWeekends).toBe(3);
     });
 })

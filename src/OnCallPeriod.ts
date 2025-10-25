@@ -1,4 +1,13 @@
 export class OnCallPeriod {
+    // Constants for day classification
+    private static readonly WEEKDAY_START = 1; // Monday
+    private static readonly WEEKDAY_END = 4;   // Thursday (inclusive)
+    
+    // Constants for shift validation
+    private static readonly END_OF_WORK_HOUR = 17;
+    private static readonly END_OF_WORK_MINUTE = 30;
+    private static readonly MIN_SHIFT_HOURS = 6;
+    private static readonly MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
 
     readonly since: Date;
     readonly until: Date;
@@ -30,7 +39,7 @@ export class OnCallPeriod {
         }
     }
 
-    public get numberOfOOhWeekDays(): number {
+    public get numberOfOohWeekDays(): number {
         return this._numberOfOohWeekDays;
     }
 
@@ -45,7 +54,7 @@ export class OnCallPeriod {
      * @returns `true` if the day number corresponds to a weekday (Monday to Thursday), otherwise `false`.
      */
     private static isWeekDay(dayNum: number): boolean {
-        return dayNum > 0 && dayNum < 5;
+        return dayNum >= OnCallPeriod.WEEKDAY_START && dayNum <= OnCallPeriod.WEEKDAY_END;
     }
 
     /**
@@ -66,13 +75,15 @@ export class OnCallPeriod {
          * a shift could start after working hours and end after the working hours
          */
         let endOfWorkingHours = new Date(since);
-        endOfWorkingHours.setHours(17, 30);
+        endOfWorkingHours.setHours(OnCallPeriod.END_OF_WORK_HOUR, OnCallPeriod.END_OF_WORK_MINUTE);
         return (endOfWorkingHours < until) && 
             OnCallPeriod.doesShiftSpanDays(since, until);
     }
 
     private static isShiftLongerThan6Hours(date: Date, onCallUntilDate: Date): boolean {
-        return (onCallUntilDate.getTime() - date.getTime()) >= 6 * 60 * 60 * 1000;
+        const shiftDurationMs = onCallUntilDate.getTime() - date.getTime();
+        const minShiftDurationMs = OnCallPeriod.MIN_SHIFT_HOURS * OnCallPeriod.MILLISECONDS_PER_HOUR;
+        return shiftDurationMs >= minShiftDurationMs;
     }
 
     private static doesShiftSpanDays(since: Date, until: Date): boolean {
@@ -84,9 +95,9 @@ export class OnCallPeriod {
         return (since.getDate() !== until.getDate());
     }
 
-    toString() {
-        console.log("On call period from %s to %s", this.since, this.until);
-        console.log("Number of OOH Weekdays (Mon-Thu): %d", this.numberOfOOhWeekDays);
-        console.log("Number of OOH Weekends (Fri-Sun): %d", this.numberOfOohWeekends);
+    toString(): string {
+        return `On call period from ${this.since} to ${this.until}\n` +
+               `Number of OOH Weekdays (Mon-Thu): ${this.numberOfOohWeekDays}\n` +
+               `Number of OOH Weekends (Fri-Sun): ${this.numberOfOohWeekends}`;
     }
 }
