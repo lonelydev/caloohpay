@@ -195,8 +195,11 @@ caloohpay -r "PQRSTUV" -t "America/New_York"
 # Override API token (useful for CI/CD or multiple accounts)
 caloohpay -r "PQRSTUV" -k "your_api_token_here"
 
-# Save to file
+# Save to CSV file (Google Sheets compatible)
 caloohpay -r "PQRSTUV" -o "./payroll-report.csv"
+
+# Multiple schedules to CSV
+caloohpay -r "PQRSTUV,PSTUVQR" -o "./monthly-oncall-report.csv"
 ```
 
 ### Sample Output
@@ -218,6 +221,45 @@ Jane Doe, 200, 4, 0
 Bob Wilson, 150, 3, 0
 ```
 
+### CSV Output Format
+
+When using the `--output-file` option, CalOohPay generates a Google Sheets compatible CSV file containing all schedule information and compensation data.
+
+#### CSV Structure
+
+```csv
+Schedule name:,Engineering Team Alpha
+Schedule URL:,https://company.pagerduty.com/schedules/PQRSTUV
+Using timezone:,Europe/London
+
+User,Total Compensation (£),Weekdays (Mon-Thu),Weekends (Fri-Sun)
+John Smith,275,3,2
+Jane Doe,200,4,0
+Bob Wilson,150,3,0
+```
+
+#### Features
+
+- **Google Sheets Compatible**: Open directly in Google Sheets or Excel
+- **Multiple Schedules**: When processing multiple schedules, each is appended to the same file
+- **Special Character Handling**: Automatically escapes commas, quotes, and newlines in names
+- **Payroll Ready**: Format designed for easy import into payroll systems
+
+#### Example Usage
+
+```bash
+# Single schedule to CSV
+caloohpay -r "PQRSTUV" -o "./august-oncall.csv"
+
+# Multiple schedules to one file
+caloohpay -r "TEAM_A,TEAM_B,TEAM_C" -o "./all-teams-august.csv"
+
+# Custom date range with CSV output
+caloohpay -r "PQRSTUV" -s "2024-01-01" -u "2024-01-31" -o "./january-oncall.csv"
+```
+
+The tool will always output to both the console AND the CSV file, so you can verify the data while generating reports.
+
 ## ✅ Current Features
 
 ### What Works
@@ -229,7 +271,8 @@ Bob Wilson, 150, 3, 0
 - ✅ **Distributed Teams**: Accurate OOH calculations across different timezones
 - ✅ **Payment Calculation**: Separate rates for weekdays/weekends
 - ✅ **Auditable Output**: User names, total compensation, and day breakdowns
-- ✅ **Comprehensive Testing**: 27 unit tests including timezone handling
+- ✅ **CSV Export**: Google Sheets compatible file output for payroll systems
+- ✅ **Comprehensive Testing**: 35 unit tests including timezone and CSV handling
 
 ### Default Behavior
 
@@ -284,10 +327,10 @@ Refer to [PagerDuty's timezone documentation](https://developer.pagerduty.com/do
 
 - [x] **API Key Override**: CLI option `--key` to override API token ✅
 - [x] **Full Timezone Support**: Uses schedule timezone from PagerDuty with optional override ✅
+- [x] **CSV Output**: Google Sheets compatible file generation for payroll systems ✅
 
 ### Planned Features
 
-- [ ] **CSV Output**: File generation for payroll systems
 - [ ] **Configurable Rates**: Custom weekday/weekend rates via config file
 - [ ] **Enhanced Output**: Colored console output and better formatting
 - [ ] **Package Distribution**: NPM package for easier installation
