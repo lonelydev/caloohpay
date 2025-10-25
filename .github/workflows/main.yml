@@ -34,6 +34,4 @@ jobs:
 
       - name: Run Jest tests
         if: github.event_name == 'pull_request'
-        env:
-          TZ: Europe/London
         run: npm test
