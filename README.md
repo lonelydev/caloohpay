@@ -1,111 +1,291 @@
-# Introduction
+# CalOohPay - Calculate Out-of-Hours Pay
 
-In some organisations, engineers get compensated for going *on-call outside of working hours* or *out of hours* or *ooh* for short.
+[![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
+[![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
+[![PagerDuty](https://img.shields.io/badge/PagerDuty-06AC38?style=flat&logo=pagerduty&logoColor=white)](https://www.pagerduty.com/)
+[![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/swcraftsperson)
 
-I have a couple of teams at my current workplace that I look after. Both with at least 4 people on the rota. Similarly, we have an *incident commander* rota. And every month, managers have to fill in a spreadsheet for payroll to account for our OOH (out of hours) on-call so that we all get compensated at the end of the month for on-call. This sounds like a simple thing, and it is. Just that it takes about 5 minutes of reconciliation per team's on-call rota.
+A command-line tool that automates the calculation of out-of-hours (OOH) on-call compensation for engineering teams using PagerDuty schedules.
 
-And if your team is geographically distributed, then you probably have more than one such sheet to fill as each location might have a different payroll and could even have different on-call rates and maybe they even get compensated an additional amount every time they respond to an actual incident by the hour! Who knows?!
+## 🚀 What It Does
 
-That is a lot of productive minutes lost doing the same thing every month. 1 manager with two teams, could take 10 minutes. So imagine having 24 of them do this monthly! 240 minutes of doing mundane things for the company when that could have been invested in more useful, creative work, like building the next big thing!
+CalOohPay eliminates the manual work of calculating on-call payments by:
+- **Fetching schedule data** directly from PagerDuty API
+- **Calculating compensation** based on weekday vs weekend rates
+- **Supporting multiple teams** and schedules simultaneously  
+- **Providing auditable records** for payroll processing
+- **Handling timezone conversions** automatically
 
-That's why I wrote `caloohpay` - a thing that **Calculates OOH Pay**.
+### The Problem It Solves
 
-## How to get started?
+In many organizations, engineers get compensated for going *on-call outside of working hours*. Managers typically spend 5-10 minutes per team each month reconciling on-call rotas for payroll. With multiple teams and distributed locations, this manual process quickly becomes time-consuming and error-prone.
 
-Unfortunately this isn't fully packaged up just yet. Not that I did not want to. It does take time to get there. I got this far by spending about 4 hours a day consistently, everyday for about a week and a half. on this project in the last week, I was supposed to be on annual leave. Look what I have done. Anyway, not boring you with my boring life choices. But wanted to give you some context as to why this isn't fully packaged yet.
+**CalOohPay automates this entire process**, turning hours of manual work into a single command.
 
-This is a basic [Typescript project that runs on node](https://nodejs.org/en/learn/getting-started/nodejs-with-typescript).
+## 📋 Prerequisites
 
-1. Clone this repository locally
-2. Create `.env` file with the key-value pair for `API_TOKEN` - refer [section](#how-do-i-get-a-pagerduty-api-user-token)
+- **Node.js** (v14 or higher)
+- **npm** or **yarn**
+- **PagerDuty API User Token** ([How to get one](#-pagerduty-api-setup))
 
-Your `.env` file should look something like this: (This example is not a real key).
+## 🚀 Quick Start
 
-```sh
-API_TOKEN=u+IrTEYvqbPOc4dMNLyR
+### 1. Installation
+
+```bash
+# Clone the repository
+git clone https://github.com/lonelydev/caloohpay.git
+cd caloohpay
+
+# Install dependencies
+npm install
+
+# Build the project
+npm run build
+
+# Link globally for CLI usage
+npm link
 ```
 
-3. Run `npm install`.
-4. Run `npm link`. You may need admin permissions for this one. `sudo` is your friend if you are on *nix or MacOs. If you are on Windows, please search online for a solution. If you find one, create a PR to this repo.
-5. Run `caloohpay help` - if the command doesn't work, you need to restart your terminal - as you just ran `npm link`.
+### 2. Configuration
 
-I'll script these steps to make it more usable and probably package it up. But that will take another 20 years. So you might as well follow along.
+Create a `.env` file in the project root:
 
-### Tests with ts-jest
+```bash
+# .env
+API_TOKEN=your_pagerduty_api_token_here
+```
 
-If you like to contribute then you know you that you might want to test your code first. Learn jest and then get going.
+### 3. Basic Usage
 
-Followed instructions on [jest via ts-jest](https://jestjs.io/docs/getting-started#via-ts-jest).
+```bash
+# Get help
+caloohpay --help
 
-## PagerDuty API User Token
+# Calculate payments for a single schedule (previous month)
+caloohpay -r "PQRSTUV"
 
-So in order for `caloohpay` to be able to fetch data from Pagerduty, you need to get either an *API token*, meant for API calls from services, like this one, or an *API User token*, which gives the thing making the API call the same permissions as you have.
+# Calculate for multiple schedules with custom date range
+caloohpay -r "PQRSTUV,PSTUVQR" -s "2024-01-01" -u "2024-01-31"
+```
 
-### How do I get a Pagerduty API User token?
+## 💰 Compensation Rates
 
-1. Login to Pagerduty
-2. Hover over your profile icon, go to *My Profile*.
-3. Then go to *User Settings* where you can see a button that reads, *Create API User Token*. Click it.
-4. Remember to store the API Key in something like **1Password** so that you can retrieve it securely for later. 
-5. I cannot stress this enough but *please don't commit that API KEY to your git repository.*
+| Period | Rate | 
+|--------|------|
+| **Weekdays** (Mon-Thu) | £50 per day |
+| **Weekends** (Fri-Sun) | £75 per day |
 
-## The CLI
+> **Note**: Rates are currently hardcoded but can be modified in `src/OnCallPaymentsCalculator.ts`
 
-Before you even download it, just wanted to share what the CLI looks like. 
-```sh
+## 🧪 Development & Testing
+
+### Running Tests
+
+```bash
+# Run all tests
+npm test
+
+# Run tests in watch mode
+npm run test:watch
+
+# Run with coverage
+npm run test:coverage
+```
+
+### Building from Source
+
+```bash
+# Install dependencies
+npm install
+
+# Build TypeScript to JavaScript
+npm run build
+
+# Run in development mode (with watch)
+npm run dev
+```
+
+### Contributing
+
+1. Fork the repository
+2. Create a feature branch (`git checkout -b feature/amazing-feature`)
+3. Make your changes
+4. Add tests for new functionality
+5. Ensure all tests pass (`npm test`)
+6. Commit your changes (`git commit -m 'Add amazing feature'`)
+7. Push to the branch (`git push origin feature/amazing-feature`)
+8. Open a Pull Request
+
+## 🔧 Troubleshooting
+
+### Common Issues
+
+**"Command not found: caloohpay"**
+- Run `npm link` after building
+- Restart your terminal
+- Check if `dist/src/CalOohPay.js` exists
+
+**"Invalid API Token"**
+- Verify your `.env` file contains the correct token
+- Ensure no extra spaces or quotes around the token
+- Check token permissions in PagerDuty
+
+**"No schedule entries found"**
+- Verify the schedule ID is correct
+- Check the date range includes on-call periods
+- Ensure you have permissions to view the schedule
+
+## 📝 Finding Schedule IDs
+
+Schedule IDs can be found in PagerDuty:
+1. Navigate to **People** → **On-Call Schedules**
+2. Click on your schedule
+3. The ID is in the URL: `https://yourcompany.pagerduty.com/schedules/PQRSTUV`
+
+## 🔑 PagerDuty API Setup
+
+To fetch schedule data from PagerDuty, you need an **API User Token** that provides the same permissions as your user account.
+
+### Getting Your API Token
+
+1. **Login to PagerDuty**
+2. **Navigate to Profile**: Hover over your profile icon → **My Profile**
+3. **Access Settings**: Go to **User Settings**
+4. **Create Token**: Click **Create API User Token**
+5. **Secure Storage**: Store the token securely (e.g., 1Password, environment variable)
+
+⚠️ **Security Warning**: Never commit your API token to version control!
+
+## 📖 CLI Reference
+
+### Command Syntax
+
+```bash
 caloohpay [options] <args>
-
-Options:
-      --version      Show version number  [boolean]
-  -r, --rota-ids     1 scheduleId or multiple scheduleIds separated by comma  [string] [required]
-  -t, --timeZoneId   the timezone id of the schedule. Refer https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone for details.  [string]
-  -s, --since        start of the schedule period (inclusive) in https://en.wikipedia.org/wiki/ISO_8601 format  [string]
-  -u, --until        end of the schedule period (inclusive) in https://en.wikipedia.org/wiki/ISO_8601 format  [string]
-  -k, --key          API_TOKEN to override environment variable API_TOKEN.
-                     Get your API User token from
-                     My Profile -> User Settings -> API Access -> Create New API User Token  [string]
-      --help         Show help  [boolean]
-
-Examples:
-  caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"    Calculates on-call payments for the comma separated pagerduty scheduleIds.\nThe default timezone is the local timezone. The default period is the previous month.
-  caloohpay -r "PQRSTUV" -s "2021-08-01" -u "2021-09-01"    Calculates on-call payments for the schedules with the given scheduleIds for the month of August 2021.
-
 ```
 
-## What works?
+### Options
 
-The solution currently accepts `rotaIds` and since and until dates in string format - `YYYY-MM-DD` format. It assigns default time strings to the *since* and *until* dates if it isn't provided. The solution works and is tested on Europe/London timezone for schedules that are also on that timezone.
+| Option | Short | Description | Required | Default |
+|--------|-------|-------------|----------|---------|
+| `--rota-ids` | `-r` | PagerDuty schedule ID(s), comma-separated | ✅ | - |
+| `--timeZoneId` | `-t` | Schedule timezone ID | ❌ | Local timezone |
+| `--since` | `-s` | Start date (YYYY-MM-DD format) | ❌ | First day of previous month |
+| `--until` | `-u` | End date (YYYY-MM-DD format) | ❌ | First day of current month |
+| `--key` | `-k` | API token override | ❌ | From `.env` file |
+| `--output-file` | `-o` | Output file path | ❌ | Console output |
+| `--help` | `-h` | Show help | ❌ | - |
 
-For the app to take in timezone and work with it, you could use Luxon.js and replace all the JS Dates to Luxon's DateTime and initialise the instances in the right timezone. I didn't budget for this work as this was a hackathon/firebreak week project. This is a good future addition though. So the command line feature `--timeZoneId` is a no-op at the moment.
+### Usage Examples
 
-The feature command line option `--key`isn't implemented yet.
+```bash
+# Basic usage - single schedule, previous month
+caloohpay -r "PQRSTUV"
 
-For generating an output file, you could run the cli and redirect output to a file.
+# Multiple schedules
+caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"
 
-### What are the default values of the *date and time* strings?
+# Custom date range
+caloohpay -r "PQRSTUV" -s "2024-01-01" -u "2024-01-31"
 
-- `since` : first day of the previous month with time starting at `00:00:00` in local time
-- `until` : first day of the current month with the time `10:00:00` in local time
+# Specific timezone
+caloohpay -r "PQRSTUV" -t "America/New_York"
 
-The latter is set to the value it is to ensure the calculator includes the evening of the last day of the previous month.
+# Save to file
+caloohpay -r "PQRSTUV" -o "./payroll-report.csv"
+```
 
-## What is to come?
+### Sample Output
 
-- ❌ allow api key override from cli option
-- ❌ respect different timezoneIds from cli
-- ❌ allow output file generation - like a csv
-- ❌ allow weekday and weekends to be configurable via file input or CLI option
-- ❌ allow weekday rates and weekend rates to be configurable
-- ❌ add some colour to console output
-- ❌ add file generation for output
-- ❌ make installable package
-- ❌ host this on our internal developer platform and schedule it to run monthly and create a CSV file of auditable on call payment records and send it to the finance team
+```
+┌─────────────────┬─────────────────────────────────────┐
+│ rotaIds         │ 'PQRSTUV'                           │
+│ timeZoneId      │ 'Europe/London'                     │
+│ since           │ '2024-10-01T00:00:00.000+01:00'    │
+│ until           │ '2024-11-01T10:00:00.000Z'         │
+└─────────────────┴─────────────────────────────────────┘
+────────────────────────────────────────
+Schedule name: Engineering Team Alpha
+Schedule URL: https://company.pagerduty.com/schedules/PQRSTUV
+User, TotalComp, Mon-Thu, Fri-Sun
+John Smith, 275, 3, 2
+Jane Doe, 200, 4, 0
+Bob Wilson, 150, 3, 0
+```
 
-## References
+## ✅ Current Features
 
-- [Time Zones on PagerDuty](https://developer.pagerduty.com/docs/1afe25e9c94cb-types)
-- [Time Zones in Javascript](https://stackoverflow.com/a/54500197/2262959)
-- [Jest Docs](https://jestjs.io/docs/getting-started)
-- [ts-node docs](https://typestrong.org/ts-node/docs/)
-- [yargs documentation - not beginner friendly](https://yargs.js.org/docs/)
-- [Retrieve time zones in nodejs environments](https://stackoverflow.com/a/44096051/2262959)
+### What Works
+- ✅ **Schedule Fetching**: Retrieves data from PagerDuty API
+- ✅ **Multi-Schedule Support**: Process multiple schedules simultaneously
+- ✅ **Date Range Flexibility**: Custom or automatic date ranges
+- ✅ **Timezone Handling**: Uses Luxon.js for timezone calculations
+- ✅ **Payment Calculation**: Separate rates for weekdays/weekends
+- ✅ **Auditable Output**: User names, total compensation, and day breakdowns
+- ✅ **Comprehensive Testing**: Unit tests with Jest
+
+### Default Behavior
+- **Since Date**: First day of previous month at `00:00:00` (local time)
+- **Until Date**: First day of current month at `10:00:00` (local time)
+- **Timezone**: Your system's local timezone
+- **Output**: Console table format
+
+> The `until` time is set to 10:00:00 to ensure evening shifts from the last day of the previous month are included.
+
+## 🚧 Development Roadmap
+
+### Planned Features
+- [ ] **API Key Override**: CLI option `--key` implementation
+- [ ] **Multiple Timezone Support**: Full timezone handling for distributed teams
+- [ ] **CSV Output**: File generation for payroll systems
+- [ ] **Configurable Rates**: Custom weekday/weekend rates via config file
+- [ ] **Enhanced Output**: Colored console output and better formatting
+- [ ] **Package Distribution**: NPM package for easier installation
+- [ ] **Automation**: Scheduled monthly runs with automated reporting
+
+### Long-term Vision
+- [ ] **Multi-platform Payroll**: Support different payroll systems
+- [ ] **Incident Response Bonus**: Additional compensation for actual incident responses
+- [ ] **Web Interface**: Simple web UI for non-technical users
+- [ ] **Reporting Dashboard**: Historical payment tracking and analytics
+
+## 📚 Technical References
+
+- [PagerDuty API Documentation](https://developer.pagerduty.com/api-reference/)
+- [PagerDuty Time Zones](https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone)
+- [Luxon.js Documentation](https://moment.github.io/luxon/)
+- [Jest Testing Framework](https://jestjs.io/docs/getting-started)
+- [TypeScript with Node.js](https://nodejs.org/en/learn/getting-started/nodejs-with-typescript)
+- [Yargs Command Line Parser](https://yargs.js.org/docs/)
+
+## 📄 License
+
+This project is licensed under the ISC License - see the [LICENSE](LICENSE) file for details.
+
+## 🤝 Support
+
+If you encounter any issues or have questions:
+
+1. Check the [troubleshooting section](#-troubleshooting)
+2. Search existing [issues](https://github.com/lonelydev/caloohpay/issues)
+3. Create a new issue with detailed information
+
+## ☕ Sponsor This Project
+
+If CalOohPay has saved you time and made your life easier, consider supporting its development!
+
+[![Buy Me A Coffee](https://img.buymeacoffee.com/button-api/?text=Buy%20me%20a%20coffee&emoji=☕&slug=swcraftsperson&button_colour=FFDD00&font_colour=000000&font_family=Cookie&outline_colour=000000&coffee_colour=ffffff)](https://buymeacoffee.com/swcraftsperson)
+
+Your support helps me:
+
+- 🚀 Continue developing new features
+- 🐛 Fix bugs and improve stability
+- 📚 Maintain documentation
+- 💡 Explore new ideas and integrations
+
+Every coffee counts and is greatly appreciated! ☕
+
+---
+
+**Made with ❤️ for engineering teams who deserve fair compensation for their on-call dedication.**
