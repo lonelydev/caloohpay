@@ -12,6 +12,7 @@ import { CommandLineOptions } from './CommandLineOptions.js';
 import { Environment, sanitiseEnvVariable } from './EnvironmentController.js';
 import { toLocaTzIsoStringWithOffset, coerceSince, coerceUntil} from './DateUtilities.js';
 import { DateTime } from "luxon";
+import { CsvWriter } from './CsvWriter.js';
 
 dotenv.config();
 
@@ -139,7 +140,21 @@ function calOohPay(cliOptions: CommandLineOptions) {
     const sanitisedEnvVars: Environment = sanitiseEnvVariable(process.env, cliOptions.key);
     const pagerDutyApi = api({ token: sanitisedEnvVars.API_TOKEN });
     
-    for (const rotaId of cliOptions.rotaIds.split(',')) {
+    // Initialize CSV writer if output file is specified
+    let csvWriter: CsvWriter | undefined;
+    if (cliOptions.outputFile) {
+        csvWriter = new CsvWriter(cliOptions.outputFile);
+        // Delete existing file to start fresh for this run
+        csvWriter.deleteIfExists();
+        console.log(`Output will be written to: ${cliOptions.outputFile}`);
+    }
+    
+    const rotaIds = cliOptions.rotaIds.split(',');
+    
+    for (let i = 0; i < rotaIds.length; i++) {
+        const rotaId = rotaIds[i];
+        const isFirstSchedule = i === 0;
+        
         pagerDutyApi
             .get(`/schedules/${rotaId}`,
                 {
@@ -169,6 +184,19 @@ function calOohPay(cliOptions: CommandLineOptions) {
 
                     const calculator = new OnCallPaymentsCalculator();
                     const auditableRecords = calculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
+                    
+                    // Write to CSV if output file is specified
+                    if (csvWriter) {
+                        csvWriter.writeScheduleData(
+                            data.schedule.name,
+                            data.schedule.html_url,
+                            effectiveTimeZone,
+                            auditableRecords,
+                            !isFirstSchedule // Append for all schedules after the first
+                        );
+                    }
+                    
+                    // Always output to console as well
                     console.log("User, TotalComp, Mon-Thu, Fri-Sun");
 
                     for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
