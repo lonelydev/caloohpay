@@ -1,10 +1,11 @@
 {
   "name": "caloohpay",
+  "version": "2.0.0",
+  "main": "dist/src/index.js",
+  "types": "dist/src/index.d.ts",
   "bin": {
     "caloohpay": "./dist/src/CalOohPay.js"
   },
-  "version": "2.0.0",
-  "main": "CalOohPay.js",
   "scripts": {
     "dev": "tsc -w",
     "start": "node dist/src/CalOohPay.js",

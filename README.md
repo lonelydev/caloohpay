@@ -58,6 +58,8 @@ API_TOKEN=your_pagerduty_api_token_here
 
 ### 3. Basic Usage
 
+#### CLI Usage
+
 ```bash
 # Get help
 caloohpay --help
@@ -68,6 +70,34 @@ caloohpay -r "PQRSTUV"
 # Calculate for multiple schedules with custom date range
 caloohpay -r "PQRSTUV,PSTUVQR" -s "2024-01-01" -u "2024-01-31"
 ```
+
+#### Programmatic Usage
+
+CalOohPay can also be used as a library in your Node.js applications:
+
+```typescript
+import { OnCallUser, OnCallPeriod, OnCallPaymentsCalculator } from 'caloohpay';
+
+// Create a user with on-call periods
+const user = new OnCallUser(
+  'user-id',
+  'John Doe',
+  [
+    new OnCallPeriod(
+      new Date('2024-08-01T10:00:00'),
+      new Date('2024-08-05T10:00:00'),
+      'Europe/London'
+    )
+  ]
+);
+
+// Calculate compensation
+const calculator = new OnCallPaymentsCalculator();
+const compensation = calculator.calculateOnCallPayment(user);
+console.log(`Total compensation: £${compensation}`);
+```
+
+See the [API Documentation](https://lonelydev.github.io/caloohpay/) for more details on programmatic usage.
 
 ## 💰 Compensation Rates
 
