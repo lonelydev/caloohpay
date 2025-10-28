@@ -13,6 +13,7 @@ import { Environment, sanitiseEnvVariable } from './EnvironmentController.js';
 import { toLocaTzIsoStringWithOffset, coerceSince, coerceUntil} from './DateUtilities.js';
 import { DateTime } from "luxon";
 import { CsvWriter } from './CsvWriter.js';
+import { PagerdutySchedule } from './PagerdutySchedule.js';
 
 dotenv.config();
 
@@ -301,6 +302,7 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
     
     // Get API token from CLI option or environment variable
     const sanitisedEnvVars: Environment = sanitiseEnvVariable(process.env, cliOptions.key);
+    
     const pagerDutyApi = api({ token: sanitisedEnvVars.API_TOKEN });
     
     // Initialize CSV writer if output file is specified
@@ -316,10 +318,11 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
     
     // Process schedules sequentially to avoid race conditions
     for (let i = 0; i < rotaIds.length; i++) {
-        const rotaId = rotaIds[i];
+        const rotaId = rotaIds[i].trim();
         const isFirstSchedule = i === 0;
         
         try {
+            // Fetch schedule data from PagerDuty API using destructuring like the original code
             const { data } = await pagerDutyApi.get(`/schedules/${rotaId}`, {
                 data: {
                     overflow: false,
@@ -329,19 +332,35 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
                 }
             });
             
-            console.log('-'.repeat(process.stdout.columns || 80));
-            console.log("Schedule name: %s", data.schedule.name);
-            console.log("Schedule URL: %s", data.schedule.html_url);
-            
-            // Use CLI timezone if provided, otherwise use schedule's timezone from API
-            const effectiveTimeZone = cliOptions.timeZoneId || data.schedule.time_zone || 'UTC';
-            console.log("Using timezone: %s", effectiveTimeZone);
-            if (cliOptions.timeZoneId && data.schedule.time_zone && cliOptions.timeZoneId !== data.schedule.time_zone) {
-                console.log("Note: CLI timezone (%s) overrides schedule timezone (%s)", 
-                    cliOptions.timeZoneId, data.schedule.time_zone);
+            // Check for API error response
+            if (data.error) {
+                throw new Error(`PagerDuty API error for schedule ${rotaId}: ${JSON.stringify(data.error)}`);
             }
             
-            const onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule, effectiveTimeZone);
+            // PDJS returns: {data, resource, response, next}
+            // data contains the full response: { schedule: {...} }
+            if (!data.schedule) {
+                throw new Error(
+                    `Invalid API response for schedule ${rotaId}: Missing 'schedule' property. ` +
+                    `Response contains: ${Object.keys(data).join(', ')}`
+                );
+            }
+            
+            const scheduleData: PagerdutySchedule = data.schedule;
+            
+            console.log('-'.repeat(process.stdout.columns || 80));
+            console.log("Schedule name: %s", scheduleData.name);
+            console.log("Schedule URL: %s", scheduleData.html_url);
+            
+            // Use CLI timezone if provided, otherwise use schedule's timezone from API
+            const effectiveTimeZone = cliOptions.timeZoneId || scheduleData.time_zone || 'UTC';
+            console.log("Using timezone: %s", effectiveTimeZone);
+            if (cliOptions.timeZoneId && scheduleData.time_zone && cliOptions.timeZoneId !== scheduleData.time_zone) {
+                console.log("Note: CLI timezone (%s) overrides schedule timezone (%s)", 
+                    cliOptions.timeZoneId, scheduleData.time_zone);
+            }
+            
+            const onCallUsers = extractOnCallUsersFromFinalSchedule(scheduleData.final_schedule, effectiveTimeZone);
             const listOfOnCallUsers = Object.values(onCallUsers);
 
             const calculator = new OnCallPaymentsCalculator();
@@ -350,8 +369,8 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
             // Write to CSV if output file is specified
             if (csvWriter) {
                 csvWriter.writeScheduleData(
-                    data.schedule.name,
-                    data.schedule.html_url,
+                    scheduleData.name,
+                    scheduleData.html_url,
                     effectiveTimeZone,
                     auditableRecords,
                     !isFirstSchedule // Append for all schedules after the first
