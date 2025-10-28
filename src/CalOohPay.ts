@@ -106,12 +106,19 @@ const argv: CommandLineOptions = yargsInstance
     })
     .coerce('since', coerceSince)
     .coerce('until', coerceUntil)
-    .argv as CommandLineOptions;
+    .parseSync() as CommandLineOptions;
 
-calOohPay(argv).catch((error: Error) => {
-    console.error("Fatal error:", error);
-    process.exit(1);
-});
+// Wrap the async call in an IIFE (Immediately Invoked Function Expression)
+// to ensure Node.js waits for the async operations to complete
+(async () => {
+    try {
+        await calOohPay(argv);
+        process.exit(0); // Explicit success exit
+    } catch (error) {
+        console.error("Fatal error:", error);
+        process.exit(1);
+    }
+})();
 
 /**
  * Converts a single PagerDuty schedule entry into an OnCallUser object.
