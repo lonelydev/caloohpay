@@ -27,9 +27,10 @@
     "Utilities",
     "*"
   ],
-  "plugin": ["typedoc-plugin-markdown"],
   "githubPages": true,
   "hideGenerator": false,
   "searchInComments": true,
-  "treatWarningsAsErrors": false
+  "treatWarningsAsErrors": false,
+  "lightHighlightTheme": "light-plus",
+  "darkHighlightTheme": "dark-plus"
 }
