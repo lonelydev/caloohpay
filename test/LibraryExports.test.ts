@@ -64,8 +64,14 @@ describe('Library Exports', () => {
     const compensation = calculator.calculateOnCallPayment(user);
 
     // Verify calculation
-    expect(compensation).toBeGreaterThan(0);
-    expect(typeof compensation).toBe('number');
+    // Aug 1 (Thu) 10:00 to Aug 5 (Mon) 10:00
+    // OOH Days: Aug 1 (Thu), Aug 2 (Fri), Aug 3 (Sat), Aug 4 (Sun)
+    // Weekdays: Thu (1) = £50
+    // Weekends: Fri, Sat, Sun (3) = £225
+    // Total: £275
+    expect(compensation).toBe(275);
+    expect(user.getTotalOohWeekDays()).toBe(1);
+    expect(user.getTotalOohWeekendDays()).toBe(3);
   });
 
   test('should work with multiple users', () => {
@@ -98,7 +104,40 @@ describe('Library Exports', () => {
     const payments = calculator.calculateOnCallPayments(users);
 
     expect(Object.keys(payments).length).toBe(2);
-    expect(payments['1']).toBeGreaterThan(0);
-    expect(payments['2']).toBeGreaterThan(0);
+    
+    // User One: Aug 1 (Thu) to Aug 5 (Mon)
+    // OOH: Thu, Fri, Sat, Sun = 1 weekday + 3 weekends = £50 + £225 = £275
+    expect(payments['1']).toBe(275);
+    
+    // User Two: Aug 5 (Mon) to Aug 8 (Thu)
+    // OOH: Mon, Tue, Wed = 3 weekdays = £150
+    expect(payments['2']).toBe(150);
+  });
+
+  test('should calculate auditable records with correct compensation', () => {
+    const user = new OnCallUser(
+      'user-1',
+      'Jane Doe',
+      [
+        new OnCallPeriod(
+          DateTime.fromISO('2024-08-28T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+          DateTime.fromISO('2024-09-02T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+          'Europe/London'
+        )
+      ]
+    );
+
+    const calculator = new OnCallPaymentsCalculator();
+    const auditableRecords = calculator.getAuditableOnCallPaymentRecords([user]);
+
+    expect(auditableRecords['user-1']).toBeDefined();
+    
+    // Aug 28 (Wed) to Sep 2 (Mon)
+    // OOH: Wed, Thu, Fri, Sat, Sun = 2 weekdays + 3 weekends
+    const record = auditableRecords['user-1'];
+    expect(record.OnCallUser.getTotalOohWeekDays()).toBe(2);
+    expect(record.OnCallUser.getTotalOohWeekendDays()).toBe(3);
+    // 2 * £50 + 3 * £75 = £100 + £225 = £325
+    expect(record.totalCompensation).toBe(325);
   });
 });
