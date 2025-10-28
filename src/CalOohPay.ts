@@ -108,7 +108,10 @@ const argv: CommandLineOptions = yargsInstance
     .coerce('until', coerceUntil)
     .argv as CommandLineOptions;
 
-calOohPay(argv);
+calOohPay(argv).catch((error: Error) => {
+    console.error("Fatal error:", error);
+    process.exit(1);
+});
 
 function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry, timeZone: string): OnCallUser {
     const onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end, timeZone);
@@ -133,7 +136,7 @@ function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule, timeZ
     return onCallUsers;
 }
 
-function calOohPay(cliOptions: CommandLineOptions) {
+async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
     console.table(cliOptions);
     
     // Get API token from CLI option or environment variable
@@ -151,68 +154,64 @@ function calOohPay(cliOptions: CommandLineOptions) {
     
     const rotaIds = cliOptions.rotaIds.split(',');
     
+    // Process schedules sequentially to avoid race conditions
     for (let i = 0; i < rotaIds.length; i++) {
         const rotaId = rotaIds[i];
         const isFirstSchedule = i === 0;
         
-        pagerDutyApi
-            .get(`/schedules/${rotaId}`,
-                {
-                    data: {
-                        overflow: false,
-                        since: cliOptions.since,
-                        time_zone: cliOptions.timeZoneId,
-                        until: cliOptions.until
-                    }
+        try {
+            const { data } = await pagerDutyApi.get(`/schedules/${rotaId}`, {
+                data: {
+                    overflow: false,
+                    since: cliOptions.since,
+                    time_zone: cliOptions.timeZoneId,
+                    until: cliOptions.until
                 }
-            ).then(
-                ({ data, resource, response, next }) => {
-                    console.log('-'.repeat(process.stdout.columns || 80));
-                    console.log("Schedule name: %s", data.schedule.name);
-                    console.log("Schedule URL: %s", data.schedule.html_url);
-                    
-                    // Use CLI timezone if provided, otherwise use schedule's timezone from API
-                    const effectiveTimeZone = cliOptions.timeZoneId || data.schedule.time_zone || 'UTC';
-                    console.log("Using timezone: %s", effectiveTimeZone);
-                    if (cliOptions.timeZoneId && data.schedule.time_zone && cliOptions.timeZoneId !== data.schedule.time_zone) {
-                        console.log("Note: CLI timezone (%s) overrides schedule timezone (%s)", 
-                            cliOptions.timeZoneId, data.schedule.time_zone);
-                    }
-                    
-                    const onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule, effectiveTimeZone);
-                    const listOfOnCallUsers = Object.values(onCallUsers);
+            });
+            
+            console.log('-'.repeat(process.stdout.columns || 80));
+            console.log("Schedule name: %s", data.schedule.name);
+            console.log("Schedule URL: %s", data.schedule.html_url);
+            
+            // Use CLI timezone if provided, otherwise use schedule's timezone from API
+            const effectiveTimeZone = cliOptions.timeZoneId || data.schedule.time_zone || 'UTC';
+            console.log("Using timezone: %s", effectiveTimeZone);
+            if (cliOptions.timeZoneId && data.schedule.time_zone && cliOptions.timeZoneId !== data.schedule.time_zone) {
+                console.log("Note: CLI timezone (%s) overrides schedule timezone (%s)", 
+                    cliOptions.timeZoneId, data.schedule.time_zone);
+            }
+            
+            const onCallUsers = extractOnCallUsersFromFinalSchedule(data.schedule.final_schedule, effectiveTimeZone);
+            const listOfOnCallUsers = Object.values(onCallUsers);
 
-                    const calculator = new OnCallPaymentsCalculator();
-                    const auditableRecords = calculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
-                    
-                    // Write to CSV if output file is specified
-                    if (csvWriter) {
-                        csvWriter.writeScheduleData(
-                            data.schedule.name,
-                            data.schedule.html_url,
-                            effectiveTimeZone,
-                            auditableRecords,
-                            !isFirstSchedule // Append for all schedules after the first
-                        );
-                    }
-                    
-                    // Always output to console as well
-                    console.log("User, TotalComp, Mon-Thu, Fri-Sun");
+            const calculator = new OnCallPaymentsCalculator();
+            const auditableRecords = calculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
+            
+            // Write to CSV if output file is specified
+            if (csvWriter) {
+                csvWriter.writeScheduleData(
+                    data.schedule.name,
+                    data.schedule.html_url,
+                    effectiveTimeZone,
+                    auditableRecords,
+                    !isFirstSchedule // Append for all schedules after the first
+                );
+            }
+            
+            // Always output to console as well
+            console.log("User, TotalComp, Mon-Thu, Fri-Sun");
 
-                    for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
-                        console.log("%s, %d, %d, %d",
-                            onCallCompensation.OnCallUser.name,
-                            onCallCompensation.totalCompensation,
-                            onCallCompensation.OnCallUser.getTotalOohWeekDays(),
-                            onCallCompensation.OnCallUser.getTotalOohWeekendDays());
-                    }
-                }
-            ).catch(
-                (error) => {
-                    console.error("Error: %s", error);
-                    process.exit(1);
-                }
-            );
+            for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
+                console.log("%s, %d, %d, %d",
+                    onCallCompensation.OnCallUser.name,
+                    onCallCompensation.totalCompensation,
+                    onCallCompensation.OnCallUser.getTotalOohWeekDays(),
+                    onCallCompensation.OnCallUser.getTotalOohWeekendDays());
+            }
+        } catch (error) {
+            console.error("Error processing schedule %s: %s", rotaId, error);
+            throw error; // Re-throw to be caught by the main error handler
+        }
     }
 }
 
