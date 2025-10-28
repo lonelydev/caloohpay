@@ -113,6 +113,36 @@ calOohPay(argv).catch((error: Error) => {
     process.exit(1);
 });
 
+/**
+ * Converts a single PagerDuty schedule entry into an OnCallUser object.
+ * 
+ * This helper function creates an OnCallPeriod from the schedule entry's start and end times,
+ * then wraps it in an OnCallUser object with the user's information.
+ * 
+ * @param scheduleEntry - A schedule entry from PagerDuty containing user and time information
+ * @param timeZone - The IANA timezone identifier to use for OOH calculations (e.g., 'America/New_York', 'Europe/London')
+ * @returns An OnCallUser object containing the user's information and a single OnCallPeriod
+ * 
+ * @remarks
+ * - If the schedule entry has no user information, empty strings are used as defaults
+ * - The timezone is critical for accurate out-of-hours (OOH) calculation
+ * - The returned OnCallUser will have exactly one OnCallPeriod
+ * 
+ * @example
+ * ```typescript
+ * const scheduleEntry = {
+ *   start: new Date('2024-01-01T18:00:00Z'),
+ *   end: new Date('2024-01-02T09:00:00Z'),
+ *   user: { id: 'PXXXXXX', summary: 'John Doe' }
+ * };
+ * const onCallUser = getOnCallUserFromScheduleEntry(scheduleEntry, 'Europe/London');
+ * // Returns OnCallUser with OOH hours calculated for London timezone
+ * ```
+ * 
+ * @see {@link OnCallUser}
+ * @see {@link OnCallPeriod}
+ * @see {@link ScheduleEntry}
+ */
 function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry, timeZone: string): OnCallUser {
     const onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end, timeZone);
     const onCallUser = new OnCallUser(
@@ -121,6 +151,53 @@ function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry, timeZone: 
     return onCallUser
 }
 
+/**
+ * Extracts and consolidates on-call users from a PagerDuty final schedule.
+ * 
+ * This function processes all schedule entries from a PagerDuty final schedule and creates
+ * a dictionary of OnCallUser objects, consolidating multiple time periods for the same user
+ * into a single OnCallUser with multiple OnCallPeriods.
+ * 
+ * @param finalSchedule - The final schedule object from PagerDuty containing rendered schedule entries
+ * @param timeZone - The IANA timezone identifier to use for OOH calculations across all entries
+ * @returns A Record mapping user IDs to OnCallUser objects with their consolidated on-call periods
+ * 
+ * @remarks
+ * Key behaviors:
+ * - Multiple schedule entries for the same user are consolidated into one OnCallUser
+ * - Each unique user ID becomes a key in the returned Record
+ * - If a user appears multiple times, their OnCallPeriods are accumulated
+ * - Empty schedule (no entries) returns an empty Record
+ * - All periods use the same timezone for consistency
+ * 
+ * Algorithm:
+ * 1. Initialize empty dictionary of users
+ * 2. For each schedule entry:
+ *    - Convert entry to OnCallUser with single period
+ *    - If user already exists, add the new period to their existing periods
+ *    - If user is new, add them to the dictionary
+ * 3. Return consolidated dictionary
+ * 
+ * @example
+ * ```typescript
+ * const finalSchedule = {
+ *   rendered_schedule_entries: [
+ *     { start: new Date('2024-01-01T18:00:00Z'), end: new Date('2024-01-02T09:00:00Z'),
+ *       user: { id: 'USER1', summary: 'John Doe' } },
+ *     { start: new Date('2024-01-02T18:00:00Z'), end: new Date('2024-01-03T09:00:00Z'),
+ *       user: { id: 'USER1', summary: 'John Doe' } },
+ *     { start: new Date('2024-01-03T18:00:00Z'), end: new Date('2024-01-04T09:00:00Z'),
+ *       user: { id: 'USER2', summary: 'Jane Smith' } }
+ *   ]
+ * };
+ * const users = extractOnCallUsersFromFinalSchedule(finalSchedule, 'Europe/London');
+ * // Returns: { 'USER1': OnCallUser with 2 periods, 'USER2': OnCallUser with 1 period }
+ * ```
+ * 
+ * @see {@link FinalSchedule}
+ * @see {@link OnCallUser}
+ * @see {@link getOnCallUserFromScheduleEntry}
+ */
 function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule, timeZone: string): Record<string, OnCallUser> {
     const onCallUsers: Record<string, OnCallUser> = {};
     if (finalSchedule.rendered_schedule_entries) {
@@ -136,6 +213,82 @@ function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule, timeZ
     return onCallUsers;
 }
 
+/**
+ * Main function to calculate out-of-hours (OOH) on-call payments for PagerDuty schedules.
+ * 
+ * This asynchronous function orchestrates the entire on-call payment calculation workflow:
+ * - Authenticates with PagerDuty API
+ * - Fetches schedule data for one or more schedules sequentially
+ * - Calculates OOH compensation for each user
+ * - Outputs results to console and optionally to CSV file
+ * 
+ * @param cliOptions - Command line options containing schedule IDs, date range, timezone, and output settings
+ * @returns A Promise that resolves when all schedules have been processed
+ * 
+ * @throws {Error} If API authentication fails, schedule fetch fails, or CSV write fails
+ * 
+ * @remarks
+ * ### Sequential Processing (Race Condition Fix)
+ * This function uses `async/await` to process schedules **sequentially** rather than concurrently.
+ * This design choice prevents:
+ * - Race conditions when writing to the same CSV file
+ * - Unpredictable output order
+ * - Interleaved console output from multiple schedules
+ * 
+ * ### Authentication
+ * API token is retrieved from:
+ * 1. CLI option (`--key` or `-k`) if provided
+ * 2. Environment variable `API_TOKEN` otherwise
+ * 
+ * ### Timezone Handling
+ * The effective timezone for OOH calculations is determined by priority:
+ * 1. CLI option (`--timeZoneId` or `-t`) if provided (overrides schedule timezone)
+ * 2. Schedule's timezone from PagerDuty API
+ * 3. 'UTC' as fallback
+ * 
+ * ### CSV Output
+ * If `outputFile` is specified:
+ * - Existing file is deleted before processing first schedule
+ * - First schedule writes create new file (append=false)
+ * - Subsequent schedules append to existing file (append=true)
+ * - All schedules write to the same file sequentially
+ * 
+ * ### Error Handling
+ * - Each schedule is processed in a try-catch block
+ * - Errors include specific schedule ID for debugging
+ * - First error stops processing and propagates to top-level handler
+ * - Top-level handler logs error and exits with code 1
+ * 
+ * @example
+ * ```typescript
+ * // Process single schedule with default settings
+ * await calOohPay({
+ *   rotaIds: 'PXXXXXX',
+ *   since: '2024-01-01T00:00:00Z',
+ *   until: '2024-01-31T23:59:59Z',
+ *   timeZoneId: undefined,
+ *   key: undefined,
+ *   outputFile: undefined
+ * });
+ * 
+ * // Process multiple schedules with CSV output
+ * await calOohPay({
+ *   rotaIds: 'PXXXXXX,PYYYYYY,PZZZZZZ',
+ *   since: '2024-01-01T00:00:00Z',
+ *   until: '2024-01-31T23:59:59Z',
+ *   timeZoneId: 'Europe/London',
+ *   key: 'your-api-token',
+ *   outputFile: './output/oncall-payments.csv'
+ * });
+ * ```
+ * 
+ * @see {@link CommandLineOptions}
+ * @see {@link OnCallPaymentsCalculator}
+ * @see {@link CsvWriter}
+ * @see {@link extractOnCallUsersFromFinalSchedule}
+ * 
+ * @since 2.0.0 - Refactored to use async/await for sequential processing
+ */
 async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
     console.table(cliOptions);
     
