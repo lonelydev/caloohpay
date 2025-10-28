@@ -7,10 +7,10 @@
     "caloohpay": "./dist/src/CalOohPay.js"
   },
   "scripts": {
-    "dev": "tsc -w",
-    "start": "node dist/src/CalOohPay.js",
+    "dev": "NODE_OPTIONS='--no-deprecation' tsc -w",
+    "start": "NODE_OPTIONS='--no-deprecation' node dist/src/CalOohPay.js",
     "build": "tsc",
-    "test": "jest",
+    "test": "NODE_OPTIONS='--no-deprecation' jest",
     "prepare": "husky",
     "commitlint": "commitlint --edit",
     "docs": "typedoc",
