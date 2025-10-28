@@ -1,5 +1,7 @@
 import { jest } from '@jest/globals';
 import { CommandLineOptions } from '../src/CommandLineOptions';
+import yargs from 'yargs';
+import { hideBin } from 'yargs/helpers';
 
 /**
  * Test suite for CalOohPay main functionality
@@ -223,6 +225,222 @@ describe('CalOohPay async operations', () => {
             const effectiveTimezone = cliTimezone || scheduleTimezone || 'UTC';
             
             expect(effectiveTimezone).toBe('UTC');
+        });
+    });
+
+    describe('Yargs parseSync() behavior', () => {
+        it('should synchronously parse command line arguments with parseSync()', () => {
+            const args = ['--rota-ids', 'PXXXXXX', '--since', '2024-01-01', '--until', '2024-01-31'];
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    alias: 'r',
+                    type: 'string',
+                    demandOption: true
+                })
+                .option('since', {
+                    alias: 's',
+                    type: 'string'
+                })
+                .option('until', {
+                    alias: 'u',
+                    type: 'string'
+                });
+            
+            const result = parser.parseSync();
+            
+            expect(result.rotaIds).toBe('PXXXXXX');
+            expect(result.since).toBe('2024-01-01');
+            expect(result.until).toBe('2024-01-31');
+        });
+
+        it('should handle multiple schedule IDs separated by comma', () => {
+            const args = ['--rota-ids', 'PXXXXXX,PYYYYYY,PZZZZZZ'];
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    type: 'string',
+                    demandOption: true
+                });
+            
+            const result = parser.parseSync();
+            
+            expect(result.rotaIds).toBe('PXXXXXX,PYYYYYY,PZZZZZZ');
+            expect(result.rotaIds.split(',')).toHaveLength(3);
+        });
+
+        it('should apply default values when options not provided', () => {
+            const args = ['--rota-ids', 'PXXXXXX'];
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    type: 'string',
+                    demandOption: true
+                })
+                .option('timeZoneId', {
+                    type: 'string'
+                })
+                .default('timeZoneId', 'UTC');
+            
+            const result = parser.parseSync();
+            
+            expect(result.rotaIds).toBe('PXXXXXX');
+            expect(result.timeZoneId).toBe('UTC');
+        });
+
+        it('should throw error for missing required arguments with parseSync()', () => {
+            const args: string[] = []; // No rota-ids provided
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    type: 'string',
+                    demandOption: true
+                })
+                .exitProcess(false); // Prevent process exit in tests
+            
+            expect(() => parser.parseSync()).toThrow();
+        });
+
+        it('should validate arguments using check() with parseSync()', () => {
+            const args = ['--rota-ids', 'PXXXXXX', '--since', '2024-02-01', '--until', '2024-01-01'];
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    type: 'string',
+                    demandOption: true
+                })
+                .option('since', {
+                    type: 'string'
+                })
+                .option('until', {
+                    type: 'string'
+                })
+                .check((argv) => {
+                    if (argv.since && argv.until) {
+                        const sinceDate = new Date(argv.since);
+                        const untilDate = new Date(argv.until);
+                        if (sinceDate > untilDate) {
+                            throw new Error('Since cannot be greater than Until');
+                        }
+                    }
+                    return true;
+                })
+                .exitProcess(false);
+            
+            expect(() => parser.parseSync()).toThrow('Since cannot be greater than Until');
+        });
+
+        it('should apply coerce functions during parseSync()', () => {
+            const args = ['--rota-ids', 'PXXXXXX', '--since', '2024-01-01'];
+            
+            let coerceWasCalled = false;
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    type: 'string',
+                    demandOption: true
+                })
+                .option('since', {
+                    type: 'string'
+                })
+                .coerce('since', (value: string) => {
+                    coerceWasCalled = true;
+                    // Simulate appending time string
+                    return `${value}T00:00:00Z`;
+                });
+            
+            const result = parser.parseSync();
+            
+            expect(coerceWasCalled).toBe(true);
+            expect(result.since).toBe('2024-01-01T00:00:00Z');
+        });
+
+        it('should handle aliases with parseSync()', () => {
+            const args = ['-r', 'PXXXXXX', '-s', '2024-01-01', '-u', '2024-01-31'];
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    alias: 'r',
+                    type: 'string',
+                    demandOption: true
+                })
+                .option('since', {
+                    alias: 's',
+                    type: 'string'
+                })
+                .option('until', {
+                    alias: 'u',
+                    type: 'string'
+                });
+            
+            const result = parser.parseSync();
+            
+            expect(result.rotaIds).toBe('PXXXXXX');
+            expect(result.r).toBe('PXXXXXX'); // Alias should also work
+            expect(result.since).toBe('2024-01-01');
+            expect(result.until).toBe('2024-01-31');
+        });
+
+        it('should handle optional parameters with parseSync()', () => {
+            const args = ['--rota-ids', 'PXXXXXX'];
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    type: 'string',
+                    demandOption: true
+                })
+                .option('output-file', {
+                    alias: 'o',
+                    type: 'string',
+                    demandOption: false
+                })
+                .option('key', {
+                    alias: 'k',
+                    type: 'string',
+                    demandOption: false
+                });
+            
+            const result = parser.parseSync();
+            
+            expect(result.rotaIds).toBe('PXXXXXX');
+            expect(result.outputFile).toBeUndefined();
+            expect(result.key).toBeUndefined();
+        });
+
+        it('should parse boolean flags correctly with parseSync()', () => {
+            const args = ['--rota-ids', 'PXXXXXX', '--help'];
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    type: 'string',
+                    demandOption: false // Make optional for help flag test
+                })
+                .option('help', {
+                    alias: 'h',
+                    type: 'boolean'
+                })
+                .exitProcess(false);
+            
+            const result = parser.parseSync();
+            
+            expect(result.help).toBe(true);
+        });
+
+        it('should demonstrate parseSync is synchronous (no Promise returned)', () => {
+            const args = ['--rota-ids', 'PXXXXXX'];
+            
+            const parser = yargs(args)
+                .option('rota-ids', {
+                    type: 'string',
+                    demandOption: true
+                });
+            
+            const result = parser.parseSync();
+            
+            // If it returns a Promise, this test would fail
+            expect(typeof result).toBe('object');
+            expect(result.then).toBeUndefined(); // Not a Promise
+            expect(result.rotaIds).toBe('PXXXXXX');
         });
     });
 });
