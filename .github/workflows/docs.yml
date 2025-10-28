@@ -37,8 +37,18 @@ jobs:
       - name: Build TypeScript
         run: npm run build
         
-      - name: Generate documentation
+      - name: Generate HTML documentation with TypeDoc
         run: npm run docs
+        
+      - name: Verify documentation was generated
+        run: |
+          echo "Checking for generated documentation..."
+          ls -la docs/api/
+          if [ ! -f "docs/api/index.html" ]; then
+            echo "Error: index.html not found in docs/api/"
+            exit 1
+          fi
+          echo "Documentation generated successfully!"
         
       - name: Setup Pages
         uses: actions/configure-pages@v4
