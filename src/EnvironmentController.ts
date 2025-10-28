@@ -53,7 +53,10 @@ export function sanitiseEnvVariable(envVars: NodeJS.ProcessEnv, apiKeyOverride?:
     const apiToken = apiKeyOverride || envVars.API_TOKEN;
     
     if (!apiToken) {
-        throw new Error("API_TOKEN not defined. Please set API_TOKEN environment variable or use --key option.");
+        throw new Error('PagerDuty API token is required. ' +
+            'Set the API_TOKEN environment variable or use the --key/-k option.\n' +
+            'Get your token from: My Profile -> User Settings -> API Access -> Create New API User Token'
+        );
     }
     
     return {

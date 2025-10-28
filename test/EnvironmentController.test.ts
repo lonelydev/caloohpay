@@ -24,14 +24,14 @@ describe('EnvironmentController', () => {
         test('should throw error when neither env var nor override is provided', () => {
             const envVars = {};
             expect(() => sanitiseEnvVariable(envVars)).toThrow(
-                'API_TOKEN not defined. Please set API_TOKEN environment variable or use --key option.'
+                'PagerDuty API token is required'
             );
         });
 
         test('should throw error when env var is undefined and no override provided', () => {
             const envVars = { API_TOKEN: undefined };
             expect(() => sanitiseEnvVariable(envVars)).toThrow(
-                'API_TOKEN not defined. Please set API_TOKEN environment variable or use --key option.'
+                'PagerDuty API token is required'
             );
         });
 
