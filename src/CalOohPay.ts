@@ -322,14 +322,22 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
         const isFirstSchedule = i === 0;
         
         try {
+            // Build API request parameters - only include time_zone if explicitly provided by user
+            const requestParams: Record<string, any> = {
+                overflow: false,
+                since: cliOptions.since,
+                until: cliOptions.until
+            };
+            
+            // Only include time_zone parameter if user explicitly provided it
+            // PagerDuty API will use the schedule's default timezone if this is omitted
+            if (cliOptions.timeZoneId) {
+                requestParams.time_zone = cliOptions.timeZoneId;
+            }
+            
             // Fetch schedule data from PagerDuty API using destructuring like the original code
             const { data } = await pagerDutyApi.get(`/schedules/${rotaId}`, {
-                data: {
-                    overflow: false,
-                    since: cliOptions.since,
-                    time_zone: cliOptions.timeZoneId,
-                    until: cliOptions.until
-                }
+                data: requestParams
             });
             
             // Check for API error response
@@ -353,7 +361,7 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
             console.log("Schedule URL: %s", scheduleData.html_url);
             
             // Use CLI timezone if provided, otherwise use schedule's timezone from API
-            const effectiveTimeZone = cliOptions.timeZoneId || scheduleData.time_zone || 'UTC';
+            const effectiveTimeZone = cliOptions.timeZoneId || scheduleData.time_zone || 'Europe/London';
             console.log("Using timezone: %s", effectiveTimeZone);
             if (cliOptions.timeZoneId && scheduleData.time_zone && cliOptions.timeZoneId !== scheduleData.time_zone) {
                 console.log("Note: CLI timezone (%s) overrides schedule timezone (%s)", 
