@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 import { OnCallCompensation } from './OnCallCompensation';
+import { Logger } from './logger/Logger';
 
 /**
  * Writes on-call payment data to CSV files in a Google Sheets compatible format.
@@ -74,8 +75,11 @@ export class CsvWriter {
      * const writer = new CsvWriter('./output/payments.csv');
      * ```
      */
-    constructor(filePath: string) {
+    private logger?: Logger;
+
+    constructor(filePath: string, logger?: Logger) {
         this.filePath = filePath;
+        this.logger = logger;
     }
 
     /**
@@ -252,12 +256,17 @@ export class CsvWriter {
             if (!fs.existsSync(dir)) {
                 fs.mkdirSync(dir, { recursive: true });
             }
-
-            // Write or append to file
-            if (append) {
+            // Write or append to file. When appending, avoid adding an extra
+            // blank line if the file already ends with a newline.
+            if (append && fs.existsSync(this.filePath)) {
+                const existing = fs.readFileSync(this.filePath, { encoding: 'utf8' });
                 fs.appendFileSync(this.filePath, '\n' + content, 'utf8');
             } else {
                 fs.writeFileSync(this.filePath, content, 'utf8');
+            }
+
+            if (this.logger) {
+                this.logger.info(`Wrote CSV to ${this.filePath}`, { append });
             }
         } catch (error) {
             throw new Error(`Failed to write to file ${this.filePath}: ${error}`);

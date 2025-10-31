@@ -8,118 +8,123 @@ import { OnCallPeriod } from './OnCallPeriod';
 import { FinalSchedule } from './FinalSchedule';
 import { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
 import { ScheduleEntry } from './ScheduleEntry';
-import { CommandLineOptions } from './CommandLineOptions.js';
-import { Environment, sanitiseEnvVariable } from './EnvironmentController.js';
-import { toLocaTzIsoStringWithOffset, coerceSince, coerceUntil} from './DateUtilities.js';
+import { CommandLineOptions } from './CommandLineOptions';
+import { Environment, sanitiseEnvVariable } from './EnvironmentController';
+import { toLocaTzIsoStringWithOffset, coerceSince, coerceUntil} from './DateUtilities';
 import { DateTime } from "luxon";
-import { CsvWriter } from './CsvWriter.js';
-import { PagerdutySchedule } from './PagerdutySchedule.js';
+import { CsvWriter } from './CsvWriter';
+import { PagerdutySchedule } from './PagerdutySchedule';
+import { ConsoleLogger } from './logger/ConsoleLogger';
+import { Logger } from './logger/Logger';
+import { maskCliOptions } from './logger/utils';
 
 dotenv.config();
 
 const yargsInstance = yargs(hideBin(process.argv));
 
-const argv: CommandLineOptions = yargsInstance
-    .wrap(yargsInstance.terminalWidth())
-    .usage('$0 [options] <args>')
-    .option('rota-ids', {
-        alias: 'r',
-        describe: '1 scheduleId or multiple scheduleIds separated by comma',
-        type: 'string',
-        demandOption: true,
-        example: 'R1234567,R7654321'
-    })
-    .option('timeZoneId', {
-        type: 'string',
-        demandOption: false,
-        alias: 't',
-        description: 'Override the timezone for OOH calculations. If not specified, uses the schedule\'s timezone from PagerDuty.\n' + 
-        'Refer https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone for valid timezone IDs.',
-    })
-    .option('since', {
-        type: 'string',
-        alias: 's',
-        description: 'start of the schedule period (inclusive).\n' +
-        'You can choose to specify this in YYYY-MM-DD format and the default time string "00:00:00" will be appended to it by the program.',
-        example: '2021-08-01'
-    })
-    .default('s', function firstDayOfPreviousMonth(): string {
-        const today = new Date();
-        return toLocaTzIsoStringWithOffset(new Date(new Date(today.getFullYear(), (today.getMonth() - 1), 1)));
-    }, 'the first day of the previous month')
-    .option('until', {
-        type: 'string',
-        alias: 'u',
-        description: 'end of the schedule period (inclusive) in https://en.wikipedia.org/wiki/ISO_8601 format' +
-        'You can choose to specify this in YYYY-MM-DD format. The default time string "23:59:59" will be appended to it by the program.',
-        example: '2021-08-31'
-    })
-    .default('u', function lastDayOfPreviousMonth(): string {
-        const today = new Date();
-        return toLocaTzIsoStringWithOffset(new Date(
-            new Date(
-                today.getFullYear(),
-                today.getMonth(),
-                1,
-                10)
-        ));
-    }, 'the first day of the this month')
-    .option('key', {
-        type: 'string',
-        demandOption: false,
-        alias: 'k',
-        description: 'API_TOKEN to override environment variable API_TOKEN.\n' + 
-        'Get your API User token from \n' + 
-        'My Profile -> User Settings -> API Access -> Create New API User Token'
-    })
-    .option('output-file', {
-        type: 'string',
-        demandOption: false,
-        alias: 'o',
-        description: 'the path to the file where you want the on-call payments table printed'
-    })
-    .option('help', {
-        type: 'boolean',
-        alias: 'h',
-        description: 'Show help'
-    })
-    .example([
-        ['caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"', 
-            'Calculates on-call payments for the comma separated pagerduty scheduleIds.\n'+ 
-            'Uses each schedule\'s timezone from PagerDuty. The default period is the previous month.'],
-        ['caloohpay -r "PQRSTUV" -s "2021-08-01" -u "2021-09-01"', 
-            'Calculates on-call payments for the schedules with the given scheduleIds for the month of August 2021.'],
-        ['caloohpay -r "PQRSTUV" -t "America/New_York"', 
-            'Overrides the schedule timezone and calculates OOH using America/New_York timezone.'],
-    ])
-    .help()
-    .check((argv) => {
-        if (argv.since && !Date.parse(argv.since)) {
-            throw new Error("Invalid date format for since");
-        }
-        if (argv.until && !Date.parse(argv.until)) {
-            throw new Error("Invalid date format for until");
-        }
-        if (argv.since && argv.until && DateTime.fromISO(argv.since) > DateTime.fromISO(argv.until)) {
-            throw new Error("Since cannot be greater than Until");
-        }
-        return true;
-    })
-    .coerce('since', coerceSince)
-    .coerce('until', coerceUntil)
-    .parseSync() as CommandLineOptions;
+// Only parse CLI when executing this file directly. Exporting `calOohPay`
+// means tests can import it without triggering CLI parsing.
+if (require.main === module) {
+    const argv: CommandLineOptions = yargsInstance
+        .wrap(yargsInstance.terminalWidth())
+        .usage('$0 [options] <args>')
+        .option('rota-ids', {
+            alias: 'r',
+            describe: '1 scheduleId or multiple scheduleIds separated by comma',
+            type: 'string',
+            demandOption: true,
+            example: 'R1234567,R7654321'
+        })
+        .option('timeZoneId', {
+            type: 'string',
+            demandOption: false,
+            alias: 't',
+            description: 'Override the timezone for OOH calculations. If not specified, uses the schedule\'s timezone from PagerDuty.\n' + 
+            'Refer https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone for valid timezone IDs.',
+        })
+        .option('since', {
+            type: 'string',
+            alias: 's',
+            description: 'start of the schedule period (inclusive).\n' +
+            'You can choose to specify this in YYYY-MM-DD format and the default time string "00:00:00" will be appended to it by the program.',
+            example: '2021-08-01'
+        })
+        .default('s', function firstDayOfPreviousMonth(): string {
+            const today = new Date();
+            return toLocaTzIsoStringWithOffset(new Date(new Date(today.getFullYear(), (today.getMonth() - 1), 1)));
+        }, 'the first day of the previous month')
+        .option('until', {
+            type: 'string',
+            alias: 'u',
+            description: 'end of the schedule period (inclusive) in https://en.wikipedia.org/wiki/ISO_8601 format' +
+            'You can choose to specify this in YYYY-MM-DD format. The default time string "23:59:59" will be appended to it by the program.',
+            example: '2021-08-31'
+        })
+        .default('u', function lastDayOfPreviousMonth(): string {
+            const today = new Date();
+            return toLocaTzIsoStringWithOffset(new Date(
+                new Date(
+                    today.getFullYear(),
+                    today.getMonth(),
+                    1,
+                    10)
+            ));
+        }, 'the first day of the this month')
+        .option('key', {
+            type: 'string',
+            demandOption: false,
+            alias: 'k',
+            description: 'API_TOKEN to override environment variable API_TOKEN.\n' + 
+            'Get your API User token from \n' + 
+            'My Profile -> User Settings -> API Access -> Create New API User Token'
+        })
+        .option('output-file', {
+            type: 'string',
+            demandOption: false,
+            alias: 'o',
+            description: 'the path to the file where you want the on-call payments table printed'
+        })
+        .option('help', {
+            type: 'boolean',
+            alias: 'h',
+            description: 'Show help'
+        })
+        .example([
+            ['caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"', 
+                'Calculates on-call payments for the comma separated pagerduty scheduleIds.\n'+ 
+                'Uses each schedule\'s timezone from PagerDuty. The default period is the previous month.'],
+            ['caloohpay -r "PQRSTUV" -s "2021-08-01" -u "2021-09-01"', 
+                'Calculates on-call payments for the schedules with the given scheduleIds for the month of August 2021.'],
+            ['caloohpay -r "PQRSTUV" -t "America/New_York"', 
+                'Overrides the schedule timezone and calculates OOH using America/New_York timezone.'],
+        ])
+        .help()
+        .check((argv) => {
+            if (argv.since && !Date.parse(argv.since)) {
+                throw new Error("Invalid date format for since");
+            }
+            if (argv.until && !Date.parse(argv.until)) {
+                throw new Error("Invalid date format for until");
+            }
+            if (argv.since && argv.until && DateTime.fromISO(argv.since) > DateTime.fromISO(argv.until)) {
+                throw new Error("Since cannot be greater than Until");
+            }
+            return true;
+        })
+        .coerce('since', coerceSince)
+        .coerce('until', coerceUntil)
+        .parseSync() as CommandLineOptions;
 
-// Wrap the async call in an IIFE (Immediately Invoked Function Expression)
-// to ensure Node.js waits for the async operations to complete
-(async () => {
-    try {
-        await calOohPay(argv);
-        process.exit(0); // Explicit success exit
-    } catch (error) {
-        console.error("Fatal error:", error);
-        process.exit(1);
-    }
-})();
+    (async () => {
+        const logger = new ConsoleLogger();
+        try {
+            await calOohPay(argv, logger);
+        } catch (error) {
+            logger.error(error as Error);
+            process.exitCode = 1;
+        }
+    })();
+}
 
 /**
  * Converts a single PagerDuty schedule entry into an OnCallUser object.
@@ -297,8 +302,9 @@ function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule, timeZ
  * 
  * @since 2.0.0 - Refactored to use async/await for sequential processing
  */
-async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
-    console.table(cliOptions);
+export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger): Promise<void> {
+    const log = logger || new ConsoleLogger();
+    log.table?.(maskCliOptions(cliOptions));
     
     // Get API token from CLI option or environment variable
     const sanitisedEnvVars: Environment = sanitiseEnvVariable(process.env, cliOptions.key);
@@ -308,10 +314,10 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
     // Initialize CSV writer if output file is specified
     let csvWriter: CsvWriter | undefined;
     if (cliOptions.outputFile) {
-        csvWriter = new CsvWriter(cliOptions.outputFile);
+        csvWriter = new CsvWriter(cliOptions.outputFile, log);
         // Delete existing file to start fresh for this run
         csvWriter.deleteIfExists();
-        console.log(`Output will be written to: ${cliOptions.outputFile}`);
+        log.info(`Output will be written to: ${cliOptions.outputFile}`);
     }
     
     const rotaIds = cliOptions.rotaIds.split(',');
@@ -356,16 +362,15 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
             
             const scheduleData: PagerdutySchedule = data.schedule;
             
-            console.log('-'.repeat(process.stdout.columns || 80));
-            console.log("Schedule name: %s", scheduleData.name);
-            console.log("Schedule URL: %s", scheduleData.html_url);
+            log.info('-'.repeat(process.stdout.columns || 80));
+            log.info(`Schedule name: ${scheduleData.name}`);
+            log.info(`Schedule URL: ${scheduleData.html_url}`);
             
             // Use CLI timezone if provided, otherwise use schedule's timezone from API
             const effectiveTimeZone = cliOptions.timeZoneId || scheduleData.time_zone || 'Europe/London';
-            console.log("Using timezone: %s", effectiveTimeZone);
+            log.info(`Using timezone: ${effectiveTimeZone}`);
             if (cliOptions.timeZoneId && scheduleData.time_zone && cliOptions.timeZoneId !== scheduleData.time_zone) {
-                console.log("Note: CLI timezone (%s) overrides schedule timezone (%s)", 
-                    cliOptions.timeZoneId, scheduleData.time_zone);
+                log.info(`Note: CLI timezone (${cliOptions.timeZoneId}) overrides schedule timezone (${scheduleData.time_zone})`);
             }
             
             const onCallUsers = extractOnCallUsersFromFinalSchedule(scheduleData.final_schedule, effectiveTimeZone);
@@ -385,20 +390,17 @@ async function calOohPay(cliOptions: CommandLineOptions): Promise<void> {
                 );
             }
             
-            // Always output to console as well
-            console.log("User, TotalComp, Mon-Thu, Fri-Sun");
-
+            // Output summary using logger
+            log.info("User, TotalComp, Mon-Thu, Fri-Sun");
             for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
-                console.log("%s, %d, %d, %d",
-                    onCallCompensation.OnCallUser.name,
-                    onCallCompensation.totalCompensation,
-                    onCallCompensation.OnCallUser.getTotalOohWeekDays(),
-                    onCallCompensation.OnCallUser.getTotalOohWeekendDays());
+                log.info(`${onCallCompensation.OnCallUser.name}, ${onCallCompensation.totalCompensation}, ${onCallCompensation.OnCallUser.getTotalOohWeekDays()}, ${onCallCompensation.OnCallUser.getTotalOohWeekendDays()}`);
             }
         } catch (error) {
-            console.error("Error processing schedule %s: %s", rotaId, error);
+            log.error(error as Error, { scheduleId: rotaId });
             throw error; // Re-throw to be caught by the main error handler
         }
     }
 }
+
+// maskCliOptions is provided by ./logger/utils.ts
 
