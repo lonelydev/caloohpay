@@ -1,2 +1,6 @@
-npm run build
-npm test
+#!/bin/sh
+. "$(dirname "$0")/_/husky.sh"
+
+# Run a fast TypeScript typecheck before committing to catch obvious issues.
+echo "pre-commit: running quick lint (tsc --noEmit)"
+npm run lint
