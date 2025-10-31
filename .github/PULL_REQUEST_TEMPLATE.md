@@ -1,76 +1,35 @@
-## 📚 Release v2.0.0: Comprehensive Release Documentation
+<!--
+Provide a clear, short description of what this PR does and why.
+Use this template to help reviewers understand the intent and testing performed.
+-->
 
-This PR includes the release documentation and version management for CalOohPay v2.0.0.
+# Pull Request
 
-### Changes Included
+## Summary
 
-#### 1. Version Bump (commit b6a2758)
-- Updated `package.json` from v1.0.0 to v2.0.0
-- Tagged as v2.0.0
+Briefly describe the changes in this PR and the motivation. Keep it short — a few sentences is ideal.
 
-#### 2. Release Documentation (commit 1c076ac)
-- **CHANGELOG.md**: Comprehensive changelog with both v1.0.0 and v2.0.0 release notes
-- **docs/v1.0.0-RELEASE.md**: Complete installation and usage guide for v1.0.0
-- **docs/v2.0.0-RELEASE.md**: Migration guide and documentation for v2.0.0
+## Changes
 
-### 🏷️ Git Tags Created
+- What changed (files, modules, behaviors)
+- Any public API changes or breaking changes
 
-- `v1.0.0` - Tagged at commit 9af9959 (pre-timezone version)
-- `v2.0.0` - Tagged at commit b6a2758 (with timezone support)
+## How to test
 
-Both tags have been pushed to the remote repository.
+Steps to verify the change locally (commands/examples):
 
-### 📖 Documentation Highlights
+1. Example: Run unit tests `npm test` and confirm they pass
+2. Example: Run `npm run build` and confirm there are no TypeScript errors
 
-#### CHANGELOG.md
-- Breaking changes clearly documented
-- Migration guide from v1.0.0 to v2.0.0
-- Version selection criteria to help users choose
-- Installation instructions for specific versions
+If applicable, include commands to run the CLI and sample inputs/outputs.
 
-#### v1.0.0-RELEASE.md (302 lines)
-- Complete installation guide for v1.0.0
-- Usage examples and CLI options
-- Known limitations (single timezone)
-- Troubleshooting guide
-- Upgrade path to v2.0.0
+## Checklist
 
-#### v2.0.0-RELEASE.md (475 lines)
-- Breaking changes detailed
-- New timezone features and examples
-- Comprehensive migration guide
-- Supported timezones list
-- Best practices for distributed teams
-- Daylight saving time handling
+- [ ] I have added/updated tests where relevant
+- [ ] I have updated documentation where necessary
+- [ ] My change is covered by existing or new tests
+- [ ] The build (`npm run build`) passes locally
 
-### 🎯 User Benefits
+## Notes
 
-Users can now:
-1. **Choose the right version** based on their needs
-2. **Easily upgrade** from v1.0.0 to v2.0.0 with clear migration steps
-3. **Install specific versions** using git tags
-4. **Understand breaking changes** before upgrading
-5. **Get timezone support** for distributed teams (v2.0.0)
-
-### ✅ Verification
-
-- ✅ All 27 tests passing
-- ✅ Build successful
-- ✅ Git tags pushed to remote
-- ✅ Documentation reviewed for accuracy
-- ✅ CommitLint passed
-
-### 📦 Next Steps After Merge
-
-1. Create GitHub releases for v1.0.0 and v2.0.0 using the documentation
-2. Consider publishing to npm (optional)
-3. Update README badges (optional)
-
----
-
-**Related Commits:**
-- b6a2758: Version bump to 2.0.0
-- 1c076ac: Release documentation
-- 4b0c71b: Timezone feature implementation (in main)
-
-**Closes**: Related to timezone support feature
+Add any additional notes for reviewers, e.g., why a particular approach was chosen or other PRs that should be reviewed together.
