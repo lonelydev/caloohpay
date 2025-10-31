@@ -164,6 +164,22 @@ View the latest API documentation online at: https://lonelydev.github.io/caloohp
 7. Push to the branch (`git push origin feature/amazing-feature`)
 8. Open a Pull Request
 
+## 🪝 Git hooks (developer workflow)
+
+This repository uses Husky to run git hooks that help keep commits and pushes healthy:
+
+- `commit-msg` – runs `commitlint` to validate the commit message format (conventional commits).
+- `pre-commit` – runs a quick lint (`npm run lint`, which performs `tsc --noEmit`) to catch type errors fast.
+- `pre-push` – runs the full build and test suite (`npm run build && npm test`) to ensure nothing breaks when pushing code.
+
+Recommended workflow:
+
+1. Make small commits locally and rely on `pre-commit` for quick feedback.
+2. Write descriptive commit messages that pass `commitlint`.
+3. Push to your feature branch; `pre-push` will run the full verification before the push completes.
+
+If you need to skip hooks for an urgent commit or push, use the `--no-verify` flag with `git commit` or `git push`.
+
 ## 🔧 Troubleshooting
 
 ### Common Issues

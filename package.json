@@ -9,10 +9,11 @@
   "scripts": {
     "dev": "NODE_OPTIONS='--no-deprecation' tsc -w",
     "start": "NODE_OPTIONS='--no-deprecation' node dist/src/CalOohPay.js",
-    "build": "tsc",
-    "test": "NODE_OPTIONS='--no-deprecation' jest",
-    "prepare": "husky",
-    "commitlint": "commitlint --edit",
+  "build": "tsc",
+  "lint": "tsc --noEmit",
+  "test": "NODE_OPTIONS='--no-deprecation' jest",
+  "prepare": "husky",
+  "commitlint": "commitlint --edit",
     "docs": "typedoc",
     "docs:watch": "typedoc --watch",
     "docs:serve": "npm run docs && npx http-server docs/api -p 8080 -o"
