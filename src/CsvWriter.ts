@@ -150,7 +150,7 @@ export class CsvWriter {
         const lines: string[] = [];
 
         // Add schedule information
-        lines.push(`Schedule name:,${this.escapeCsvValue(scheduleName)}`);
+        lines.push(`\nSchedule name:,${this.escapeCsvValue(scheduleName)}`);
         lines.push(`Schedule URL:,${this.escapeCsvValue(scheduleUrl)}`);
         lines.push(`Using timezone:,${this.escapeCsvValue(timezone)}`);
         lines.push(''); // Empty line for spacing

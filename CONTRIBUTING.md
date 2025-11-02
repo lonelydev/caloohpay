@@ -204,7 +204,7 @@ PR checklist before requesting review:
 ## Branch protection and releases
 
 - Push to branches on your fork and open a PR to `main` (or `develop` if used).
-- The repo is configured with Husky hooks to run typecheck/lint/test during commit/push. CI should run `npm run verify`.
+- The repo is configured with Husky hooks to run typecheck/lint/test during commit/push. CI runs the same checks (`npm run typecheck`, `npm run lint`, `npm test`) plus `npm run build`.
 
 ## Reporting issues
 
