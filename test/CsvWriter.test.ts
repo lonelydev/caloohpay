@@ -3,10 +3,10 @@ import * as fs from 'fs';
 import { DateTime } from 'luxon';
 import * as path from 'path';
 
-import { CsvWriter } from '../src/CsvWriter';
-import { OnCallCompensation } from '../src/OnCallCompensation';
-import { OnCallPeriod } from '../src/OnCallPeriod';
-import { OnCallUser } from '../src/OnCallUser';
+import { CsvWriter } from '@src/CsvWriter';
+import type { OnCallCompensation } from '@src/OnCallCompensation';
+import { OnCallPeriod } from '@src/OnCallPeriod';
+import { OnCallUser } from '@src/OnCallUser';
 
 const testOutputDir = path.join(__dirname, 'test-output');
 const testFilePath = path.join(testOutputDir, 'test-output.csv');

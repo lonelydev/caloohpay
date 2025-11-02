@@ -1,7 +1,7 @@
 import { describe, expect,it } from '@jest/globals';
 
-import { CommandLineOptions } from '../src/CommandLineOptions';
-import { maskCliOptions } from '../src/logger/utils';
+import type { CommandLineOptions } from '@src/CommandLineOptions';
+import { maskCliOptions } from '@src/logger/utils';
 
 /**
  * Test suite for type safety improvements
@@ -269,7 +269,7 @@ describe('Type Safety Improvements', () => {
         });
 
         it('should accept Array type for table data', () => {
-            const data: Array<unknown> = [
+            const data: unknown[] = [
                 { name: 'John', payment: 275 },
                 { name: 'Jane', payment: 400 }
             ];

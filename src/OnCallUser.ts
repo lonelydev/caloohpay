@@ -54,7 +54,7 @@ export class OnCallUser {
      * Private storage for all on-call periods assigned to this user.
      * Use the getter or methods to access/modify.
      */
-    private _onCallPeriods: Array<OnCallPeriod> = [];
+    private _onCallPeriods: OnCallPeriod[] = [];
 
     /**
      * Creates a new OnCallUser instance.

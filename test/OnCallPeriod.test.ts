@@ -1,6 +1,6 @@
 import {describe, expect, test} from '@jest/globals';
 
-import { OnCallPeriod } from '../src/OnCallPeriod';
+import { OnCallPeriod } from '@src/OnCallPeriod';
 
 describe('should initialise OnCallPeriod with the right number of weekdays and weekends', () => {
     const testTimeZone = 'Europe/London';

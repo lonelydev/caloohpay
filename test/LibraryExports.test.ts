@@ -8,7 +8,8 @@ import {
   CsvWriter,
   OnCallPaymentsCalculator,
   OnCallPeriod,
-  OnCallUser} from '../src/index';
+  OnCallUser,
+} from '@src/index';
 
 describe('Library Exports', () => {
   test('should export OnCallPaymentsCalculator', () => {

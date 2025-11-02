@@ -70,9 +70,9 @@ export class OnCallPeriod {
     readonly timeZone: string;
 
     /** Calculated count of OOH weekdays (Mon-Thu) in this period */
-    private _numberOfOohWeekDays: number = 0;
+    private _numberOfOohWeekDays = 0;
     /** Calculated count of OOH weekend days (Fri-Sun) in this period */
-    private _numberOfOohWeekends: number = 0;
+    private _numberOfOohWeekends = 0;
 
     /**
      * Creates a new OnCallPeriod and automatically calculates OOH days.
@@ -93,7 +93,7 @@ export class OnCallPeriod {
      * );
      * ```
      */
-    constructor(s: Date, u: Date, timeZone: string = 'UTC') {
+    constructor(s: Date, u: Date, timeZone = 'UTC') {
         this.since = new Date(s);
         this.until = new Date(u);
         this.timeZone = timeZone;

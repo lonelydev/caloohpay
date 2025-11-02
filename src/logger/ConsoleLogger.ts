@@ -39,7 +39,7 @@ export class ConsoleLogger implements Logger {
              
             // console.table accepts any tabular data (array, object, etc)
             // Type assertion is safe here as we handle errors in catch block
-            console.table(data as Record<string, unknown> | Array<unknown>);
+            console.table(data as Record<string, unknown> | unknown[]);
         } catch {
             // fallback to logging the object
             console.log(data);
