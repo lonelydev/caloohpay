@@ -58,7 +58,7 @@ export interface CommandLineOptions {
      * Can also be provided via API_TOKEN environment variable.
      * Command-line value takes precedence over environment variable.
      */
-    key: string;
+    key?: string;
     
     /**
      * Path to the output CSV file for payroll data.
@@ -67,12 +67,12 @@ export interface CommandLineOptions {
      * 
      * @example 'output/august-2024-payments.csv'
      */
-    outputFile: string;
+    outputFile?: string;
     
     /**
      * Whether to display help information.
      * When true, shows usage instructions and exits without processing.
      */
-    help: boolean;
+    help?: boolean;
 }
 

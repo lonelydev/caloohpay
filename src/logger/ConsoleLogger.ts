@@ -37,7 +37,9 @@ export class ConsoleLogger implements Logger {
         // console.table can throw on some objects; guard it
         try {
             // eslint-disable-next-line no-console
-            console.table(data as any);
+            // console.table accepts any tabular data (array, object, etc)
+            // Type assertion is safe here as we handle errors in catch block
+            console.table(data as Record<string, unknown> | Array<unknown>);
         } catch (err) {
             // fallback to logging the object
             console.log(data);

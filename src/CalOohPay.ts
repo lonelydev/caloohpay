@@ -18,6 +18,25 @@ import { ConsoleLogger } from './logger/ConsoleLogger';
 import { Logger } from './logger/Logger';
 import { maskCliOptions } from './logger/utils';
 
+/**
+ * PagerDuty API request parameters for schedule queries.
+ * 
+ * @remarks
+ * These parameters are passed to the PagerDuty API when fetching schedule data.
+ * The time_zone parameter is optional - if omitted, PagerDuty uses the schedule's
+ * default timezone.
+ */
+interface PagerDutyScheduleParams {
+    /** Whether to include overflow schedules */
+    overflow: boolean;
+    /** Start date/time in ISO 8601 format */
+    since: string;
+    /** End date/time in ISO 8601 format */
+    until: string;
+    /** Optional IANA timezone identifier to override schedule's default timezone */
+    time_zone?: string;
+}
+
 dotenv.config();
 
 const yargsInstance = yargs(hideBin(process.argv));
@@ -120,7 +139,9 @@ if (require.main === module) {
         try {
             await calOohPay(argv, logger);
         } catch (error) {
-            logger.error(error as Error);
+            // Ensure error is an Error instance for proper logging
+            const errorToLog = error instanceof Error ? error : new Error(String(error));
+            logger.error(errorToLog);
             process.exitCode = 1;
         }
     })();
@@ -329,7 +350,7 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
         
         try {
             // Build API request parameters - only include time_zone if explicitly provided by user
-            const requestParams: Record<string, any> = {
+            const requestParams: PagerDutyScheduleParams = {
                 overflow: false,
                 since: cliOptions.since,
                 until: cliOptions.until
@@ -396,8 +417,10 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
                 log.info(`${onCallCompensation.OnCallUser.name}, ${onCallCompensation.totalCompensation}, ${onCallCompensation.OnCallUser.getTotalOohWeekDays()}, ${onCallCompensation.OnCallUser.getTotalOohWeekendDays()}`);
             }
         } catch (error) {
-            log.error(error as Error, { scheduleId: rotaId });
-            throw error; // Re-throw to be caught by the main error handler
+            // Ensure error is an Error instance for proper logging
+            const errorToLog = error instanceof Error ? error : new Error(String(error));
+            log.error(errorToLog, { scheduleId: rotaId });
+            throw error; // Re-throw original error to preserve stack trace
         }
     }
 }
