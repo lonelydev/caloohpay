@@ -132,6 +132,43 @@ npm run docs:serve
 
 If you change an exported API, update the docs and run `npm run docs` to validate the generated output.
 
+## Architecture diagram
+
+A high-level overview of the CalOohPay CLI components and developer tooling (generated with Mermaid):
+
+```mermaid
+flowchart LR
+  subgraph CLI["Command-line runtime"]
+    A["CalOohPay<br/>src/CalOohPay.ts"] --> B["CommandLineOptions<br/>src/CommandLineOptions.ts"]
+    A --> C["EnvironmentController<br/>src/EnvironmentController.ts"]
+    A --> L["Logger<br/>src/logger/ConsoleLogger.ts"]
+  end
+
+  A --> PD["PagerDuty Client<br/>src/pgapi.ts<br/> (pdjs)"]
+  PD --> S["PagerdutySchedule<br/>src/PagerdutySchedule.ts"]
+  S --> F["FinalSchedule<br/>src/FinalSchedule.ts"]
+  F --> Calc["OnCallPaymentsCalculator<br/>src/OnCallPaymentsCalculator.ts"]
+  Calc --> Models["Models<br/>src/OnCallUser.ts, src/OnCallPeriod.ts"]
+  Calc --> Csv["CsvWriter<br/>src/CsvWriter.ts"]
+  Csv --> Out["Output: CSV file / Console"]
+  L --> Out
+
+  subgraph Dev["Developer tooling"]
+    ESL["ESLint<br/>eslint.config.cjs"]
+    HUS["Husky (.husky)"]
+    J["Tests: Jest"]
+    TD["Docs: TypeDoc"]
+  end
+
+  HUS -->|pre-commit hooks| A
+  ESL -->|lint checks| A
+  J -->|test runs| A
+  TD -->|generate docs| F
+
+  style CLI fill:#f9f,stroke:#333,stroke-width:1px
+  style Dev fill:#efe,stroke:#333,stroke-width:1px
+```
+
 ## Commit messages and PR checklist
 
 We follow Conventional Commits. This makes changelog and release automation easier.
