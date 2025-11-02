@@ -1,0 +1,21 @@
+
+Schedule name:,Infrastructure Platform Rota - Tier 1
+Schedule URL:,https://ovo-tech.pagerduty.com/schedules/PNMPHEA
+Using timezone:,Europe/London
+
+User,Total Compensation (£),Weekdays (Mon-Thu),Weekends (Fri-Sun)
+Chris Every,975,9,7
+Ricardo Nogueira,0,0,0
+Alex McArdle,900,9,6
+Eleanor Nicholson,0,0,0
+
+Schedule name:,24/7 Incident Commander
+Schedule URL:,https://ovo-tech.pagerduty.com/schedules/PBV22PW
+Using timezone:,Europe/London
+
+User,Total Compensation (£),Weekdays (Mon-Thu),Weekends (Fri-Sun)
+Richard Rattlidge,325,2,3
+Ben Angell,425,4,3
+Marco Delaurenti,425,4,3
+Eakan Gopalakrishnan,425,4,3
+David Richards,275,4,1
