@@ -46,6 +46,7 @@
   "devDependencies": {
     "@commitlint/cli": "^19.5.0",
     "@commitlint/config-conventional": "^19.5.0",
+    "@eslint/js": "9.38.0",
     "@jest/globals": "^29.7.0",
     "@types/jest": "^29.5.12",
     "@types/luxon": "^3.4.2",
@@ -53,7 +54,7 @@
     "@types/yargs": "^17.0.33",
     "@typescript-eslint/eslint-plugin": "^8.46.2",
     "@typescript-eslint/parser": "^8.46.2",
-    "eslint": "^9.39.0",
+    "eslint": "9.38.0",
     "eslint-import-resolver-typescript": "^4.4.4",
     "eslint-plugin-import": "^2.32.0",
     "eslint-plugin-simple-import-sort": "^12.1.1",
@@ -63,12 +64,16 @@
     "ts-jest": "^29.2.4",
     "typedoc": "^0.28.14",
     "typedoc-plugin-markdown": "^4.9.0",
-    "typescript": "^5.5.4"
+    "typescript": "^5.9.3",
+    "typescript-eslint": "^8.46.2"
   },
   "dependencies": {
     "@pagerduty/pdjs": "^2.2.4",
     "dotenv": "^16.4.5",
     "luxon": "^3.5.0",
     "yargs": "^17.7.2"
+  },
+  "resolutions": {
+    "eslint": "9.38.0"
   }
 }

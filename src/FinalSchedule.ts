@@ -36,7 +36,7 @@ export interface FinalSchedule {
      * The name of the schedule layer or the overall schedule name.
      * Typically matches the schedule name configured in PagerDuty.
      */
-    name: String;
+    name: string;
     
     /**
      * Array of all on-call entries in the schedule for the requested period.

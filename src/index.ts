@@ -31,13 +31,21 @@
 // Core Calculator
 export { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
 
+// CLI entry points / helpers
+export { calOohPay, extractOnCallUsersFromFinalSchedule } from './CalOohPay';
+
 // Models
 export { OnCallPeriod } from './OnCallPeriod';
 export { OnCallUser } from './OnCallUser';
 
 // Utilities
 export { CsvWriter } from './CsvWriter';
-export { coerceSince, coerceUntil,convertTimezone } from './DateUtilities';
+export { coerceSince, coerceUntil, convertTimezone } from './DateUtilities';
+
+// Environment and logger helpers
+export { sanitiseEnvVariable } from './EnvironmentController';
+export type { Logger } from './logger/Logger';
+export { maskCliOptions } from './logger/utils';
 
 // Types
 export type { CommandLineOptions } from './CommandLineOptions';

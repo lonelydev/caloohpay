@@ -1,13 +1,13 @@
 #!/usr/bin/env node
 import { api } from '@pagerduty/pdjs';
 import * as dotenv from 'dotenv';
-import { DateTime } from "luxon";
-import yargs from "yargs";
+import { DateTime } from 'luxon';
+import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import { CommandLineOptions } from './CommandLineOptions';
 import { CsvWriter } from './CsvWriter';
-import { coerceSince, coerceUntil,toLocaTzIsoStringWithOffset} from './DateUtilities';
+import { coerceSince, coerceUntil, toLocaTzIsoStringWithOffset } from './DateUtilities';
 import { Environment, sanitiseEnvVariable } from './EnvironmentController';
 import { FinalSchedule } from './FinalSchedule';
 import { ConsoleLogger } from './logger/ConsoleLogger';
@@ -181,9 +181,11 @@ if (require.main === module) {
 function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry, timeZone: string): OnCallUser {
     const onCallPeriod = new OnCallPeriod(scheduleEntry.start, scheduleEntry.end, timeZone);
     const onCallUser = new OnCallUser(
-        scheduleEntry.user?.id || "",
-        scheduleEntry.user?.summary || "", [onCallPeriod]);
-    return onCallUser
+        scheduleEntry.user?.id || '',
+        scheduleEntry.user?.summary || '',
+        [onCallPeriod]
+    );
+    return onCallUser;
 }
 
 /**
@@ -413,7 +415,7 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
             }
             
             // Output summary using logger
-            log.info("User, TotalComp, Mon-Thu, Fri-Sun");
+            log.info('User, TotalComp, Mon-Thu, Fri-Sun');
             for (const [, onCallCompensation] of Object.entries(auditableRecords)) {
                 log.info(`${onCallCompensation.OnCallUser.name}, ${onCallCompensation.totalCompensation}, ${onCallCompensation.OnCallUser.getTotalOohWeekDays()}, ${onCallCompensation.OnCallUser.getTotalOohWeekendDays()}`);
             }

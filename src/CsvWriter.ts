@@ -66,6 +66,9 @@ export class CsvWriter {
      */
     private filePath: string;
 
+    /** Optional logger used to emit debug information during writes. */
+    private logger?: Logger;
+
     /**
      * Creates a new CsvWriter instance.
      * 
@@ -76,8 +79,6 @@ export class CsvWriter {
      * const writer = new CsvWriter('./output/payments.csv');
      * ```
      */
-    private logger?: Logger;
-
     constructor(filePath: string, logger?: Logger) {
         this.filePath = filePath;
         this.logger = logger;
@@ -144,7 +145,7 @@ export class CsvWriter {
         scheduleUrl: string,
         timezone: string,
         auditableRecords: Record<string, OnCallCompensation>,
-        append: boolean = false
+        append = false
     ): void {
         const lines: string[] = [];
 
