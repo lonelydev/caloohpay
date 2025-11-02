@@ -30,6 +30,9 @@ module.exports = [
       'unused-imports/no-unused-imports': 'error',
       'import/no-unresolved': 'error',
       'import/no-duplicates': 'error',
+      // Disallow useless path segments like './foo/../bar' and importing directly from 'src/'
+      'import/no-useless-path-segments': ['error', { commonjs: true, noUselessIndex: true }],
+      'no-restricted-imports': ['error', { patterns: ['**/src/**'] }],
 
       // TypeScript-specific rules
       '@typescript-eslint/no-unused-vars': ['error', { argsIgnorePattern: '^_' }]
@@ -40,6 +43,7 @@ module.exports = [
     files: ['src/logger/**', 'test/**'],
     rules: {
       'no-console': 'off'
+      , 'no-restricted-imports': 'off'
     }
   }
 ];

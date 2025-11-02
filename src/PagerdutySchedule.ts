@@ -1,4 +1,4 @@
-import { FinalSchedule } from "./FinalSchedule.js";
+import { FinalSchedule } from "./FinalSchedule";
 
 /**
  * Represents a complete PagerDuty schedule with its configuration and entries.
