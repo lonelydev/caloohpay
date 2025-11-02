@@ -32,18 +32,18 @@
 export { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
 
 // Models
-export { OnCallUser } from './OnCallUser';
 export { OnCallPeriod } from './OnCallPeriod';
+export { OnCallUser } from './OnCallUser';
 
 // Utilities
 export { CsvWriter } from './CsvWriter';
-export { convertTimezone, coerceSince, coerceUntil } from './DateUtilities';
+export { coerceSince, coerceUntil,convertTimezone } from './DateUtilities';
 
 // Types
-export type { OnCallCompensation } from './OnCallCompensation';
 export type { CommandLineOptions } from './CommandLineOptions';
-export type { PagerdutySchedule } from './PagerdutySchedule';
+export type { Environment } from './EnvironmentController';
 export type { FinalSchedule } from './FinalSchedule';
+export type { OnCallCompensation } from './OnCallCompensation';
+export type { PagerdutySchedule } from './PagerdutySchedule';
 export type { ScheduleEntry } from './ScheduleEntry';
 export type { User } from './User';
-export type { Environment } from './EnvironmentController';

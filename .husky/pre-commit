@@ -3,4 +3,8 @@
 
 # Run a fast TypeScript typecheck before committing to catch obvious issues.
 echo "pre-commit: running quick lint (tsc --noEmit)"
-npm run lint
+npm run lint:fix && npm run typecheck
+if [ $? -ne 0 ]; then
+  echo "pre-commit: linting or typecheck failed, aborting commit."
+  exit 1
+fi

@@ -1,6 +1,7 @@
 import { describe, expect, test } from '@jest/globals';
-import { OnCallPeriod } from '../src/OnCallPeriod';
 import { DateTime } from 'luxon';
+
+import { OnCallPeriod } from '../src/OnCallPeriod';
 
 describe('Timezone handling for distributed teams', () => {
     test('should correctly calculate OOH for a shift in Europe/London timezone', () => {

@@ -1,4 +1,5 @@
 import { describe, expect, test } from '@jest/globals';
+
 import { sanitiseEnvVariable } from '../src/EnvironmentController';
 
 describe('EnvironmentController', () => {

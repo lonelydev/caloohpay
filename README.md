@@ -108,77 +108,12 @@ See the [API Documentation](https://lonelydev.github.io/caloohpay/) for more det
 
 > **Note**: Rates are currently hardcoded but can be modified in `src/OnCallPaymentsCalculator.ts`
 
-## 🧪 Development & Testing
-
-### Running Tests
-
-```bash
-# Run all tests
-npm test
-
-# Run tests in watch mode
-npm run test:watch
-
-# Run with coverage
-npm run test:coverage
-```
-
-### Building from Source
-
-```bash
-# Install dependencies
-npm install
-
-# Build TypeScript to JavaScript
-npm run build
-
-# Run in development mode (with watch)
 npm run dev
-```
-
-### Documentation
-
-Generate and view API documentation:
-
-```bash
-# Generate documentation
-npm run docs
-
-# Generate and serve locally (opens browser at http://localhost:8080)
 npm run docs:serve
-
-# Watch mode (regenerates on file changes)
 npm run docs:watch
-```
+## Development and contributing
 
-View the latest API documentation online at: https://lonelydev.github.io/caloohpay/
-
-### Contributing
-
-1. Fork the repository
-2. Create a feature branch (`git checkout -b feature/amazing-feature`)
-3. Make your changes
-4. Add tests for new functionality
-5. Ensure all tests pass (`npm test`)
-6. Commit your changes (`git commit -m 'Add amazing feature'`)
-7. Push to the branch (`git push origin feature/amazing-feature`)
-8. Open a Pull Request
-
-## 🪝 Git hooks (developer workflow)
-
-This repository uses Husky to run git hooks that help keep commits and pushes healthy:
-
-- `commit-msg` – runs `commitlint` to validate the commit message format (conventional commits).
-- `pre-commit` – runs a quick lint (`npm run lint`, which performs `tsc --noEmit`) to catch type errors fast.
-- `pre-push` – runs the full build and test suite (`npm run build && npm test`) to ensure nothing breaks when pushing code.
-
-Recommended workflow:
-
-1. Make small commits locally and rely on `pre-commit` for quick feedback.
-2. Write descriptive commit messages that pass `commitlint`.
-3. Push to your feature branch; `pre-push` will run the full verification before the push completes.
-
-If you need to skip hooks for an urgent commit or push, use the `--no-verify` flag with `git commit` or `git push`.
+Development, testing, contributor workflow and git-hook guidance has moved to [CONTRIBUTING.md](CONTRIBUTING.md). Please read that document for detailed setup and contribution instructions, including how to run tests, lint, generate docs, and prepare a pull request.
 
 ## 🔧 Troubleshooting
 
@@ -290,7 +225,7 @@ When using the `--output-file` option, CalOohPay generates a Google Sheets compa
 
 #### CSV Structure
 
-```csv
+```text
 Schedule name:,Engineering Team Alpha
 Schedule URL:,https://company.pagerduty.com/schedules/PQRSTUV
 Using timezone:,Europe/London

@@ -1,6 +1,7 @@
-import { describe, it, expect } from '@jest/globals';
-import { maskCliOptions } from '../src/logger/utils';
+import { describe, expect,it } from '@jest/globals';
+
 import { CommandLineOptions } from '../src/CommandLineOptions';
+import { maskCliOptions } from '../src/logger/utils';
 
 /**
  * Test suite for type safety improvements

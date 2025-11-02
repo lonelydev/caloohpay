@@ -1,13 +1,14 @@
 import * as fs from 'fs';
 import * as path from 'path';
+
 import { calOohPay } from '../../src/CalOohPay';
 import { MockLogger } from '../doubles/MockLogger';
 
 // Mock the PagerDuty client used in CalOohPay. We'll provide a fake `api()`
 // with a `get` method that returns a canned schedule response.
 jest.mock('@pagerduty/pdjs', () => ({
-    api: (opts: any) => ({
-        get: async (url: string, opts2: any) => {
+    api: (_opts: any) => ({
+        get: async (url: string, _opts2: any) => {
             const scheduleId = url.split('/').pop();
             return {
                 data: {

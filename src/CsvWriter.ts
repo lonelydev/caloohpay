@@ -1,7 +1,8 @@
 import * as fs from 'fs';
 import * as path from 'path';
-import { OnCallCompensation } from './OnCallCompensation';
+
 import { Logger } from './logger/Logger';
+import { OnCallCompensation } from './OnCallCompensation';
 
 /**
  * Writes on-call payment data to CSV files in a Google Sheets compatible format.
@@ -157,7 +158,7 @@ export class CsvWriter {
         lines.push('User,Total Compensation (£),Weekdays (Mon-Thu),Weekends (Fri-Sun)');
 
         // Add user compensation data
-        for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
+        for (const [, onCallCompensation] of Object.entries(auditableRecords)) {
             const userName = this.escapeCsvValue(onCallCompensation.OnCallUser.name);
             const totalComp = onCallCompensation.totalCompensation;
             const weekdays = onCallCompensation.OnCallUser.getTotalOohWeekDays();
@@ -259,7 +260,6 @@ export class CsvWriter {
             // Write or append to file. When appending, avoid adding an extra
             // blank line if the file already ends with a newline.
             if (append && fs.existsSync(this.filePath)) {
-                const existing = fs.readFileSync(this.filePath, { encoding: 'utf8' });
                 fs.appendFileSync(this.filePath, '\n' + content, 'utf8');
             } else {
                 fs.writeFileSync(this.filePath, content, 'utf8');
