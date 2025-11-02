@@ -1,7 +1,4 @@
-import { jest } from '@jest/globals';
-import { CommandLineOptions } from '../src/CommandLineOptions';
 import yargs from 'yargs';
-import { hideBin } from 'yargs/helpers';
 
 /**
  * Test suite for CalOohPay main functionality

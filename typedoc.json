@@ -32,5 +32,6 @@
   "searchInComments": true,
   "treatWarningsAsErrors": false,
   "lightHighlightTheme": "light-plus",
-  "darkHighlightTheme": "dark-plus"
+  "darkHighlightTheme": "dark-plus",
+  "highlightLanguages": ["ts", "js", "json", "csv", "bash"]
 }

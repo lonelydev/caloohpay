@@ -118,7 +118,7 @@ export class OnCallPeriod {
         
         while (curDateTime < untilDateTime) {
             // Check if there's an OOH shift from this day to the end of the period
-            if (OnCallPeriod.wasPersonOnCallOOH(curDateTime, untilDateTime, this.timeZone)) {
+            if (OnCallPeriod.wasPersonOnCallOOH(curDateTime, untilDateTime)) {
                 if (OnCallPeriod.isWeekDay(curDateTime.weekday)) {
                     this._numberOfOohWeekDays++;
                 } else {
@@ -191,7 +191,7 @@ export class OnCallPeriod {
      * - Same-day shifts (even if they end late)
      * - Shifts that end before 17:30
      */
-    private static wasPersonOnCallOOH(since: DateTime, until: DateTime, timeZone: string): boolean {
+    private static wasPersonOnCallOOH(since: DateTime, until: DateTime): boolean {
         return (OnCallPeriod.doesShiftSpanEveningTillNextDay(since, until) &&
             OnCallPeriod.isShiftLongerThan6Hours(since, until));
     }

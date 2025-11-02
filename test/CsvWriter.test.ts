@@ -1,11 +1,12 @@
-import { describe, expect, test, beforeEach, afterEach } from '@jest/globals';
+import { afterEach,beforeEach, describe, expect, test } from '@jest/globals';
+import * as fs from 'fs';
+import { DateTime } from 'luxon';
+import * as path from 'path';
+
 import { CsvWriter } from '../src/CsvWriter';
 import { OnCallCompensation } from '../src/OnCallCompensation';
-import { OnCallUser } from '../src/OnCallUser';
 import { OnCallPeriod } from '../src/OnCallPeriod';
-import * as fs from 'fs';
-import * as path from 'path';
-import { DateTime } from 'luxon';
+import { OnCallUser } from '../src/OnCallUser';
 
 const testOutputDir = path.join(__dirname, 'test-output');
 const testFilePath = path.join(testOutputDir, 'test-output.csv');

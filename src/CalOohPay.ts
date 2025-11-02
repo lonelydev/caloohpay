@@ -1,22 +1,23 @@
 #!/usr/bin/env node
 import { api } from '@pagerduty/pdjs';
 import * as dotenv from 'dotenv';
-import { hideBin } from 'yargs/helpers';
-import yargs from "yargs";
-import { OnCallUser } from './OnCallUser';
-import { OnCallPeriod } from './OnCallPeriod';
-import { FinalSchedule } from './FinalSchedule';
-import { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
-import { ScheduleEntry } from './ScheduleEntry';
-import { CommandLineOptions } from './CommandLineOptions';
-import { Environment, sanitiseEnvVariable } from './EnvironmentController';
-import { toLocaTzIsoStringWithOffset, coerceSince, coerceUntil} from './DateUtilities';
 import { DateTime } from "luxon";
+import yargs from "yargs";
+import { hideBin } from 'yargs/helpers';
+
+import { CommandLineOptions } from './CommandLineOptions';
 import { CsvWriter } from './CsvWriter';
-import { PagerdutySchedule } from './PagerdutySchedule';
+import { coerceSince, coerceUntil,toLocaTzIsoStringWithOffset} from './DateUtilities';
+import { Environment, sanitiseEnvVariable } from './EnvironmentController';
+import { FinalSchedule } from './FinalSchedule';
 import { ConsoleLogger } from './logger/ConsoleLogger';
 import { Logger } from './logger/Logger';
 import { maskCliOptions } from './logger/utils';
+import { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
+import { OnCallPeriod } from './OnCallPeriod';
+import { OnCallUser } from './OnCallUser';
+import { PagerdutySchedule } from './PagerdutySchedule';
+import { ScheduleEntry } from './ScheduleEntry';
 
 /**
  * PagerDuty API request parameters for schedule queries.
@@ -232,7 +233,7 @@ function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry, timeZone: 
  * @see {@link OnCallUser}
  * @see {@link getOnCallUserFromScheduleEntry}
  */
-function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule, timeZone: string): Record<string, OnCallUser> {
+export function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule, timeZone: string): Record<string, OnCallUser> {
     const onCallUsers: Record<string, OnCallUser> = {};
     if (finalSchedule.rendered_schedule_entries) {
         finalSchedule.rendered_schedule_entries.forEach(scheduleEntry => {
@@ -413,7 +414,7 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
             
             // Output summary using logger
             log.info("User, TotalComp, Mon-Thu, Fri-Sun");
-            for (const [userId, onCallCompensation] of Object.entries(auditableRecords)) {
+            for (const [, onCallCompensation] of Object.entries(auditableRecords)) {
                 log.info(`${onCallCompensation.OnCallUser.name}, ${onCallCompensation.totalCompensation}, ${onCallCompensation.OnCallUser.getTotalOohWeekDays()}, ${onCallCompensation.OnCallUser.getTotalOohWeekendDays()}`);
             }
         } catch (error) {

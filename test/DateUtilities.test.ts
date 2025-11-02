@@ -1,6 +1,6 @@
-import { convertTimezone, toLocaTzIsoStringWithOffset } from '../src/DateUtilities';
 import {describe, expect, test} from '@jest/globals';
-import { DateTime } from 'luxon';
+
+import { convertTimezone } from '../src/DateUtilities';
 
 describe('DateUtilities.toLocaTzIsoStringWithOffset', () => {
     const testTimezone = 'Europe/London';

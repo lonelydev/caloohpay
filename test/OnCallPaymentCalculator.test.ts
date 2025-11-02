@@ -1,8 +1,9 @@
 import { describe, expect, test } from '@jest/globals';
+import { DateTime } from "luxon";
+
 import { OnCallPaymentsCalculator } from "../src/OnCallPaymentsCalculator";
 import { OnCallPeriod } from '../src/OnCallPeriod';
 import { OnCallUser } from '../src/OnCallUser';
-import { DateTime } from "luxon";
 
 const testTimeZone = 'Europe/London';
 
