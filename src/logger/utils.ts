@@ -1,4 +1,4 @@
-import { CommandLineOptions } from '../../src/CommandLineOptions';
+import { CommandLineOptions } from '../CommandLineOptions';
 
 /**
  * Masks sensitive API key in CLI options before logging.
