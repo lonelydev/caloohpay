@@ -132,6 +132,18 @@ npm run docs:serve
 
 If you change an exported API, update the docs and run `npm run docs` to validate the generated output.
 
+Import rule note
+----------------
+
+We enforce an ESLint rule that forbids importing directly from `src/` paths in source files (e.g. `import x from 'src/Whatever'`). This keeps module boundaries clear and avoids brittle absolute-style imports.
+
+How to import local modules correctly:
+
+- From other `src` files: use relative imports (e.g. `import { Foo } from './Foo'` or `import { Bar } from '../utils/Bar'`).
+- From tests: imports from `../src/...` are allowed (tests often reference source files directly). If you prefer, open an issue and we can standardize on a different pattern.
+
+If ESLint flags `no-restricted-imports` for a `src/` import, change it to a relative import or import from the package entry (`import { Foo } from '.'`) where appropriate.
+
 ## Architecture diagram
 
 A high-level overview of the CalOohPay CLI components and developer tooling (generated with Mermaid):
