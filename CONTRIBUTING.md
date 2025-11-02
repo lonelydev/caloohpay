@@ -67,6 +67,10 @@ npm test
 npm run lint
 ```
 
+Configuration note: ESLint uses a flat config file `eslint.config.cjs` (ESLint v9). If you need to change or add rules, edit `eslint.config.cjs`. Flat configs differ from legacy `.eslintrc` files (they are an array of config objects). For advanced or type-aware rules you may need to enable them in CI or adjust `parserOptions.project`.
+
+Husky note: You may see a deprecation warning when committing about sourcing `_/husky.sh` in `.husky/pre-commit`. That message advises removing the two lines that source husky helper scripts prior to Husky v10; update `.husky/pre-commit` when upgrading Husky to v10 to avoid breakage.
+
 - Auto-fix lintable issues (imports, formatting, unused imports):
 
 ```bash
