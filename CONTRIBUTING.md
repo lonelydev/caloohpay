@@ -85,6 +85,23 @@ npm run typecheck
 
 Pre-commit and pre-push hooks are configured to help enforce these rules. If you need to skip them temporarily you can use `--no-verify`, but avoid doing this for regular PRs.
 
+Husky & Git hooks
+-----------------
+
+This repository uses Husky to manage Git hooks. The project uses the `husky install` flow (run automatically on install via the `prepare` script). To ensure hooks are available locally after cloning:
+
+```bash
+# Install dependencies
+npm install
+
+# Install Husky hooks (also run automatically by `npm install` because of the `prepare` script)
+npm run prepare
+```
+
+If you need to re-install or update hooks manually, run `npx husky install` or `npm run prepare`.
+
+Note: The repo currently depends on Husky v9 but the pre-commit hook is written to remain compatible with future Husky v10 changes. If you upgrade Husky, make sure to run `npm run prepare` again and verify hooks.
+
 ## Docs (TypeDoc)
 
 API documentation is generated with TypeDoc. All public exports should have JSDoc/TypeDoc comments to make the generated docs useful.
