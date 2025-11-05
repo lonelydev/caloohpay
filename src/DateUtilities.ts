@@ -82,6 +82,8 @@ export function convertTimezone(date: Date | string, timeZoneId: string): DateTi
  * @param value - The date string to coerce (ISO format or YYYY-MM-DD)
  * @returns ISO string representing midnight on the specified date
  * 
+ * @throws {Error} If the date string cannot be parsed as a valid ISO date
+ * 
  * @remarks
  * This function is used in the CLI to normalize the `--since` parameter,
  * ensuring that calculations start at the exact beginning of the day in
@@ -91,7 +93,7 @@ export function convertTimezone(date: Date | string, timeZoneId: string): DateTi
  * - Parses input as ISO string
  * - Sets time to 00:00:00.000 (start of day)
  * - Returns full ISO format with timezone
- * - Falls back to original value if parsing fails
+ * - Throws error if parsing fails (fail-fast approach)
  * 
  * @example
  * ```typescript
@@ -100,11 +102,24 @@ export function convertTimezone(date: Date | string, timeZoneId: string): DateTi
  * 
  * coerceSince('2024-08-01T14:30:00Z');
  * // Returns: '2024-08-01T00:00:00.000Z'
+ * 
+ * coerceSince('invalid-date');
+ * // Throws: Error: Invalid date format: invalid-date. Expected ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ssZ).
  * ```
  */
 export function coerceSince(value: string): string {
-    const dt = DateTime.fromISO(value).startOf('day');
-    return dt.toISO() || value;
+    const dt = DateTime.fromISO(value);
+    if (!dt.isValid) {
+        throw new Error(
+            `Invalid date format: ${value}. Expected ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ssZ). ` +
+            `Reason: ${dt.invalidReason}`
+        );
+    }
+    const result = dt.startOf('day').toISO();
+    if (!result) {
+        throw new Error(`Failed to convert date to ISO string: ${value}`);
+    }
+    return result;
 }
 
 /**
@@ -119,6 +134,8 @@ export function coerceSince(value: string): string {
  * @param value - The date string to coerce (ISO format or YYYY-MM-DD)
  * @returns ISO string representing the last millisecond of the specified date
  * 
+ * @throws {Error} If the date string cannot be parsed as a valid ISO date
+ * 
  * @remarks
  * This function is used in the CLI to normalize the `--until` parameter,
  * ensuring that calculations include all shifts ending on the specified date,
@@ -128,7 +145,7 @@ export function coerceSince(value: string): string {
  * - Parses input as ISO string
  * - Sets time to 23:59:59.999 (end of day)
  * - Returns full ISO format with timezone
- * - Falls back to original value if parsing fails
+ * - Throws error if parsing fails (fail-fast approach)
  * 
  * ### Important for OOH Calculations
  * Using end-of-day ensures that overnight shifts ending early on the
@@ -141,9 +158,22 @@ export function coerceSince(value: string): string {
  * 
  * coerceUntil('2024-08-31T10:00:00Z');
  * // Returns: '2024-08-31T23:59:59.999Z'
+ * 
+ * coerceUntil('not-a-date');
+ * // Throws: Error: Invalid date format: not-a-date. Expected ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ssZ).
  * ```
  */
 export function coerceUntil(value: string): string {
-    const dt = DateTime.fromISO(value).endOf('day');
-    return dt.toISO() || value;
+    const dt = DateTime.fromISO(value);
+    if (!dt.isValid) {
+        throw new Error(
+            `Invalid date format: ${value}. Expected ISO format (YYYY-MM-DD or YYYY-MM-DDTHH:mm:ssZ). ` +
+            `Reason: ${dt.invalidReason}`
+        );
+    }
+    const result = dt.endOf('day').toISO();
+    if (!result) {
+        throw new Error(`Failed to convert date to ISO string: ${value}`);
+    }
+    return result;
 }
