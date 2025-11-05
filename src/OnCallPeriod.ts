@@ -103,8 +103,8 @@ export class OnCallPeriod {
     /**
      * Initializes the count of OOH weekdays and weekends for this period.
      * 
-     * Iterates through each day in the period and checks if there was qualifying
-     * OOH work on that day. Categorizes each OOH day as either weekday or weekend.
+     * Uses a functional approach to collect all OOH days and categorize them
+     * into weekdays and weekends. This makes the logic easier to test and reason about.
      * 
      * @private
      * @remarks
@@ -113,20 +113,46 @@ export class OnCallPeriod {
      * day boundaries and work-hour calculations.
      */
     private initializeOohWeekDayAndWeekendDayCount() {
+        const oohDays = this.getOohDaysInPeriod();
+        this._numberOfOohWeekDays = oohDays.filter(dt => OnCallPeriod.isWeekDay(dt.weekday)).length;
+        this._numberOfOohWeekends = oohDays.filter(dt => !OnCallPeriod.isWeekDay(dt.weekday)).length;
+    }
+
+    /**
+     * Collects all days in the period that qualify as out-of-hours work.
+     * 
+     * Iterates through each day from start to end, checking if there was qualifying
+     * OOH work on that day. Returns an array of DateTime objects representing
+     * each OOH day.
+     * 
+     * @private
+     * @returns Array of DateTime objects for each day with OOH work
+     * 
+     * @remarks
+     * This pure function approach makes the logic more testable and easier to understand.
+     * It separates the iteration logic from the categorization logic, following the
+     * Single Responsibility Principle.
+     * 
+     * @example
+     * ```typescript
+     * // Internal usage - returns array like:
+     * // [DateTime('2024-08-01'), DateTime('2024-08-02'), DateTime('2024-08-03')]
+     * ```
+     */
+    private getOohDaysInPeriod(): DateTime[] {
+        const oohDays: DateTime[] = [];
         let curDateTime = DateTime.fromJSDate(this.since, { zone: this.timeZone });
         const untilDateTime = DateTime.fromJSDate(this.until, { zone: this.timeZone });
         
         while (curDateTime < untilDateTime) {
             // Check if there's an OOH shift from this day to the end of the period
             if (OnCallPeriod.wasPersonOnCallOOH(curDateTime, untilDateTime)) {
-                if (OnCallPeriod.isWeekDay(curDateTime.weekday)) {
-                    this._numberOfOohWeekDays++;
-                } else {
-                    this._numberOfOohWeekends++;
-                }
+                oohDays.push(curDateTime);
             }
             curDateTime = curDateTime.plus({ days: 1 });
         }
+        
+        return oohDays;
     }
 
     /**
