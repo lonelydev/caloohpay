@@ -270,7 +270,9 @@ export class CsvWriter {
                 this.logger.info(`Wrote CSV to ${this.filePath}`, { append });
             }
         } catch (error) {
-            throw new Error(`Failed to write to file ${this.filePath}: ${error}`);
+            const err = new Error(`Failed to write to file ${this.filePath}`);
+            err.cause = error;
+            throw err;
         }
     }
 
