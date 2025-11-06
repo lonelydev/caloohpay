@@ -110,7 +110,7 @@ describe('DST transition edge cases', () => {
             const period = new OnCallPeriod(since, until, 'Europe/London');
             
             expect(period.timeZone).toBe('Europe/London');
-            // Fri, Sat, Sun (with DST transition - this day is 25 hours long!)
+            // Fri, Sat, Sun (with DST transition - Sunday is 25 hours long)
             expect(period.numberOfOohWeekends).toBe(3);
             expect(period.numberOfOohWeekDays).toBe(0);
         });
@@ -213,8 +213,8 @@ describe('DST transition edge cases', () => {
             const period = new OnCallPeriod(since, until, 'Australia/Melbourne');
             
             expect(period.timeZone).toBe('Australia/Melbourne');
-            // Dec 20 (Fri), 21 (Sat), 22 (Sun), 27 (Fri), 28 (Sat), 29 (Sun), Jan 3 (Fri - no, ends at 9am)
             // Weekends: Fri 20, Sat 21, Sun 22, Fri 27, Sat 28, Sun 29
+            // Jan 3 (Fri) is not counted because shift ends at 9am, before 17:30 threshold
             expect(period.numberOfOohWeekends).toBe(6);
             // Weekdays: Mon 23, Tue 24, Wed 25 (Christmas), Thu 26, Mon 30, Tue 31, Wed 1, Thu 2
             expect(period.numberOfOohWeekDays).toBe(8);
@@ -238,7 +238,8 @@ describe('DST transition edge cases', () => {
             const period = new OnCallPeriod(since, until, 'Australia/Melbourne');
             
             expect(period.timeZone).toBe('Australia/Melbourne');
-            // Weekends: Fri 4, Sat 5, Sun 6 (with DST) - Thursday is a weekday!
+            // Weekends: Fri 4, Sat 5, Sun 6 (with DST)
+            // Note: Thursday is a weekday (Mon-Thu), Friday-Sunday are weekends
             expect(period.numberOfOohWeekends).toBe(3); // Fri, Sat, Sun
             // Weekdays: Thu 3, Mon 7
             expect(period.numberOfOohWeekDays).toBe(2); // Thu, Mon
