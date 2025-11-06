@@ -1,6 +1,7 @@
 import * as fs from 'fs';
 import * as path from 'path';
 
+import { CURRENCY_SYMBOL } from './Constants';
 import { Logger } from './logger/Logger';
 import { OnCallCompensation } from './OnCallCompensation';
 
@@ -156,7 +157,7 @@ export class CsvWriter {
         lines.push(''); // Empty line for spacing
 
         // Add header row
-        lines.push('User,Total Compensation (£),Weekdays (Mon-Thu),Weekends (Fri-Sun)');
+        lines.push(`User,Total Compensation (${CURRENCY_SYMBOL}),Weekdays (Mon-Thu),Weekends (Fri-Sun)`);
 
         // Add user compensation data
         for (const [, onCallCompensation] of Object.entries(auditableRecords)) {

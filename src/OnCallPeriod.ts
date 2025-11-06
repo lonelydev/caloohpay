@@ -1,5 +1,14 @@
 import { DateTime } from 'luxon';
 
+import {
+    END_OF_WORK_HOUR,
+    END_OF_WORK_MINUTE,
+    MILLISECONDS_PER_HOUR,
+    MIN_SHIFT_HOURS,
+    WEEKDAY_END,
+    WEEKDAY_START
+} from './Constants';
+
 /**
  * Represents a continuous on-call period with automatic OOH (Out of Hours) calculation.
  * 
@@ -46,21 +55,21 @@ import { DateTime } from 'luxon';
  * ```
  */
 export class OnCallPeriod {
-    // Constants for day classification
+    // Constants for day classification (imported from Constants.ts)
     /** Monday (Luxon uses 1-7, where 1 = Monday) */
-    private static readonly WEEKDAY_START = 1; // Monday
+    private static readonly WEEKDAY_START = WEEKDAY_START;
     /** Thursday (inclusive as a weekday) */
-    private static readonly WEEKDAY_END = 4;   // Thursday (inclusive)
+    private static readonly WEEKDAY_END = WEEKDAY_END;
     
-    // Constants for shift validation
+    // Constants for shift validation (imported from Constants.ts)
     /** Hour when work day ends (5:30 PM = 17:30) */
-    private static readonly END_OF_WORK_HOUR = 17;
+    private static readonly END_OF_WORK_HOUR = END_OF_WORK_HOUR;
     /** Minute component of end of work day (17:30) */
-    private static readonly END_OF_WORK_MINUTE = 30;
+    private static readonly END_OF_WORK_MINUTE = END_OF_WORK_MINUTE;
     /** Minimum shift duration in hours to qualify as OOH */
-    private static readonly MIN_SHIFT_HOURS = 6;
+    private static readonly MIN_SHIFT_HOURS = MIN_SHIFT_HOURS;
     /** Conversion factor for hours to milliseconds */
-    private static readonly MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
+    private static readonly MILLISECONDS_PER_HOUR = MILLISECONDS_PER_HOUR;
 
     /** Start date/time of the on-call period */
     readonly since: Date;

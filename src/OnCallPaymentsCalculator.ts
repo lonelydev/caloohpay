@@ -1,3 +1,4 @@
+import { WEEKDAY_RATE, WEEKEND_RATE } from "./Constants";
 import { OnCallCompensation } from "./OnCallCompensation";
 import { OnCallUser } from "./OnCallUser";
 
@@ -55,13 +56,13 @@ export class OnCallPaymentsCalculator {
      * Compensation rate for weekday (Mon-Thu) OOH shifts.
      * Fixed at £50 per OOH weekday.
      */
-    public static readonly WeekDayRate: number = 50;
+    public static readonly WeekDayRate: number = WEEKDAY_RATE;
     
     /**
      * Compensation rate for weekend (Fri-Sun) OOH shifts.
      * Fixed at £75 per OOH weekend day.
      */
-    public static readonly WeekEndRate: number = 75;
+    public static readonly WeekEndRate: number = WEEKEND_RATE;
 
     /**
      * Validates that an OnCallUser is properly initialized for calculation.

@@ -6,6 +6,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import { CommandLineOptions } from './CommandLineOptions';
+import { FALLBACK_SCHEDULE_TIMEZONE } from './Constants';
 import { CsvWriter } from './CsvWriter';
 import { coerceSince, coerceUntil, toLocaTzIsoStringWithOffset } from './DateUtilities';
 import { Environment, sanitiseEnvVariable } from './EnvironmentController';
@@ -391,7 +392,7 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
             log.info(`Schedule URL: ${scheduleData.html_url}`);
             
             // Use CLI timezone if provided, otherwise use schedule's timezone from API
-            const effectiveTimeZone = cliOptions.timeZoneId || scheduleData.time_zone || 'Europe/London';
+            const effectiveTimeZone = cliOptions.timeZoneId || scheduleData.time_zone || FALLBACK_SCHEDULE_TIMEZONE;
             log.info(`Using timezone: ${effectiveTimeZone}`);
             if (cliOptions.timeZoneId && scheduleData.time_zone && cliOptions.timeZoneId !== scheduleData.time_zone) {
                 log.info(`Note: CLI timezone (${cliOptions.timeZoneId}) overrides schedule timezone (${scheduleData.time_zone})`);

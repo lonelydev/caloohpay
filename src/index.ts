@@ -28,6 +28,9 @@
  * ```
  */
 
+// Constants
+export * from './Constants';
+
 // Core Calculator
 export { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
 
