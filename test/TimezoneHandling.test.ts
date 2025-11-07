@@ -446,7 +446,7 @@ describe('DST transition edge cases', () => {
     });
 
     describe('Edge cases around midnight during DST', () => {
-        it('should handle shift starting at midnight during spring DST transition', () => {
+        test('should handle shift starting at midnight during spring DST transition', () => {
             // Europe/London: Shift starting right when clocks change
             const since = new Date('2024-03-31T00:00:00+00:00'); // Sunday midnight (before DST)
             const until = new Date('2024-04-01T09:00:00+01:00'); // Monday morning (after DST)
