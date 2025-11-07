@@ -56,9 +56,11 @@ The core logic for determining if a shift qualifies as out-of-hours is in the `O
 
 ### Compensation Calculation
 
-Compensation rates are defined in `OnCallPaymentsCalculator`:
-- **Weekdays (Mon-Thu)**: £50 per day
-- **Weekends (Fri-Sun)**: £75 per day
+Compensation rates are defined in `Constants.ts` and referenced by `OnCallPaymentsCalculator`:
+- **Weekdays (Mon-Thu)**: £50 per day (`WEEKDAY_RATE` constant)
+- **Weekends (Fri-Sun)**: £75 per day (`WEEKEND_RATE` constant)
+
+To modify rates, update the values in `src/Constants.ts`.
 
 ### Timezone Support
 

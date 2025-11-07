@@ -106,7 +106,7 @@ See the [API Documentation](https://lonelydev.github.io/caloohpay/) for more det
 | **Weekdays** (Mon-Thu) | £50 per day |
 | **Weekends** (Fri-Sun) | £75 per day |
 
-> **Note**: Rates are currently hardcoded but can be modified in `src/OnCallPaymentsCalculator.ts`
+> **Note**: Compensation rates are defined in `src/Constants.ts` and can be modified there. The calculator references these centralized constants via `WEEKDAY_RATE` and `WEEKEND_RATE`.
 
 npm run dev
 npm run docs:serve
