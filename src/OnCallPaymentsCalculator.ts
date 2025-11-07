@@ -77,10 +77,16 @@ export class OnCallPaymentsCalculator {
      */
     private validateOnCallUser(onCallUser: OnCallUser): void {
         if (!onCallUser) {
-            throw new Error("User undefined!");
+            throw new Error(
+                "Cannot calculate payment: OnCallUser is undefined. " +
+                "Ensure user object is properly initialized before calling calculation methods."
+            );
         }
-        if (!onCallUser.onCallPeriods) {
-            throw new Error("No on call periods defined!");
+        if (!onCallUser.onCallPeriods || onCallUser.onCallPeriods.length === 0) {
+            throw new Error(
+                `Cannot calculate payment for user '${onCallUser.id}' (${onCallUser.name || 'unnamed'}): ` +
+                `No on-call periods defined. User must have at least one OnCallPeriod assigned.`
+            );
         }
     }
 

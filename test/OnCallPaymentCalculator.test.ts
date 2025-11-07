@@ -467,3 +467,97 @@ describe('Cross-timezone Comparison Edge Cases', () => {
         expect(melbourneUser.onCallPeriods[0].numberOfOohWeekDays).toBeDefined();
     });
 });
+
+describe('Error Handling and Validation', () => {
+    const calculator = new OnCallPaymentsCalculator();
+
+    describe('validateOnCallUser', () => {
+        test('should throw descriptive error when user is undefined', () => {
+            expect(() => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                calculator.calculateOnCallPayment(undefined as any);
+            }).toThrow(
+                "Cannot calculate payment: OnCallUser is undefined. " +
+                "Ensure user object is properly initialized before calling calculation methods."
+            );
+        });
+
+        test('should throw descriptive error when user has no on-call periods', () => {
+            const userWithNoPeriods = new OnCallUser('USER123', 'Test User', []);
+            
+            expect(() => {
+                calculator.calculateOnCallPayment(userWithNoPeriods);
+            }).toThrow(
+                "Cannot calculate payment for user 'USER123' (Test User): " +
+                "No on-call periods defined. User must have at least one OnCallPeriod assigned."
+            );
+        });
+
+        test('should throw descriptive error for unnamed user with no periods', () => {
+            const userWithNoPeriods = new OnCallUser('USER456', '', []);
+            
+            expect(() => {
+                calculator.calculateOnCallPayment(userWithNoPeriods);
+            }).toThrow(
+                "Cannot calculate payment for user 'USER456' (unnamed): " +
+                "No on-call periods defined. User must have at least one OnCallPeriod assigned."
+            );
+        });
+
+        test('should include user ID in error message for context', () => {
+            const userWithNoPeriods = new OnCallUser('PXXXXXX', 'John Doe', []);
+            
+            expect(() => {
+                calculator.calculateOnCallPayment(userWithNoPeriods);
+            }).toThrow(/user 'PXXXXXX'/);
+        });
+
+        test('should include user name in error message for context', () => {
+            const userWithNoPeriods = new OnCallUser('USER789', 'Jane Smith', []);
+            
+            expect(() => {
+                calculator.calculateOnCallPayment(userWithNoPeriods);
+            }).toThrow(/Jane Smith/);
+        });
+    });
+
+    describe('calculateOnCallPayments batch validation', () => {
+        test('should fail fast on first invalid user in batch', () => {
+            const validUser = new OnCallUser('USER1', 'Valid User', [
+                new OnCallPeriod(
+                    DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                    DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                    'Europe/London'
+                )
+            ]);
+            const invalidUser = new OnCallUser('USER2', 'Invalid User', []);
+            
+            expect(() => {
+                calculator.calculateOnCallPayments([validUser, invalidUser]);
+            }).toThrow(/Cannot calculate payment for user 'USER2'/);
+        });
+    });
+
+    describe('getAuditableOnCallPaymentRecords validation', () => {
+        test('should provide clear error for undefined user in audit records', () => {
+            expect(() => {
+                // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                calculator.getAuditableOnCallPaymentRecords([undefined as any]);
+            }).toThrow(
+                "Cannot calculate payment: OnCallUser is undefined. " +
+                "Ensure user object is properly initialized before calling calculation methods."
+            );
+        });
+
+        test('should provide clear error for user without periods in audit records', () => {
+            const userWithNoPeriods = new OnCallUser('AUDIT123', 'Audit User', []);
+            
+            expect(() => {
+                calculator.getAuditableOnCallPaymentRecords([userWithNoPeriods]);
+            }).toThrow(
+                "Cannot calculate payment for user 'AUDIT123' (Audit User): " +
+                "No on-call periods defined. User must have at least one OnCallPeriod assigned."
+            );
+        });
+    });
+});
