@@ -11,6 +11,18 @@ import { OnCallUser } from '@src/OnCallUser';
 const testOutputDir = path.join(__dirname, 'test-output');
 const testFilePath = path.join(testOutputDir, 'test-output.csv');
 
+/**
+ * Test suite for CsvWriter functionality
+ * 
+ * Comprehensive tests covering:
+ * - Basic CSV file creation and data formatting
+ * - Multiple user handling and schedule appending
+ * - Special character escaping (commas, quotes, newlines)
+ * - Unicode and international character support
+ * - Edge cases: empty data, long strings, mixed special characters
+ * - Directory creation and file system operations
+ * - RFC 4180 CSV compliance
+ */
 describe('CsvWriter', () => {
     let csvWriter: CsvWriter;
 
@@ -304,5 +316,275 @@ describe('CsvWriter', () => {
 
         fs.unlinkSync(testFilePath);
         expect(csvWriter.fileExists()).toBe(false);
+    });
+
+    describe('Special character edge cases', () => {
+        test('should handle Unicode characters in user names', () => {
+            const onCallUser = new OnCallUser(
+                '1',
+                'José García-Müller 李明',
+                [
+                    new OnCallPeriod(
+                        DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        'Europe/London'
+                    )
+                ]
+            );
+
+            const auditableRecords: Record<string, OnCallCompensation> = {
+                '1': {
+                    OnCallUser: onCallUser,
+                    totalCompensation: 275
+                }
+            };
+
+            csvWriter.writeScheduleData(
+                'International Team 🌍',
+                'https://example.pagerduty.com/schedules/ABC123',
+                'Europe/London',
+                auditableRecords,
+                false
+            );
+
+            const content = fs.readFileSync(testFilePath, 'utf8');
+            expect(content).toContain('José García-Müller 李明');
+            expect(content).toContain('International Team 🌍');
+        });
+
+        test('should handle newlines in schedule names', () => {
+            const onCallUser = new OnCallUser(
+                '1',
+                'John Doe',
+                [
+                    new OnCallPeriod(
+                        DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        'Europe/London'
+                    )
+                ]
+            );
+
+            const auditableRecords: Record<string, OnCallCompensation> = {
+                '1': {
+                    OnCallUser: onCallUser,
+                    totalCompensation: 275
+                }
+            };
+
+            csvWriter.writeScheduleData(
+                'Team Name\nWith Newline',
+                'https://example.pagerduty.com/schedules/ABC123',
+                'Europe/London',
+                auditableRecords,
+                false
+            );
+
+            const content = fs.readFileSync(testFilePath, 'utf8');
+            // Newlines should be wrapped in quotes
+            expect(content).toContain('"Team Name\nWith Newline"');
+        });
+
+        test('should handle very long user names', () => {
+            const longName = 'A'.repeat(500) + ', B' + 'C'.repeat(500);
+            const onCallUser = new OnCallUser(
+                '1',
+                longName,
+                [
+                    new OnCallPeriod(
+                        DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        'Europe/London'
+                    )
+                ]
+            );
+
+            const auditableRecords: Record<string, OnCallCompensation> = {
+                '1': {
+                    OnCallUser: onCallUser,
+                    totalCompensation: 275
+                }
+            };
+
+            csvWriter.writeScheduleData(
+                'Engineering Team',
+                'https://example.pagerduty.com/schedules/ABC123',
+                'Europe/London',
+                auditableRecords,
+                false
+            );
+
+            const content = fs.readFileSync(testFilePath, 'utf8');
+            expect(content).toContain(longName);
+            // Should be quoted due to comma
+            expect(content).toContain(`"${longName}"`);
+        });
+
+        test('should handle multiple consecutive quotes in user names', () => {
+            const onCallUser = new OnCallUser(
+                '1',
+                'John """Triple Quote""" Doe',
+                [
+                    new OnCallPeriod(
+                        DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        'Europe/London'
+                    )
+                ]
+            );
+
+            const auditableRecords: Record<string, OnCallCompensation> = {
+                '1': {
+                    OnCallUser: onCallUser,
+                    totalCompensation: 275
+                }
+            };
+
+            csvWriter.writeScheduleData(
+                'Engineering Team',
+                'https://example.pagerduty.com/schedules/ABC123',
+                'Europe/London',
+                auditableRecords,
+                false
+            );
+
+            const content = fs.readFileSync(testFilePath, 'utf8');
+            // Each quote should be doubled
+            expect(content).toContain('John """"""Triple Quote"""""" Doe');
+        });
+
+        test('should handle empty strings gracefully', () => {
+            const onCallUser = new OnCallUser(
+                '1',
+                '',
+                [
+                    new OnCallPeriod(
+                        DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        'Europe/London'
+                    )
+                ]
+            );
+
+            const auditableRecords: Record<string, OnCallCompensation> = {
+                '1': {
+                    OnCallUser: onCallUser,
+                    totalCompensation: 275
+                }
+            };
+
+            csvWriter.writeScheduleData(
+                '',
+                'https://example.pagerduty.com/schedules/ABC123',
+                'Europe/London',
+                auditableRecords,
+                false
+            );
+
+            expect(csvWriter.fileExists()).toBe(true);
+            const content = fs.readFileSync(testFilePath, 'utf8');
+            expect(content).toContain('Schedule name:,');
+            expect(content).toContain(',275,'); // Empty name followed by compensation
+        });
+
+        test('should handle tabs and other whitespace characters', () => {
+            const onCallUser = new OnCallUser(
+                '1',
+                'John\tDoe\r\nSenior Engineer',
+                [
+                    new OnCallPeriod(
+                        DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        'Europe/London'
+                    )
+                ]
+            );
+
+            const auditableRecords: Record<string, OnCallCompensation> = {
+                '1': {
+                    OnCallUser: onCallUser,
+                    totalCompensation: 275
+                }
+            };
+
+            csvWriter.writeScheduleData(
+                'Engineering Team',
+                'https://example.pagerduty.com/schedules/ABC123',
+                'Europe/London',
+                auditableRecords,
+                false
+            );
+
+            const content = fs.readFileSync(testFilePath, 'utf8');
+            // Should be quoted due to newline
+            expect(content).toContain('"John\tDoe\r\nSenior Engineer"');
+        });
+
+        test('should handle URLs with special characters', () => {
+            const onCallUser = new OnCallUser(
+                '1',
+                'John Doe',
+                [
+                    new OnCallPeriod(
+                        DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        'Europe/London'
+                    )
+                ]
+            );
+
+            const auditableRecords: Record<string, OnCallCompensation> = {
+                '1': {
+                    OnCallUser: onCallUser,
+                    totalCompensation: 275
+                }
+            };
+
+            csvWriter.writeScheduleData(
+                'Engineering Team',
+                'https://example.pagerduty.com/schedules/ABC123?filter=active&sort=name,asc',
+                'Europe/London',
+                auditableRecords,
+                false
+            );
+
+            const content = fs.readFileSync(testFilePath, 'utf8');
+            // URL with comma should be quoted
+            expect(content).toContain('"https://example.pagerduty.com/schedules/ABC123?filter=active&sort=name,asc"');
+        });
+
+        test('should handle mixed special characters in single field', () => {
+            const onCallUser = new OnCallUser(
+                '1',
+                'Doe, "Johnny" O\'Malley\nSr. Engineer',
+                [
+                    new OnCallPeriod(
+                        DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        DateTime.fromISO('2024-08-05T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate(),
+                        'Europe/London'
+                    )
+                ]
+            );
+
+            const auditableRecords: Record<string, OnCallCompensation> = {
+                '1': {
+                    OnCallUser: onCallUser,
+                    totalCompensation: 275
+                }
+            };
+
+            csvWriter.writeScheduleData(
+                'Team, "Alpha" Squad\nPrimary',
+                'https://example.pagerduty.com/schedules/ABC123',
+                'Europe/London',
+                auditableRecords,
+                false
+            );
+
+            const content = fs.readFileSync(testFilePath, 'utf8');
+            // Both should be properly quoted and escaped
+            expect(content).toContain('"Team, ""Alpha"" Squad\nPrimary"');
+            expect(content).toContain('"Doe, ""Johnny"" O\'Malley\nSr. Engineer"');
+        });
     });
 });
