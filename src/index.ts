@@ -45,6 +45,7 @@ export { OnCallUser } from './OnCallUser';
 // Utilities
 export { CsvWriter } from './CsvWriter';
 export { coerceSince, coerceUntil, convertTimezone } from './DateUtilities';
+export { InputValidator } from './validation/InputValidator';
 
 // Environment and logger helpers
 export { sanitiseEnvVariable } from './EnvironmentController';

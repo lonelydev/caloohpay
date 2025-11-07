@@ -1,7 +1,6 @@
 #!/usr/bin/env node
 import { api } from '@pagerduty/pdjs';
 import * as dotenv from 'dotenv';
-import { DateTime } from 'luxon';
 import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
@@ -19,6 +18,7 @@ import { OnCallPeriod } from './OnCallPeriod';
 import { OnCallUser } from './OnCallUser';
 import { PagerdutySchedule } from './PagerdutySchedule';
 import { ScheduleEntry } from './ScheduleEntry';
+import { InputValidator } from './validation/InputValidator';
 
 /**
  * PagerDuty API request parameters for schedule queries.
@@ -138,15 +138,25 @@ if (require.main === module) {
                 'Overrides the schedule timezone and calculates OOH using America/New_York timezone.'],
         ])
         .help()
-        .check((argv) => {
-            if (argv.since && !Date.parse(argv.since)) {
-                throw new Error("Invalid date format for since");
+        .check((argv: Partial<CommandLineOptions>) => {
+            // Use centralized validation
+            if (argv.since) {
+                InputValidator.validateDateString(argv.since as string, 'since');
             }
-            if (argv.until && !Date.parse(argv.until)) {
-                throw new Error("Invalid date format for until");
+            if (argv.until) {
+                InputValidator.validateDateString(argv.until as string, 'until');
             }
-            if (argv.since && argv.until && DateTime.fromISO(argv.since) > DateTime.fromISO(argv.until)) {
-                throw new Error("Since cannot be greater than Until");
+            if (argv.since && argv.until) {
+                InputValidator.validateDateRange(argv.since as string, argv.until as string);
+            }
+            if (argv.rotaIds) {
+                InputValidator.validateScheduleIds(argv.rotaIds as string);
+            }
+            if (argv.timeZoneId) {
+                InputValidator.validateTimezone(argv.timeZoneId as string);
+            }
+            if (argv.outputFile) {
+                InputValidator.validateFilePath(argv.outputFile as string);
             }
             return true;
         })
