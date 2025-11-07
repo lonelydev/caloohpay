@@ -40,6 +40,7 @@ If you're looking to use CalOohPay as a CLI tool, please refer to the main [READ
 ### For Developers
 
 This API documentation is useful if you're:
+
 - Contributing to CalOohPay
 - Understanding the codebase architecture
 - Building integrations or extensions
@@ -50,6 +51,7 @@ This API documentation is useful if you're:
 ### Out-of-Hours (OOH) Detection
 
 The core logic for determining if a shift qualifies as out-of-hours is in the `OnCallPeriod` class. A shift is considered OOH if:
+
 1. It spans multiple days (doesn't start and end on the same day)
 2. It extends past 17:30 (5:30 PM)
 3. It's longer than 6 hours
@@ -57,6 +59,7 @@ The core logic for determining if a shift qualifies as out-of-hours is in the `O
 ### Compensation Calculation
 
 Compensation rates are defined in `Constants.ts` and referenced by `OnCallPaymentsCalculator`:
+
 - **Weekdays (Mon-Thu)**: £50 per day (`WEEKDAY_RATE` constant)
 - **Weekends (Fri-Sun)**: £75 per day (`WEEKEND_RATE` constant)
 
@@ -68,7 +71,7 @@ CalOohPay uses [Luxon](https://moment.github.io/luxon/) for timezone-aware date/
 
 ## 🏗️ Architecture Overview
 
-```
+```text
 CalOohPay (CLI Entry Point)
     ↓
 PagerDuty API Client

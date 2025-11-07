@@ -102,6 +102,7 @@ Commonly used JSDoc tags:
 ## 📝 Updating Documentation
 
 Documentation is automatically regenerated when:
+
 1. Code changes are pushed to `main`
 2. The GitHub Actions workflow runs
 3. You run `npm run docs` locally
