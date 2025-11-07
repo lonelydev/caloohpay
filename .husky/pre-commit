@@ -1,10 +1,6 @@
 #!/bin/sh
-# Husky compatibility: older Husky (v6-v8) includes a helper script at .husky/_/husky.sh
-# Newer Husky versions may not provide that file. Source it only if present so the
-# hook works on both older and newer Husky installations.
-if [ -f "$(dirname "$0")/_/husky.sh" ]; then
-  . "$(dirname "$0")/_/husky.sh"
-fi
+# Husky pre-commit hook for Husky v9+
+# No need to source husky.sh in newer versions
 
 # Run a fast TypeScript typecheck before committing to catch obvious issues.
 echo "pre-commit: running quick lint (tsc --noEmit)"

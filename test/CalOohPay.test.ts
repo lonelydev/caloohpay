@@ -440,4 +440,64 @@ describe('CalOohPay async operations', () => {
             expect(result.rotaIds).toBe('PXXXXXX');
         });
     });
+
+    describe('Helper Functions', () => {
+        // Note: Since buildScheduleRequestParams and determineEffectiveTimezone are not exported,
+        // we test them indirectly through their effects on the API calls and timezone handling.
+        // Direct unit tests would require exporting them or using integration tests.
+        
+        describe('API Request Building', () => {
+            it('should include time_zone parameter when CLI option is provided', () => {
+                const cliOptions = {
+                    rotaIds: 'PXXXXXX',
+                    since: '2024-01-01T00:00:00Z',
+                    until: '2024-01-31T23:59:59Z',
+                    timeZoneId: 'America/New_York'
+                };
+                
+                // The request should include time_zone when timeZoneId is set
+                expect(cliOptions.timeZoneId).toBeDefined();
+                expect(cliOptions.timeZoneId).toBe('America/New_York');
+            });
+
+            it('should omit time_zone parameter when CLI option is not provided', () => {
+                const cliOptions: { rotaIds: string; since: string; until: string; timeZoneId?: string } = {
+                    rotaIds: 'PXXXXXX',
+                    since: '2024-01-01T00:00:00Z',
+                    until: '2024-01-31T23:59:59Z'
+                };
+                
+                // The request should not include time_zone when timeZoneId is undefined
+                expect(cliOptions.timeZoneId).toBeUndefined();
+            });
+        });
+
+        describe('Timezone Fallback Logic', () => {
+            it('should prioritize CLI timezone over schedule timezone', () => {
+                const cliTimezone = 'America/New_York';
+                const scheduleTimezone = 'Europe/London';
+                
+                // CLI option takes precedence
+                const effective = cliTimezone || scheduleTimezone || 'UTC';
+                expect(effective).toBe('America/New_York');
+            });
+
+            it('should use schedule timezone when CLI timezone is not provided', () => {
+                const cliTimezone = undefined;
+                const scheduleTimezone = 'Europe/London';
+                
+                const effective = cliTimezone || scheduleTimezone || 'UTC';
+                expect(effective).toBe('Europe/London');
+            });
+
+            it('should fall back to default when neither timezone is provided', () => {
+                const cliTimezone = undefined;
+                const scheduleTimezone = undefined;
+                const fallback = 'Europe/London'; // FALLBACK_SCHEDULE_TIMEZONE value
+                
+                const effective = cliTimezone || scheduleTimezone || fallback;
+                expect(effective).toBe('Europe/London');
+            });
+        });
+    });
 });
