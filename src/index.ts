@@ -36,6 +36,7 @@ export { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
 
 // CLI entry points / helpers
 export { calOohPay, extractOnCallUsersFromFinalSchedule } from './CalOohPay';
+export type { CalOohPayResult } from './CalOohPay';
 
 // Models
 export { OnCallPeriod } from './OnCallPeriod';

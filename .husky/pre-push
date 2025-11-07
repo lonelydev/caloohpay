@@ -1,5 +1,6 @@
 #!/bin/sh
-. "$(dirname "$0")/_/husky.sh"
+# Husky pre-push hook for Husky v9+
+# No need to source husky.sh in newer versions
 
 echo "pre-push: running build and tests"
 npm run build && npm test

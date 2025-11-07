@@ -39,6 +39,24 @@ interface PagerDutyScheduleParams {
     time_zone?: string;
 }
 
+/**
+ * Summary result from processing schedules.
+ * 
+ * @remarks
+ * This interface provides aggregate metrics from a calOohPay execution,
+ * useful for testing, monitoring, and integration scenarios.
+ * 
+ * @since 2.1.0
+ */
+export interface CalOohPayResult {
+    /** Number of schedules successfully processed */
+    schedulesProcessed: number;
+    /** Total number of unique users across all schedules */
+    totalUsers: number;
+    /** Total compensation amount in GBP across all schedules */
+    totalCompensation: number;
+}
+
 dotenv.config();
 
 const yargsInstance = yargs(hideBin(process.argv));
@@ -252,6 +270,82 @@ export function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule
 }
 
 /**
+ * Builds PagerDuty API request parameters for schedule queries.
+ * 
+ * @param cliOptions - Command line options containing date range and optional timezone override
+ * @returns Request parameters object for PagerDuty API
+ * 
+ * @remarks
+ * The time_zone parameter is only included if explicitly provided by the user via CLI.
+ * When omitted, PagerDuty API uses the schedule's default timezone.
+ * 
+ * @example
+ * ```typescript
+ * const params = buildScheduleRequestParams({
+ *   rotaIds: 'PXXXXXX',
+ *   since: '2024-01-01T00:00:00Z',
+ *   until: '2024-01-31T23:59:59Z',
+ *   timeZoneId: 'America/New_York'
+ * });
+ * // Returns: { overflow: false, since: '...', until: '...', time_zone: 'America/New_York' }
+ * ```
+ * 
+ * @since 2.1.0
+ */
+function buildScheduleRequestParams(cliOptions: CommandLineOptions): PagerDutyScheduleParams {
+    const params: PagerDutyScheduleParams = {
+        overflow: false,
+        since: cliOptions.since,
+        until: cliOptions.until
+    };
+    
+    // Only include time_zone parameter if user explicitly provided it
+    // PagerDuty API will use the schedule's default timezone if this is omitted
+    if (cliOptions.timeZoneId) {
+        params.time_zone = cliOptions.timeZoneId;
+    }
+    
+    return params;
+}
+
+/**
+ * Determines the effective timezone for OOH calculations with fallback priority.
+ * 
+ * @param cliTimezone - Timezone from CLI option (highest priority)
+ * @param scheduleTimezone - Timezone from PagerDuty schedule
+ * @returns The effective timezone identifier to use for calculations
+ * 
+ * @remarks
+ * Priority order:
+ * 1. CLI option (user override) - if provided
+ * 2. Schedule's timezone from PagerDuty API - if available
+ * 3. Fallback constant (FALLBACK_SCHEDULE_TIMEZONE) - as last resort
+ * 
+ * @example
+ * ```typescript
+ * // CLI override takes precedence
+ * determineEffectiveTimezone('America/New_York', 'Europe/London')
+ * // Returns: 'America/New_York'
+ * 
+ * // Uses schedule timezone when no CLI override
+ * determineEffectiveTimezone(undefined, 'Europe/London')
+ * // Returns: 'Europe/London'
+ * 
+ * // Falls back to constant when neither provided
+ * determineEffectiveTimezone(undefined, undefined)
+ * // Returns: 'Europe/London' (FALLBACK_SCHEDULE_TIMEZONE)
+ * ```
+ * 
+ * @since 2.1.0
+ */
+function determineEffectiveTimezone(
+    cliTimezone: string | undefined,
+    scheduleTimezone: string | undefined
+): string {
+    return cliTimezone || scheduleTimezone || FALLBACK_SCHEDULE_TIMEZONE;
+}
+
+/**
  * Main function to calculate out-of-hours (OOH) on-call payments for PagerDuty schedules.
  * 
  * This asynchronous function orchestrates the entire on-call payment calculation workflow:
@@ -326,8 +420,13 @@ export function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule
  * @see {@link extractOnCallUsersFromFinalSchedule}
  * 
  * @since 2.0.0 - Refactored to use async/await for sequential processing
+ * @since 2.1.0 - Added optional return type for testing and monitoring
  */
-export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger): Promise<void> {
+export async function calOohPay(
+    cliOptions: CommandLineOptions, 
+    logger?: Logger,
+    returnResults = false
+): Promise<CalOohPayResult | undefined> {
     const log = logger || new ConsoleLogger();
     log.table?.(maskCliOptions(cliOptions));
     
@@ -347,24 +446,19 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
     
     const rotaIds = cliOptions.rotaIds.split(',');
     
+    // Track metrics for optional return
+    let schedulesProcessed = 0;
+    const processedUserIds = new Set<string>();
+    let totalCompensation = 0;
+    
     // Process schedules sequentially to avoid race conditions
     for (let i = 0; i < rotaIds.length; i++) {
         const rotaId = rotaIds[i].trim();
         const isFirstSchedule = i === 0;
         
         try {
-            // Build API request parameters - only include time_zone if explicitly provided by user
-            const requestParams: PagerDutyScheduleParams = {
-                overflow: false,
-                since: cliOptions.since,
-                until: cliOptions.until
-            };
-            
-            // Only include time_zone parameter if user explicitly provided it
-            // PagerDuty API will use the schedule's default timezone if this is omitted
-            if (cliOptions.timeZoneId) {
-                requestParams.time_zone = cliOptions.timeZoneId;
-            }
+            // Build API request parameters using helper function
+            const requestParams = buildScheduleRequestParams(cliOptions);
             
             // Fetch schedule data from PagerDuty API using destructuring like the original code
             const { data } = await pagerDutyApi.get(`/schedules/${rotaId}`, {
@@ -391,8 +485,11 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
             log.info(`Schedule name: ${scheduleData.name}`);
             log.info(`Schedule URL: ${scheduleData.html_url}`);
             
-            // Use CLI timezone if provided, otherwise use schedule's timezone from API
-            const effectiveTimeZone = cliOptions.timeZoneId || scheduleData.time_zone || FALLBACK_SCHEDULE_TIMEZONE;
+            // Determine effective timezone using helper function
+            const effectiveTimeZone = determineEffectiveTimezone(
+                cliOptions.timeZoneId,
+                scheduleData.time_zone
+            );
             log.info(`Using timezone: ${effectiveTimeZone}`);
             if (cliOptions.timeZoneId && scheduleData.time_zone && cliOptions.timeZoneId !== scheduleData.time_zone) {
                 log.info(`Note: CLI timezone (${cliOptions.timeZoneId}) overrides schedule timezone (${scheduleData.time_zone})`);
@@ -403,6 +500,13 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
 
             const calculator = new OnCallPaymentsCalculator();
             const auditableRecords = calculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
+            
+            // Track metrics for optional return
+            schedulesProcessed++;
+            for (const [userId, compensation] of Object.entries(auditableRecords)) {
+                processedUserIds.add(userId);
+                totalCompensation += compensation.totalCompensation;
+            }
             
             // Write to CSV if output file is specified
             if (csvWriter) {
@@ -426,6 +530,15 @@ export async function calOohPay(cliOptions: CommandLineOptions, logger?: Logger)
             log.error(errorToLog, { scheduleId: rotaId });
             throw error; // Re-throw original error to preserve stack trace
         }
+    }
+    
+    // Return metrics if requested (useful for testing and monitoring)
+    if (returnResults) {
+        return {
+            schedulesProcessed,
+            totalUsers: processedUserIds.size,
+            totalCompensation
+        };
     }
 }
 
