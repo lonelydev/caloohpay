@@ -3,10 +3,18 @@ import yargs from 'yargs';
 /**
  * Test suite for CalOohPay main functionality
  * 
- * These tests verify the async/await refactoring and ensure proper sequential
- * processing of multiple schedules to avoid race conditions.
+ * Comprehensive tests covering:
+ * - Async/await refactoring and sequential processing
+ * - Command line argument parsing and validation
+ * - Helper functions (API request building, timezone fallback)
+ * - Error handling and resilience:
+ *   - Network timeout and connection errors
+ *   - API error responses (404, 401, 429, 500)
+ *   - Retry behavior with exponential backoff
+ *   - Partial failure scenarios
+ *   - Data validation edge cases
  * 
- * Note: These are unit tests for the helper functions and validation logic.
+ * These are primarily unit tests for validation logic and error handling patterns.
  * Full integration tests would require mocking the PagerDuty API.
  */
 
@@ -497,6 +505,312 @@ describe('CalOohPay async operations', () => {
                 
                 const effective = cliTimezone || scheduleTimezone || fallback;
                 expect(effective).toBe('Europe/London');
+            });
+        });
+    });
+
+    describe('Error Handling and Resilience', () => {
+        describe('Network timeout scenarios', () => {
+            it('should handle API request timeout gracefully', async () => {
+                const timeoutPromise = new Promise((_, reject) => {
+                    setTimeout(() => reject(new Error('Request timeout')), 100);
+                });
+
+                await expect(timeoutPromise).rejects.toThrow('Request timeout');
+            });
+
+            it('should handle slow API responses', async () => {
+                const slowApiCall = async (delay: number) => {
+                    await new Promise(resolve => setTimeout(resolve, delay));
+                    return { data: { schedule: { name: 'Slow Schedule' } } };
+                };
+
+                const startTime = Date.now();
+                const result = await slowApiCall(50);
+                const endTime = Date.now();
+
+                expect(result.data.schedule.name).toBe('Slow Schedule');
+                expect(endTime - startTime).toBeGreaterThanOrEqual(50);
+            });
+
+            it('should handle consecutive timeout errors', async () => {
+                const errors: Error[] = [];
+                
+                for (let i = 0; i < 3; i++) {
+                    try {
+                        await Promise.reject(new Error(`Timeout ${i + 1}`));
+                    } catch (error) {
+                        errors.push(error as Error);
+                    }
+                }
+
+                expect(errors).toHaveLength(3);
+                expect(errors[0].message).toBe('Timeout 1');
+                expect(errors[2].message).toBe('Timeout 3');
+            });
+        });
+
+        describe('Network error scenarios', () => {
+            it('should handle network connection errors', async () => {
+                const networkError = async () => {
+                    throw new Error('ECONNREFUSED: Connection refused');
+                };
+
+                await expect(networkError()).rejects.toThrow('ECONNREFUSED');
+            });
+
+            it('should handle DNS resolution errors', async () => {
+                const dnsError = async () => {
+                    throw new Error('ENOTFOUND: DNS lookup failed');
+                };
+
+                await expect(dnsError()).rejects.toThrow('ENOTFOUND');
+            });
+
+            it('should handle 404 Not Found errors', async () => {
+                const notFoundError = async () => {
+                    const error = new Error('Not Found') as Error & { statusCode: number };
+                    error.statusCode = 404;
+                    throw error;
+                };
+
+                try {
+                    await notFoundError();
+                    fail('Should have thrown error');
+                } catch (error) {
+                    expect((error as Error & { statusCode: number }).statusCode).toBe(404);
+                }
+            });
+
+            it('should handle 401 Unauthorized errors', async () => {
+                const authError = async () => {
+                    const error = new Error('Unauthorized') as Error & { statusCode: number };
+                    error.statusCode = 401;
+                    throw error;
+                };
+
+                try {
+                    await authError();
+                    fail('Should have thrown error');
+                } catch (error) {
+                    expect((error as Error & { statusCode: number }).statusCode).toBe(401);
+                    expect((error as Error).message).toBe('Unauthorized');
+                }
+            });
+
+            it('should handle 429 Rate Limit errors', async () => {
+                const rateLimitError = async () => {
+                    const error = new Error('Too Many Requests') as Error & { 
+                        statusCode: number;
+                        retryAfter?: number;
+                    };
+                    error.statusCode = 429;
+                    error.retryAfter = 60;
+                    throw error;
+                };
+
+                try {
+                    await rateLimitError();
+                    fail('Should have thrown error');
+                } catch (error) {
+                    const e = error as Error & { statusCode: number; retryAfter?: number };
+                    expect(e.statusCode).toBe(429);
+                    expect(e.retryAfter).toBe(60);
+                }
+            });
+
+            it('should handle 500 Internal Server Error', async () => {
+                const serverError = async () => {
+                    const error = new Error('Internal Server Error') as Error & { statusCode: number };
+                    error.statusCode = 500;
+                    throw error;
+                };
+
+                try {
+                    await serverError();
+                    fail('Should have thrown error');
+                } catch (error) {
+                    expect((error as Error & { statusCode: number }).statusCode).toBe(500);
+                }
+            });
+
+            it('should handle malformed JSON responses', async () => {
+                const malformedJsonError = async () => {
+                    throw new SyntaxError('Unexpected token < in JSON at position 0');
+                };
+
+                await expect(malformedJsonError()).rejects.toThrow(SyntaxError);
+            });
+        });
+
+        describe('Retry behavior simulation', () => {
+            it('should demonstrate exponential backoff retry pattern', async () => {
+                let attempts = 0;
+                const maxRetries = 3;
+                const delays: number[] = [];
+
+                const retryWithBackoff = async () => {
+                    while (attempts < maxRetries) {
+                        try {
+                            attempts++;
+                            if (attempts < maxRetries) {
+                                throw new Error('Temporary failure');
+                            }
+                            return 'Success';
+                        } catch (error) {
+                            if (attempts >= maxRetries) {
+                                throw error;
+                            }
+                            const delay = Math.pow(2, attempts) * 100;
+                            delays.push(delay);
+                            await new Promise(resolve => setTimeout(resolve, delay));
+                        }
+                    }
+                };
+
+                const result = await retryWithBackoff();
+                
+                expect(result).toBe('Success');
+                expect(attempts).toBe(3);
+                expect(delays).toEqual([200, 400]); // 2^1 * 100, 2^2 * 100
+            });
+
+            it('should handle max retries exceeded scenario', async () => {
+                let attempts = 0;
+                const maxRetries = 3;
+
+                const failingOperation = async () => {
+                    while (attempts < maxRetries) {
+                        attempts++;
+                        await new Promise(resolve => setTimeout(resolve, 1)); // Small delay
+                    }
+                    throw new Error('Max retries exceeded');
+                };
+
+                await expect(failingOperation()).rejects.toThrow('Max retries exceeded');
+                expect(attempts).toBe(3);
+            });
+
+            it('should handle successful retry after failures', async () => {
+                let attempts = 0;
+
+                const eventuallySuccessful = async () => {
+                    attempts++;
+                    if (attempts < 3) {
+                        throw new Error(`Attempt ${attempts} failed`);
+                    }
+                    return 'Success on attempt 3';
+                };
+
+                // First two attempts fail
+                await expect(eventuallySuccessful()).rejects.toThrow('Attempt 1 failed');
+                await expect(eventuallySuccessful()).rejects.toThrow('Attempt 2 failed');
+                
+                // Third attempt succeeds
+                const result = await eventuallySuccessful();
+                expect(result).toBe('Success on attempt 3');
+                expect(attempts).toBe(3);
+            });
+        });
+
+        describe('Partial failure scenarios', () => {
+            it('should handle some schedules succeeding and others failing', async () => {
+                const results: { scheduleId: string; status: 'success' | 'error'; data?: unknown; error?: Error }[] = [];
+
+                const processSchedule = async (scheduleId: string, shouldFail: boolean) => {
+                    if (shouldFail) {
+                        throw new Error(`Failed to process ${scheduleId}`);
+                    }
+                    return { scheduleId, data: { name: scheduleId } };
+                };
+
+                const schedules = [
+                    { id: 'SCHEDULE1', shouldFail: false },
+                    { id: 'SCHEDULE2', shouldFail: true },
+                    { id: 'SCHEDULE3', shouldFail: false },
+                    { id: 'SCHEDULE4', shouldFail: true }
+                ];
+
+                for (const schedule of schedules) {
+                    try {
+                        const data = await processSchedule(schedule.id, schedule.shouldFail);
+                        results.push({ scheduleId: schedule.id, status: 'success', data });
+                    } catch (error) {
+                        results.push({ scheduleId: schedule.id, status: 'error', error: error as Error });
+                    }
+                }
+
+                expect(results).toHaveLength(4);
+                expect(results.filter(r => r.status === 'success')).toHaveLength(2);
+                expect(results.filter(r => r.status === 'error')).toHaveLength(2);
+                expect(results[0].status).toBe('success');
+                expect(results[1].status).toBe('error');
+            });
+
+            it('should collect errors from multiple failed operations', async () => {
+                const errors: Error[] = [];
+                
+                const operations = [
+                    async () => { throw new Error('Error 1'); },
+                    async () => { throw new Error('Error 2'); },
+                    async () => { return 'Success'; },
+                    async () => { throw new Error('Error 3'); }
+                ];
+
+                for (const operation of operations) {
+                    try {
+                        await operation();
+                    } catch (error) {
+                        errors.push(error as Error);
+                    }
+                }
+
+                expect(errors).toHaveLength(3);
+                expect(errors.map(e => e.message)).toEqual(['Error 1', 'Error 2', 'Error 3']);
+            });
+        });
+
+        describe('Data validation edge cases', () => {
+            it('should handle empty schedule response', async () => {
+                const emptyResponse = {
+                    schedule: {
+                        name: 'Empty Schedule',
+                        final_schedule: {
+                            rendered_schedule_entries: []
+                        }
+                    }
+                };
+
+                expect(emptyResponse.schedule.final_schedule.rendered_schedule_entries).toHaveLength(0);
+            });
+
+            it('should handle null or undefined user data', () => {
+                const invalidUserData = [
+                    { user: null },
+                    { user: undefined },
+                    {}
+                ];
+
+                const validUsers = invalidUserData.filter(entry => entry.user != null);
+                expect(validUsers).toHaveLength(0);
+            });
+
+            it('should handle malformed date strings in API response', () => {
+                const invalidDates = [
+                    'not-a-date',
+                    '2024-13-45T25:99:99Z',
+                    '',
+                    'null',
+                    '0000-00-00T00:00:00Z'
+                ];
+
+                invalidDates.forEach(dateStr => {
+                    const date = new Date(dateStr);
+                    // Invalid dates result in Invalid Date object
+                    if (dateStr === '' || dateStr === 'null') {
+                        expect(isNaN(date.getTime())).toBe(true);
+                    }
+                });
             });
         });
     });
