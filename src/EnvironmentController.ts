@@ -1,3 +1,5 @@
+import { InputValidator } from "./validation/InputValidator";
+
 /**
  * Environment configuration for API authentication.
  * 
@@ -52,7 +54,10 @@ export interface Environment {
 export function sanitiseEnvVariable(envVars: NodeJS.ProcessEnv, apiKeyOverride?: string): Environment {
     const apiToken = apiKeyOverride || envVars.API_TOKEN;
     
-    if (!apiToken) {
+    // Use centralized validation
+    if (apiToken) {
+        InputValidator.validateApiToken(apiToken);
+    } else {
         throw new Error('PagerDuty API token is required. ' +
             'Set the API_TOKEN environment variable or use the --key/-k option.\n' +
             'Get your token from: My Profile -> User Settings -> API Access -> Create New API User Token'

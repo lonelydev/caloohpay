@@ -66,7 +66,7 @@ describe('calOohPay integration (mocked PagerDuty)', () => {
             since: '2024-08-01T00:00:00Z',
             until: '2024-08-31T23:59:59Z',
             timeZoneId: undefined,
-            key: 'fake-key',
+            key: 'fake-key-1234567890123456789',
             outputFile: outFile,
             help: false,
         }, logger);
@@ -93,7 +93,7 @@ describe('calOohPay integration (mocked PagerDuty)', () => {
             since: '2024-08-01T00:00:00Z',
             until: '2024-08-31T23:59:59Z',
             timeZoneId: undefined,
-            key: 'fake-key',
+            key: 'fake-key-1234567890123456789',
             outputFile: multiOutFile,
             help: false,
         }, logger);

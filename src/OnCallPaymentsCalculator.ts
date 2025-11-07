@@ -1,6 +1,7 @@
 import { WEEKDAY_RATE, WEEKEND_RATE } from "./Constants";
 import { OnCallCompensation } from "./OnCallCompensation";
 import { OnCallUser } from "./OnCallUser";
+import { InputValidator } from "./validation/InputValidator";
 
 /**
  * Calculates on-call compensation for users based on their OOH (Out of Hours) shifts.
@@ -67,6 +68,8 @@ export class OnCallPaymentsCalculator {
     /**
      * Validates that an OnCallUser is properly initialized for calculation.
      * 
+     * Uses centralized validation from InputValidator.
+     * 
      * @private
      * @param onCallUser - The user to validate
      * @throws {Error} If user is undefined or has no on-call periods
@@ -76,18 +79,7 @@ export class OnCallPaymentsCalculator {
      * Called automatically by all calculation methods.
      */
     private validateOnCallUser(onCallUser: OnCallUser): void {
-        if (!onCallUser) {
-            throw new Error(
-                "Cannot calculate payment: OnCallUser is undefined. " +
-                "Ensure user object is properly initialized before calling calculation methods."
-            );
-        }
-        if (!onCallUser.onCallPeriods || onCallUser.onCallPeriods.length === 0) {
-            throw new Error(
-                `Cannot calculate payment for user '${onCallUser.id}' (${onCallUser.name || 'unnamed'}): ` +
-                `No on-call periods defined. User must have at least one OnCallPeriod assigned.`
-            );
-        }
+        InputValidator.validateOnCallUser(onCallUser);
     }
 
     /**

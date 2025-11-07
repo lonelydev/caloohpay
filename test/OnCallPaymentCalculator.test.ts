@@ -499,8 +499,8 @@ describe('Error Handling and Validation', () => {
             expect(() => {
                 calculator.calculateOnCallPayment(userWithNoPeriods);
             }).toThrow(
-                "Cannot calculate payment for user 'USER456' (unnamed): " +
-                "No on-call periods defined. User must have at least one OnCallPeriod assigned."
+                'OnCallUser with id "USER456" is missing required "name" field. ' +
+                'Each user must have a displayable name for reporting.'
             );
         });
 
