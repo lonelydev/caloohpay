@@ -268,11 +268,12 @@ export class InputValidator {
         }
 
         // PagerDuty tokens are typically at least 20 characters
+        // SECURITY: Don't reveal exact token length to avoid metadata leakage
         if (token.trim().length < 20) {
             throw new Error(
-                `API token appears too short (${token.trim().length} characters). ` +
-                `Valid PagerDuty API tokens are typically 20+ characters. ` +
-                `Please verify your token is complete and correct.`
+                'API token appears invalid or incomplete. ' +
+                'Valid PagerDuty API tokens are typically 20+ characters. ' +
+                'Please verify your token is complete and correct.'
             );
         }
     }

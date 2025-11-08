@@ -45,7 +45,7 @@ describe('EnvironmentController', () => {
         test('should throw error when API token is too short', () => {
             const envVars = {};
             expect(() => sanitiseEnvVariable(envVars, 'short'))
-                .toThrow('API token appears too short');
+                .toThrow('API token appears invalid or incomplete');
         });
     });
 });
