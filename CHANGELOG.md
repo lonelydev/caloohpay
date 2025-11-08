@@ -5,6 +5,26 @@ All notable changes to CalOohPay will be documented in this file.
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [Unreleased]
+
+### Added
+
+- **Configurable Compensation Rates**: Support for custom weekday and weekend rates via `.caloohpay.json` configuration file
+  - `ConfigLoader` class to load and validate configuration from file system
+  - `RatesConfig` interface defining rate structure (weekdayRate, weekendRate, currency)
+  - Support for project-level and user-level config file locations
+  - Automatic fallback to default rates (£50/£75) when no config file exists
+  - Comprehensive validation of rate values with helpful error messages
+- **Enhanced OnCallPaymentsCalculator**: Now accepts custom rates via constructor parameters while maintaining backward compatibility with default rates
+- **New Validation Methods**: Added `validatePositiveNumber()` and `validateNonEmptyString()` to InputValidator for configuration validation
+- Example configuration file: `.caloohpay.json.example`
+
+### Changed
+
+- `OnCallPaymentsCalculator` constructor now accepts optional `weekdayRate` and `weekendRate` parameters
+- Updated programmatic API to support custom rates
+- Enhanced documentation with configuration guides and examples
+
 ## [2.0.0] - 2025-10-25
 
 ### 🚀 Major Features
