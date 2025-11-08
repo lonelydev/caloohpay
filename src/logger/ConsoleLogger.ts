@@ -8,11 +8,18 @@ import { Logger } from './Logger';
  * before being written to the console.
  * 
  * @remarks
- * Security features:
+ * **Security Features (Defense in Depth)**:
  * - Automatically masks strings that look like API tokens (20+ alphanumeric chars)
  * - Masks object properties with sensitive keys (token, key, password, secret, etc.)
- * - Recursively masks nested objects
+ * - Recursively masks nested objects with circular reference detection
  * - Prevents accidental logging of sensitive data in error messages and metadata
+ * - Case-insensitive pattern matching for various formats (key:, key=, "key": )
+ * 
+ * **Usage Guidelines**:
+ * - This provides automatic protection but should be used with other layers
+ * - For errors, consider using sanitizeError() before logging for extra safety
+ * - Never disable masking or bypass the logger for sensitive operations
+ * - Review logs before sharing to ensure no sensitive data leaked through
  * 
  * @category Logging
  */

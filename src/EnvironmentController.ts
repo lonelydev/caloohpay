@@ -16,13 +16,16 @@ import { InputValidator } from "./validation/InputValidator";
  * ```
  */
 export interface Environment {
-    /**
-     * PagerDuty API authentication token.
-     * Required for all API calls to PagerDuty.
-     * Should be a valid PagerDuty REST API token with appropriate permissions.
-     * 
-     * @see {@link https://support.pagerduty.com/docs/api-access-keys|PagerDuty API Access Keys}
-     */
+/**
+ * PagerDuty API authentication token.
+ * Required for all API calls to PagerDuty.
+ * Should be a valid PagerDuty REST API token with appropriate permissions.
+ * 
+ * **SECURITY NOTE**: Never log this value in clear text. Use the automatic
+ * masking provided by ConsoleLogger or sanitizeError() before logging.
+ * 
+ * @see {@link https://support.pagerduty.com/docs/api-access-keys|PagerDuty API Access Keys}
+ */
     API_TOKEN: string;
 }
 
@@ -32,6 +35,13 @@ export interface Environment {
  * This function ensures that the required API token is available, either from
  * the environment variables or a command-line override. It prioritizes the
  * command-line provided key over the environment variable.
+ * 
+ * **SECURITY BEST PRACTICES**:
+ * - API tokens are validated but never logged in clear text
+ * - Use ConsoleLogger for any logging needs (automatic masking enabled)
+ * - Use sanitizeError() from logger/utils before throwing/logging errors
+ * - Avoid including tokens in error messages or stack traces
+ * - Never expose token length or other metadata in validation messages
  * 
  * @category Utilities
  * 
@@ -54,7 +64,7 @@ export interface Environment {
 export function sanitiseEnvVariable(envVars: NodeJS.ProcessEnv, apiKeyOverride?: string): Environment {
     const apiToken = apiKeyOverride || envVars.API_TOKEN;
     
-    // Use centralized validation
+    // SECURITY: Use centralized validation that doesn't leak token metadata
     if (apiToken) {
         InputValidator.validateApiToken(apiToken);
     } else {
