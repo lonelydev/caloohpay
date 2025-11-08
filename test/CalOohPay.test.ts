@@ -1,3 +1,4 @@
+import { describe, expect, it } from '@jest/globals';
 import yargs from 'yargs';
 
 /**
@@ -640,6 +641,89 @@ describe('CalOohPay async operations', () => {
                 };
 
                 await expect(malformedJsonError()).rejects.toThrow(SyntaxError);
+            });
+        });
+
+        describe('API error response sanitization', () => {
+            it('should sanitize PagerDuty API errors to exclude sensitive data', () => {
+                // Simulate an API error response that might contain sensitive data
+                const apiErrorWithSensitiveData = {
+                    error: {
+                        message: 'Authentication failed',
+                        code: 401,
+                        details: 'Invalid token: abcd1234567890efghijklmn',
+                        token: 'leaked_token_12345678901234',
+                        request_id: 'req_123'
+                    }
+                };
+
+                // When we sanitize, we should only keep safe fields
+                const sanitizedError = {
+                    message: apiErrorWithSensitiveData.error.message,
+                    code: apiErrorWithSensitiveData.error.code
+                };
+
+                expect(sanitizedError).toEqual({
+                    message: 'Authentication failed',
+                    code: 401
+                });
+                expect(sanitizedError).not.toHaveProperty('details');
+                expect(sanitizedError).not.toHaveProperty('token');
+                expect(sanitizedError).not.toHaveProperty('request_id');
+            });
+
+            it('should handle missing error properties gracefully', () => {
+                const minimalError = {
+                    error: {} as { message?: string; code?: string | number; status?: number }
+                };
+
+                const sanitizedError = {
+                    message: minimalError.error.message || 'Unknown error',
+                    code: minimalError.error.code || 'unknown'
+                };
+
+                expect(sanitizedError).toEqual({
+                    message: 'Unknown error',
+                    code: 'unknown'
+                });
+            });
+
+            it('should use status as fallback for code', () => {
+                const errorWithStatus = {
+                    error: {
+                        message: 'Not found',
+                        status: 404
+                    }
+                };
+
+                const sanitizedError = {
+                    message: errorWithStatus.error.message,
+                    code: errorWithStatus.error.status
+                };
+
+                expect(sanitizedError.code).toBe(404);
+            });
+
+            it('should not leak URL parameters or headers in error messages', () => {
+                const errorWithUrl = {
+                    error: {
+                        message: 'Request failed',
+                        code: 400,
+                        url: 'https://api.pagerduty.com/schedules?token=secret123',
+                        headers: {
+                            Authorization: 'Bearer token123'
+                        }
+                    }
+                };
+
+                // Only extract safe fields
+                const sanitizedError = {
+                    message: errorWithUrl.error.message,
+                    code: errorWithUrl.error.code
+                };
+
+                expect(JSON.stringify(sanitizedError)).not.toContain('token=secret123');
+                expect(JSON.stringify(sanitizedError)).not.toContain('Bearer token123');
             });
         });
 

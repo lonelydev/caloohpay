@@ -476,8 +476,14 @@ export async function calOohPay(
             });
             
             // Check for API error response
+            // SECURITY: Sanitize error object to prevent logging sensitive data
             if (data.error) {
-                throw new Error(`PagerDuty API error for schedule ${rotaId}: ${JSON.stringify(data.error)}`);
+                const sanitizedError = {
+                    message: data.error.message || 'Unknown error',
+                    code: data.error.code || data.error.status || 'unknown',
+                    // Exclude any fields that might contain tokens or sensitive data
+                };
+                throw new Error(`PagerDuty API error for schedule ${rotaId}: ${JSON.stringify(sanitizedError)}`);
             }
             
             // PDJS returns: {data, resource, response, next}
