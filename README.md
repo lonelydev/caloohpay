@@ -101,12 +101,63 @@ See the [API Documentation](https://lonelydev.github.io/caloohpay/) for more det
 
 ## 💰 Compensation Rates
 
-| Period | Rate | 
+### Default Rates
+
+| Period | Rate |
 |--------|------|
 | **Weekdays** (Mon-Thu) | £50 per day |
 | **Weekends** (Fri-Sun) | £75 per day |
 
-> **Note**: Compensation rates are defined in `src/Constants.ts` and can be modified there. The calculator references these centralized constants via `WEEKDAY_RATE` and `WEEKEND_RATE`.
+### Customizing Rates
+
+CalOohPay supports custom compensation rates via a configuration file. Create a `.caloohpay.json` file in your project root or home directory:
+
+```json
+{
+  "rates": {
+    "weekdayRate": 60,
+    "weekendRate": 90,
+    "currency": "USD"
+  }
+}
+```
+
+#### Configuration Options
+
+| Field | Type | Required | Description |
+|-------|------|----------|-------------|
+| `rates.weekdayRate` | number | ✅ | Compensation for OOH weekday shifts (Mon-Thu) |
+| `rates.weekendRate` | number | ✅ | Compensation for OOH weekend shifts (Fri-Sun) |
+| `rates.currency` | string | ❌ | Currency code (e.g., 'GBP', 'USD', 'EUR'). Defaults to 'GBP' |
+
+#### Config File Locations
+
+The tool searches for `.caloohpay.json` in this order:
+
+1. **Current working directory** - Project-specific rates
+2. **Home directory** (`~/.caloohpay.json`) - User-wide defaults
+3. **Built-in defaults** - Falls back to £50/£75 if no config found
+
+#### Programmatic Usage with Custom Rates
+
+```typescript
+import { ConfigLoader, OnCallPaymentsCalculator } from 'caloohpay';
+
+// Load rates from config file
+const loader = new ConfigLoader();
+const rates = loader.loadRates();
+
+// Use custom rates
+const calculator = new OnCallPaymentsCalculator(
+  rates.weekdayRate,
+  rates.weekendRate
+);
+
+const compensation = calculator.calculateOnCallPayment(user);
+console.log(`Total: ${rates.currency} ${compensation}`);
+```
+
+> **Note**: If no config file exists, the application uses the default rates (£50 weekday / £75 weekend) defined in `src/Constants.ts`.
 
 npm run dev
 npm run docs:serve
@@ -328,10 +379,10 @@ Refer to [PagerDuty's timezone documentation](https://developer.pagerduty.com/do
 - [x] **API Key Override**: CLI option `--key` to override API token ✅
 - [x] **Full Timezone Support**: Uses schedule timezone from PagerDuty with optional override ✅
 - [x] **CSV Output**: Google Sheets compatible file generation for payroll systems ✅
+- [x] **Configurable Rates**: Custom weekday/weekend rates via `.caloohpay.json` config file ✅
 
 ### Planned Features
 
-- [ ] **Configurable Rates**: Custom weekday/weekend rates via config file
 - [ ] **Enhanced Output**: Colored console output and better formatting
 - [ ] **Package Distribution**: NPM package for easier installation
 - [ ] **Automation**: Scheduled monthly runs with automated reporting

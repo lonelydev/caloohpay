@@ -31,6 +31,11 @@
 // Constants
 export * from './Constants';
 
+// Configuration
+export { ConfigLoader } from './config/ConfigLoader';
+export type { CalOohPayConfig, RatesConfig } from './config/RatesConfig';
+export { DEFAULT_RATES } from './config/RatesConfig';
+
 // Core Calculator
 export { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
 

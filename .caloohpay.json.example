@@ -1,0 +1,7 @@
+{
+  "rates": {
+    "weekdayRate": 50,
+    "weekendRate": 75,
+    "currency": "GBP"
+  }
+}

@@ -311,4 +311,73 @@ export class InputValidator {
             );
         }
     }
+
+    /**
+     * Validates that a number is positive (greater than 0).
+     * 
+     * Used for validating configuration values that must be positive,
+     * such as compensation rates.
+     * 
+     * @param {number} value - The number to validate
+     * @param {string} fieldName - Name of the field being validated (for error messages)
+     * 
+     * @throws {Error} If value is not a number, NaN, or not positive
+     * 
+     * @category Validation
+     * 
+     * @example
+     * ```typescript
+     * InputValidator.validatePositiveNumber(50, 'weekdayRate');     // OK
+     * InputValidator.validatePositiveNumber(0, 'weekdayRate');      // throws Error
+     * InputValidator.validatePositiveNumber(-10, 'weekdayRate');    // throws Error
+     * InputValidator.validatePositiveNumber(NaN, 'weekdayRate');    // throws Error
+     * ```
+     */
+    static validatePositiveNumber(value: number, fieldName: string): void {
+        if (typeof value !== 'number' || isNaN(value)) {
+            throw new Error(
+                `${fieldName} must be a valid number. Received: ${value}`
+            );
+        }
+
+        if (value <= 0) {
+            throw new Error(
+                `${fieldName} must be a positive number (greater than 0). Received: ${value}`
+            );
+        }
+    }
+
+    /**
+     * Validates that a string is non-empty (after trimming whitespace).
+     * 
+     * Used for validating required string fields like currency codes.
+     * 
+     * @param {string} value - The string to validate
+     * @param {string} fieldName - Name of the field being validated (for error messages)
+     * 
+     * @throws {Error} If value is not a string or is empty after trimming
+     * 
+     * @category Validation
+     * 
+     * @example
+     * ```typescript
+     * InputValidator.validateNonEmptyString('GBP', 'currency');      // OK
+     * InputValidator.validateNonEmptyString('  USD  ', 'currency');  // OK (trimmed)
+     * InputValidator.validateNonEmptyString('', 'currency');         // throws Error
+     * InputValidator.validateNonEmptyString('   ', 'currency');      // throws Error
+     * ```
+     */
+    static validateNonEmptyString(value: string, fieldName: string): void {
+        if (typeof value !== 'string') {
+            throw new Error(
+                `${fieldName} must be a string. Received: ${typeof value}`
+            );
+        }
+
+        if (value.trim().length === 0) {
+            throw new Error(
+                `${fieldName} cannot be empty`
+            );
+        }
+    }
 }
