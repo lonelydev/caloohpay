@@ -256,14 +256,19 @@ export class CsvWriter {
         try {
             // Ensure directory exists
             const dir = path.dirname(this.filePath);
+            // eslint-disable-next-line security/detect-non-literal-fs-filename -- this.filePath is validated in constructor via path.resolve, user-provided but sanitized
             if (!fs.existsSync(dir)) {
+                // eslint-disable-next-line security/detect-non-literal-fs-filename -- dir derived from validated this.filePath
                 fs.mkdirSync(dir, { recursive: true });
             }
             // Write or append to file. When appending, avoid adding an extra
             // blank line if the file already ends with a newline.
+            // eslint-disable-next-line security/detect-non-literal-fs-filename -- this.filePath validated in constructor
             if (append && fs.existsSync(this.filePath)) {
+                // eslint-disable-next-line security/detect-non-literal-fs-filename -- this.filePath validated in constructor
                 fs.appendFileSync(this.filePath, '\n' + content, 'utf8');
             } else {
+                // eslint-disable-next-line security/detect-non-literal-fs-filename -- this.filePath validated in constructor
                 fs.writeFileSync(this.filePath, content, 'utf8');
             }
 
@@ -292,6 +297,7 @@ export class CsvWriter {
      * ```
      */
     fileExists(): boolean {
+        // eslint-disable-next-line security/detect-non-literal-fs-filename -- this.filePath validated in constructor
         return fs.existsSync(this.filePath);
     }
 
@@ -310,6 +316,7 @@ export class CsvWriter {
      */
     deleteIfExists(): void {
         if (this.fileExists()) {
+            // eslint-disable-next-line security/detect-non-literal-fs-filename -- this.filePath validated in constructor
             fs.unlinkSync(this.filePath);
         }
     }

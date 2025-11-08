@@ -1,5 +1,7 @@
 name: CI
-
+permissions:
+  contents: read
+  
 on:
   push:
     branches:
@@ -31,6 +33,9 @@ jobs:
       - name: Validate current commit (last commit) with commitlint
         if: github.event_name == 'push'
         run: npx commitlint --last --verbose
+
+      - name: npm vulnerability check
+        run: npm audit --audit-level=moderate
 
       - name: Validate PR commits with commitlint
         if: github.event_name == 'pull_request'

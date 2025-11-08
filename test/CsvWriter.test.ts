@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-non-literal-fs-filename -- Test file: all file paths are controlled test fixtures */
+
 import { afterEach,beforeEach, describe, expect, test } from '@jest/globals';
 import * as fs from 'fs';
 import { DateTime } from 'luxon';

@@ -1,3 +1,5 @@
+/* eslint-disable security/detect-non-literal-fs-filename -- Test file: all file paths are controlled test fixtures */
+
 import * as fs from 'fs';
 import * as path from 'path';
 
