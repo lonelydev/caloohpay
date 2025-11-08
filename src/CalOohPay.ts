@@ -463,6 +463,7 @@ export async function calOohPay(
     
     // Process schedules sequentially to avoid race conditions
     for (let i = 0; i < rotaIds.length; i++) {
+        // eslint-disable-next-line security/detect-object-injection -- i is loop counter, rotaIds is from validated CLI input
         const rotaId = rotaIds[i].trim();
         const isFirstSchedule = i === 0;
         
