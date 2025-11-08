@@ -74,31 +74,23 @@ caloohpay -r "PQRSTUV,PSTUVQR" -s "2024-01-01" -u "2024-01-31"
 
 #### Programmatic Usage
 
-CalOohPay can also be used as a library in your Node.js applications:
+CalOohPay can also be used as a library in your Node.js applications. See the [API Documentation](https://lonelydev.github.io/caloohpay/) for comprehensive guides and examples including:
+
+- Using custom compensation rates
+- Programmatic configuration
+- Advanced calculator usage
+- Integration examples
+
+Basic example:
 
 ```typescript
-import { OnCallUser, OnCallPeriod, OnCallPaymentsCalculator } from 'caloohpay';
+import { OnCallPaymentsCalculator } from 'caloohpay';
 
-// Create a user with on-call periods
-const user = new OnCallUser(
-  'user-id',
-  'John Doe',
-  [
-    new OnCallPeriod(
-      new Date('2024-08-01T10:00:00'),
-      new Date('2024-08-05T10:00:00'),
-      'Europe/London'
-    )
-  ]
-);
-
-// Calculate compensation
 const calculator = new OnCallPaymentsCalculator();
 const compensation = calculator.calculateOnCallPayment(user);
-console.log(`Total compensation: £${compensation}`);
 ```
 
-See the [API Documentation](https://lonelydev.github.io/caloohpay/) for more details on programmatic usage.
+**📚 [View Full API Documentation →](https://lonelydev.github.io/caloohpay/)**
 
 ## 💰 Compensation Rates
 
@@ -111,7 +103,7 @@ See the [API Documentation](https://lonelydev.github.io/caloohpay/) for more det
 
 ### Customizing Rates
 
-CalOohPay supports custom compensation rates via a configuration file. Create a `.caloohpay.json` file in your project root or home directory:
+You can customize compensation rates by creating a `.caloohpay.json` file:
 
 ```json
 {
@@ -123,42 +115,15 @@ CalOohPay supports custom compensation rates via a configuration file. Create a 
 }
 ```
 
-#### Configuration Options
+The tool searches for this file in:
 
-| Field | Type | Required | Description |
-|-------|------|----------|-------------|
-| `rates.weekdayRate` | number | ✅ | Compensation for OOH weekday shifts (Mon-Thu) |
-| `rates.weekendRate` | number | ✅ | Compensation for OOH weekend shifts (Fri-Sun) |
-| `rates.currency` | string | ❌ | Currency code (e.g., 'GBP', 'USD', 'EUR'). Defaults to 'GBP' |
+1. Current working directory (project-specific rates)
+2. Home directory `~/.caloohpay.json` (user-wide defaults)
+3. Built-in defaults if no config found
 
-#### Config File Locations
+**📚 [Full Configuration Guide →](https://lonelydev.github.io/caloohpay/#compensation-calculation)**
 
-The tool searches for `.caloohpay.json` in this order:
-
-1. **Current working directory** - Project-specific rates
-2. **Home directory** (`~/.caloohpay.json`) - User-wide defaults
-3. **Built-in defaults** - Falls back to £50/£75 if no config found
-
-#### Programmatic Usage with Custom Rates
-
-```typescript
-import { ConfigLoader, OnCallPaymentsCalculator } from 'caloohpay';
-
-// Load rates from config file
-const loader = new ConfigLoader();
-const rates = loader.loadRates();
-
-// Use custom rates
-const calculator = new OnCallPaymentsCalculator(
-  rates.weekdayRate,
-  rates.weekendRate
-);
-
-const compensation = calculator.calculateOnCallPayment(user);
-console.log(`Total: ${rates.currency} ${compensation}`);
-```
-
-> **Note**: If no config file exists, the application uses the default rates (£50 weekday / £75 weekend) defined in `src/Constants.ts`.
+Example config file: [.caloohpay.json.example](./.caloohpay.json.example)
 
 npm run dev
 npm run docs:serve
@@ -216,189 +181,72 @@ To fetch schedule data from PagerDuty, you need an **API User Token** that provi
 
 ## 📖 CLI Reference
 
-### Command Syntax
+### Quick Reference
 
 ```bash
-caloohpay [options] <args>
+caloohpay -r "SCHEDULE_ID" [options]
 ```
 
-### Options
+**Common Options:**
 
-| Option | Short | Description | Required | Default |
-|--------|-------|-------------|----------|---------|
-| `--rota-ids` | `-r` | PagerDuty schedule ID(s), comma-separated | ✅ | - |
-| `--timeZoneId` | `-t` | Override schedule timezone for OOH calculations | ❌ | Schedule's timezone from PagerDuty |
-| `--since` | `-s` | Start date (YYYY-MM-DD format) | ❌ | First day of previous month |
-| `--until` | `-u` | End date (YYYY-MM-DD format) | ❌ | First day of current month |
-| `--key` | `-k` | API token override | ❌ | From `.env` file |
-| `--output-file` | `-o` | Output file path | ❌ | Console output |
-| `--help` | `-h` | Show help | ❌ | - |
+- `-r, --rota-ids` - Schedule ID(s) (required)
+- `-s, --since` - Start date (YYYY-MM-DD)
+- `-u, --until` - End date (YYYY-MM-DD)
+- `-o, --output-file` - Save to CSV file
+- `-t, --timeZoneId` - Override timezone
+- `-k, --key` - API token override
 
-### Usage Examples
+**Examples:**
 
 ```bash
-# Basic usage - single schedule, previous month
+# Basic usage
 caloohpay -r "PQRSTUV"
 
-# Multiple schedules
-caloohpay -r "PQRSTUV,PSTUVQR,PTUVSQR"
+# Multiple schedules to CSV
+caloohpay -r "TEAM_A,TEAM_B" -o "./monthly-report.csv"
 
 # Custom date range
 caloohpay -r "PQRSTUV" -s "2024-01-01" -u "2024-01-31"
-
-# Override timezone (useful for distributed teams or testing)
-caloohpay -r "PQRSTUV" -t "America/New_York"
-
-# Override API token (useful for CI/CD or multiple accounts)
-caloohpay -r "PQRSTUV" -k "your_api_token_here"
-
-# Save to CSV file (Google Sheets compatible)
-caloohpay -r "PQRSTUV" -o "./payroll-report.csv"
-
-# Multiple schedules to CSV
-caloohpay -r "PQRSTUV,PSTUVQR" -o "./monthly-oncall-report.csv"
 ```
 
-### Sample Output
-
-```
-┌─────────────────┬─────────────────────────────────────┐
-│ rotaIds         │ 'PQRSTUV'                           │
-│ timeZoneId      │ 'Europe/London'                     │
-│ since           │ '2024-10-01T00:00:00.000+01:00'    │
-│ until           │ '2024-11-01T10:00:00.000Z'         │
-└─────────────────┴─────────────────────────────────────┘
-────────────────────────────────────────
-Schedule name: Engineering Team Alpha
-Schedule URL: https://company.pagerduty.com/schedules/PQRSTUV
-Using timezone: Europe/London
-User, TotalComp, Mon-Thu, Fri-Sun
-John Smith, 275, 3, 2
-Jane Doe, 200, 4, 0
-Bob Wilson, 150, 3, 0
-```
-
-### CSV Output Format
-
-When using the `--output-file` option, CalOohPay generates a Google Sheets compatible CSV file containing all schedule information and compensation data.
-
-#### CSV Structure
-
-```text
-Schedule name:,Engineering Team Alpha
-Schedule URL:,https://company.pagerduty.com/schedules/PQRSTUV
-Using timezone:,Europe/London
-
-User,Total Compensation (£),Weekdays (Mon-Thu),Weekends (Fri-Sun)
-John Smith,275,3,2
-Jane Doe,200,4,0
-Bob Wilson,150,3,0
-```
-
-#### Features
-
-- **Google Sheets Compatible**: Open directly in Google Sheets or Excel
-- **Multiple Schedules**: When processing multiple schedules, each is appended to the same file
-- **Special Character Handling**: Automatically escapes commas, quotes, and newlines in names
-- **Payroll Ready**: Format designed for easy import into payroll systems
-
-#### Example Usage
-
-```bash
-# Single schedule to CSV
-caloohpay -r "PQRSTUV" -o "./august-oncall.csv"
-
-# Multiple schedules to one file
-caloohpay -r "TEAM_A,TEAM_B,TEAM_C" -o "./all-teams-august.csv"
-
-# Custom date range with CSV output
-caloohpay -r "PQRSTUV" -s "2024-01-01" -u "2024-01-31" -o "./january-oncall.csv"
-```
-
-The tool will always output to both the console AND the CSV file, so you can verify the data while generating reports.
+**📚 [Complete CLI Documentation →](https://lonelydev.github.io/caloohpay/)**
 
 ## ✅ Current Features
 
-### What Works
-
-- ✅ **Schedule Fetching**: Retrieves data from PagerDuty API
+- ✅ **PagerDuty Integration**: Fetches schedules with automatic timezone detection
 - ✅ **Multi-Schedule Support**: Process multiple schedules simultaneously
-- ✅ **Date Range Flexibility**: Custom or automatic date ranges
-- ✅ **Full Timezone Support**: Uses schedule timezone from PagerDuty with optional CLI override
-- ✅ **Distributed Teams**: Accurate OOH calculations across different timezones
-- ✅ **Payment Calculation**: Separate rates for weekdays/weekends
-- ✅ **Auditable Output**: User names, total compensation, and day breakdowns
-- ✅ **CSV Export**: Google Sheets compatible file output for payroll systems
-- ✅ **Comprehensive Testing**: 35 unit tests including timezone and CSV handling
+- ✅ **Configurable Rates**: Custom weekday/weekend rates via `.caloohpay.json`
+- ✅ **Timezone Support**: Accurate OOH calculations for distributed teams
+- ✅ **CSV Export**: Google Sheets compatible payroll files
+- ✅ **Comprehensive Testing**: 328+ unit tests with full coverage
 
-### Default Behavior
-
-- **Since Date**: First day of previous month at `00:00:00` (local time)
-- **Until Date**: First day of current month at `10:00:00` (local time)
-- **Timezone**: Uses schedule's timezone from PagerDuty API (can be overridden with `--timeZoneId`)
-- **Output**: Console table format
-
-> The `until` time is set to 10:00:00 to ensure evening shifts from the last day of the previous month are included.
-
-### Timezone Handling for Distributed Teams
-
-CalOohPay now provides full support for distributed teams working across different timezones:
-
-#### How It Works
-
-1. **Automatic Timezone Detection**: The tool automatically retrieves each schedule's timezone from the PagerDuty API
-2. **Accurate OOH Calculations**: All out-of-hours calculations are performed in the schedule's timezone, ensuring correct day/night classification
-3. **Optional Override**: Use `--timeZoneId` to override the schedule timezone for testing or special cases
-
-#### Examples
+### Quick Timezone Example
 
 ```bash
-# Let the tool use the schedule's timezone from PagerDuty (recommended)
+# Automatic timezone detection (recommended)
 caloohpay -r "SCHEDULE_ID"
 
-# Override for a team in New York
+# Override timezone if needed
 caloohpay -r "SCHEDULE_ID" -t "America/New_York"
-
-# Override for a team in Tokyo
-caloohpay -r "SCHEDULE_ID" -t "Asia/Tokyo"
-
-# Override for UTC calculations
-caloohpay -r "SCHEDULE_ID" -t "UTC"
 ```
 
-#### Supported Timezones
-
-All IANA timezone identifiers are supported, including:
-
-- `America/New_York`, `America/Los_Angeles`, `America/Chicago`
-- `Europe/London`, `Europe/Paris`, `Europe/Berlin`
-- `Asia/Tokyo`, `Asia/Singapore`, `Asia/Kolkata`
-- `Australia/Sydney`, `Pacific/Auckland`
-- And many more...
-
-Refer to [PagerDuty's timezone documentation](https://developer.pagerduty.com/docs/1afe25e9c94cb-types#time-zone) for the complete list.
+**📚 [Complete Feature Guide & Timezone Details →](https://lonelydev.github.io/caloohpay/)**
 
 ## 🚧 Development Roadmap
 
-### Completed Features
+**Recently Completed:**
 
-- [x] **API Key Override**: CLI option `--key` to override API token ✅
-- [x] **Full Timezone Support**: Uses schedule timezone from PagerDuty with optional override ✅
-- [x] **CSV Output**: Google Sheets compatible file generation for payroll systems ✅
-- [x] **Configurable Rates**: Custom weekday/weekend rates via `.caloohpay.json` config file ✅
+- ✅ Configurable rates via config file
+- ✅ Full timezone support with automatic detection
+- ✅ CSV export for payroll systems
 
-### Planned Features
+**Coming Soon:**
 
-- [ ] **Enhanced Output**: Coloured console output and better formatting
-- [ ] **Package Distribution**: NPM package for easier installation
-- [ ] **Automation**: Scheduled monthly runs with automated reporting
+- Enhanced console output with colors
+- NPM package distribution
+- Automated monthly reporting
 
-### Long-term Vision
-
-- [ ] **Multi-platform Payroll**: Support different payroll systems
-- [ ] **Incident Response Bonus**: Additional compensation for actual incident responses
-- [ ] **Web Interface**: Simple web UI for non-technical users
-- [ ] **Reporting Dashboard**: Historical payment tracking and analytics
+**📚 [Full Roadmap & Feature Plans →](https://lonelydev.github.io/caloohpay/)**
 
 ## 📚 Technical References
 
