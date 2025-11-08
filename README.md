@@ -10,6 +10,7 @@ A command-line tool that automates the calculation of out-of-hours (OOH) on-call
 ## 🚀 What It Does
 
 CalOohPay eliminates the manual work of calculating on-call payments by:
+
 - **Fetching schedule data** directly from PagerDuty API
 - **Calculating compensation** based on weekday vs weekend rates
 - **Supporting multiple teams** and schedules simultaneously  
@@ -162,6 +163,7 @@ console.log(`Total: ${rates.currency} ${compensation}`);
 npm run dev
 npm run docs:serve
 npm run docs:watch
+
 ## Development and contributing
 
 Development, testing, contributor workflow and git-hook guidance has moved to [CONTRIBUTING.md](CONTRIBUTING.md). Please read that document for detailed setup and contribution instructions, including how to run tests, lint, generate docs, and prepare a pull request.
@@ -173,16 +175,19 @@ Note on ESLint configuration: this project uses ESLint v9 with a flat config fil
 ### Common Issues
 
 **"Command not found: caloohpay"**
+
 - Run `npm link` after building
 - Restart your terminal
 - Check if `dist/src/CalOohPay.js` exists
 
 **"Invalid API Token"**
+
 - Verify your `.env` file contains the correct token
 - Ensure no extra spaces or quotes around the token
 - Check token permissions in PagerDuty
 
 **"No schedule entries found"**
+
 - Verify the schedule ID is correct
 - Check the date range includes on-call periods
 - Ensure you have permissions to view the schedule
@@ -190,6 +195,7 @@ Note on ESLint configuration: this project uses ESLint v9 with a flat config fil
 ## 📝 Finding Schedule IDs
 
 Schedule IDs can be found in PagerDuty:
+
 1. Navigate to **People** → **On-Call Schedules**
 2. Click on your schedule
 3. The ID is in the URL: `https://yourcompany.pagerduty.com/schedules/PQRSTUV`
@@ -383,7 +389,7 @@ Refer to [PagerDuty's timezone documentation](https://developer.pagerduty.com/do
 
 ### Planned Features
 
-- [ ] **Enhanced Output**: Colored console output and better formatting
+- [ ] **Enhanced Output**: Coloured console output and better formatting
 - [ ] **Package Distribution**: NPM package for easier installation
 - [ ] **Automation**: Scheduled monthly runs with automated reporting
 

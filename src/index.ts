@@ -7,6 +7,7 @@
  * @packageDocumentation
  * 
  * @example
+ * Basic usage with default rates:
  * ```typescript
  * import { OnCallUser, OnCallPeriod, OnCallPaymentsCalculator } from 'caloohpay';
  * 
@@ -25,6 +26,23 @@
  * const calculator = new OnCallPaymentsCalculator();
  * const compensation = calculator.calculateOnCallPayment(user);
  * console.log(`Total compensation: £${compensation}`);
+ * ```
+ * 
+ * @example
+ * Using custom rates from config file:
+ * ```typescript
+ * import { ConfigLoader, OnCallPaymentsCalculator } from 'caloohpay';
+ * 
+ * const loader = new ConfigLoader();
+ * const rates = loader.loadRates();
+ * 
+ * const calculator = new OnCallPaymentsCalculator(
+ *   rates.weekdayRate,
+ *   rates.weekendRate
+ * );
+ * 
+ * const compensation = calculator.calculateOnCallPayment(user);
+ * console.log(`Total: ${rates.currency} ${compensation}`);
  * ```
  */
 

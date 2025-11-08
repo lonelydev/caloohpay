@@ -15,6 +15,11 @@ CalOohPay is a command-line tool that automates the calculation of out-of-hours 
 - **[OnCallPeriod](OnCallPeriod/README.md)** - Represents an on-call shift period with OOH detection
 - **[OnCallUser](OnCallUser/README.md)** - User model with on-call periods
 
+### Configuration
+
+- **[ConfigLoader](config/ConfigLoader/README.md)** - Loads and validates `.caloohpay.json` config file
+- **[RatesConfig](config/RatesConfig/README.md)** - Configuration interfaces for compensation rates
+
 ### Data Models
 
 - **[OnCallCompensation](OnCallCompensation/README.md)** - Compensation record for a user
@@ -58,12 +63,32 @@ The core logic for determining if a shift qualifies as out-of-hours is in the `O
 
 ### Compensation Calculation
 
-Compensation rates are defined in `Constants.ts` and referenced by `OnCallPaymentsCalculator`:
+Compensation rates can be customized via a `.caloohpay.json` configuration file or use the default rates:
 
-- **Weekdays (Mon-Thu)**: £50 per day (`WEEKDAY_RATE` constant)
-- **Weekends (Fri-Sun)**: £75 per day (`WEEKEND_RATE` constant)
+- **Weekdays (Mon-Thu)**: £50 per day (default `WEEKDAY_RATE` constant)
+- **Weekends (Fri-Sun)**: £75 per day (default `WEEKEND_RATE` constant)
 
-To modify rates, update the values in `src/Constants.ts`.
+#### Using Custom Rates
+
+Create a `.caloohpay.json` file in your project root or home directory:
+
+```json
+{
+  "rates": {
+    "weekdayRate": 60,
+    "weekendRate": 90,
+    "currency": "USD"
+  }
+}
+```
+
+The `OnCallPaymentsCalculator` accepts rates via constructor, allowing you to:
+
+- Use default rates (backward compatible)
+- Load custom rates from config file
+- Programmatically set rates per calculator instance
+
+See the [Configuration Guide](https://github.com/lonelydev/caloohpay#-compensation-rates) in the README for more details.
 
 ### Timezone Support
 
@@ -87,7 +112,7 @@ Output (Console + CSV)
 
 ## 📝 Code Examples
 
-### Calculating Compensation
+### Calculating Compensation (Default Rates)
 
 ```typescript
 import { OnCallUser } from './OnCallUser';
@@ -109,6 +134,26 @@ const user = new OnCallUser(
 const calculator = new OnCallPaymentsCalculator();
 const compensation = calculator.calculateOnCallPayment(user);
 console.log(`Total compensation: £${compensation}`);
+```
+
+### Using Custom Rates Programmatically
+
+```typescript
+import { ConfigLoader } from './config/ConfigLoader';
+import { OnCallPaymentsCalculator } from './OnCallPaymentsCalculator';
+
+// Load rates from .caloohpay.json
+const loader = new ConfigLoader();
+const rates = loader.loadRates();
+
+// Create calculator with custom rates
+const calculator = new OnCallPaymentsCalculator(
+  rates.weekdayRate,
+  rates.weekendRate
+);
+
+const compensation = calculator.calculateOnCallPayment(user);
+console.log(`Total: ${rates.currency} ${compensation}`);
 ```
 
 ### Generating CSV Reports
