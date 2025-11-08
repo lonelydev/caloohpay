@@ -7,7 +7,7 @@ import { InputValidator } from "./validation/InputValidator";
  * Calculates on-call compensation for users based on their OOH (Out of Hours) shifts.
  * 
  * This class implements the business logic for computing monetary compensation
- * for on-call duty. It applies fixed rates for weekday and weekend OOH shifts
+ * for on-call duty. It supports configurable rates for weekday and weekend OOH shifts
  * and provides methods for both simple payment calculations and detailed
  * auditable records.
  * 
@@ -16,17 +16,22 @@ import { InputValidator } from "./validation/InputValidator";
  * @remarks
  * ## Compensation Rates
  * 
- * - **Weekdays** (Monday-Thursday): £50 per OOH day
- * - **Weekends** (Friday-Sunday): £75 per OOH day
+ * Rates can be configured in two ways:
  * 
- * These rates are static and can be accessed via:
+ * 1. **Via Constructor** - Pass custom rates when creating the calculator
+ * 2. **Via Config File** - Use `.caloohpay.json` for organization-wide settings
+ * 3. **Default Rates** - Falls back to:
+ *    - **Weekdays** (Monday-Thursday): £50 per OOH day
+ *    - **Weekends** (Friday-Sunday): £75 per OOH day
+ * 
+ * These default rates maintain backward compatibility and can be accessed via:
  * - {@link OnCallPaymentsCalculator.WeekDayRate}
  * - {@link OnCallPaymentsCalculator.WeekEndRate}
  * 
  * ## Calculation Formula
  * 
  * ```
- * Total Compensation = (Weekday OOH Days × £50) + (Weekend OOH Days × £75)
+ * Total Compensation = (Weekday OOH Days × Weekday Rate) + (Weekend OOH Days × Weekend Rate)
  * ```
  * 
  * ## Validation
@@ -34,36 +39,93 @@ import { InputValidator } from "./validation/InputValidator";
  * All calculation methods validate input to ensure:
  * - User object is defined
  * - User has on-call periods assigned
+ * - Rates are positive numbers (when provided)
  * 
  * @example
  * ```typescript
+ * // Using default rates
  * const calculator = new OnCallPaymentsCalculator();
- * 
- * // Simple payment calculation
  * const amount = calculator.calculateOnCallPayment(user);
- * console.log(`Total compensation: £${amount}`);
  * 
- * // Batch calculation for multiple users
- * const payments = calculator.calculateOnCallPayments([user1, user2, user3]);
- * console.log(payments); // { 'user-id-1': 275, 'user-id-2': 150, ... }
+ * // Using custom rates
+ * const customCalculator = new OnCallPaymentsCalculator(60, 90);
+ * const customAmount = customCalculator.calculateOnCallPayment(user);
  * 
- * // Detailed auditable records
- * const records = calculator.getAuditableOnCallPaymentRecords([user1, user2]);
- * // Includes full user details and breakdown
+ * // Using rates from config file
+ * const loader = new ConfigLoader();
+ * const rates = loader.loadRates();
+ * const configCalculator = new OnCallPaymentsCalculator(
+ *   rates.weekdayRate,
+ *   rates.weekendRate
+ * );
  * ```
  */
 export class OnCallPaymentsCalculator {
     /**
-     * Compensation rate for weekday (Mon-Thu) OOH shifts.
+     * Default compensation rate for weekday (Mon-Thu) OOH shifts.
      * Fixed at £50 per OOH weekday.
+     * 
+     * @static
+     * @readonly
      */
     public static readonly WeekDayRate: number = WEEKDAY_RATE;
     
     /**
-     * Compensation rate for weekend (Fri-Sun) OOH shifts.
+     * Default compensation rate for weekend (Fri-Sun) OOH shifts.
      * Fixed at £75 per OOH weekend day.
+     * 
+     * @static
+     * @readonly
      */
     public static readonly WeekEndRate: number = WEEKEND_RATE;
+
+    /**
+     * Instance-level weekday rate (configurable per calculator instance).
+     * 
+     * @private
+     */
+    private readonly weekdayRate: number;
+
+    /**
+     * Instance-level weekend rate (configurable per calculator instance).
+     * 
+     * @private
+     */
+    private readonly weekendRate: number;
+
+    /**
+     * Creates a new OnCallPaymentsCalculator with optional custom rates.
+     * 
+     * @param {number} [weekdayRate] - Custom weekday rate (defaults to WEEKDAY_RATE from Constants)
+     * @param {number} [weekendRate] - Custom weekend rate (defaults to WEEKEND_RATE from Constants)
+     * 
+     * @throws {Error} If provided rates are not positive numbers
+     * 
+     * @example
+     * ```typescript
+     * // Use default rates
+     * const defaultCalculator = new OnCallPaymentsCalculator();
+     * 
+     * // Use custom rates (e.g., USD rates)
+     * const usdCalculator = new OnCallPaymentsCalculator(60, 90);
+     * 
+     * // Use rates from config
+     * const config = new ConfigLoader().loadRates();
+     * const configCalculator = new OnCallPaymentsCalculator(
+     *   config.weekdayRate,
+     *   config.weekendRate
+     * );
+     * ```
+     */
+    constructor(weekdayRate?: number, weekendRate?: number) {
+        // Use provided rates or fall back to defaults
+        this.weekdayRate = weekdayRate !== undefined ? weekdayRate : OnCallPaymentsCalculator.WeekDayRate;
+        this.weekendRate = weekendRate !== undefined ? weekendRate : OnCallPaymentsCalculator.WeekEndRate;
+
+        // Validate rates
+        InputValidator.validatePositiveNumber(this.weekdayRate, 'weekdayRate');
+        InputValidator.validatePositiveNumber(this.weekendRate, 'weekendRate');
+    }
 
     /**
      * Validates that an OnCallUser is properly initialized for calculation.
@@ -113,8 +175,8 @@ export class OnCallPaymentsCalculator {
      */
     calculateOnCallPayment(onCallUser: OnCallUser): number {
         this.validateOnCallUser(onCallUser);
-        return (onCallUser.getTotalOohWeekDays() * OnCallPaymentsCalculator.WeekDayRate) + 
-            (onCallUser.getTotalOohWeekendDays() * OnCallPaymentsCalculator.WeekEndRate);
+        return (onCallUser.getTotalOohWeekDays() * this.weekdayRate) + 
+            (onCallUser.getTotalOohWeekendDays() * this.weekendRate);
     }
 
     /**
@@ -205,8 +267,8 @@ export class OnCallPaymentsCalculator {
             onCallCompensations[onCallUser.id] = {
                 OnCallUser: onCallUser,
                 totalCompensation: 
-                    (onCallUser.getTotalOohWeekDays() * OnCallPaymentsCalculator.WeekDayRate) + 
-                    (onCallUser.getTotalOohWeekendDays() * OnCallPaymentsCalculator.WeekEndRate)
+                    (onCallUser.getTotalOohWeekDays() * this.weekdayRate) + 
+                    (onCallUser.getTotalOohWeekendDays() * this.weekendRate)
             }
         }
         

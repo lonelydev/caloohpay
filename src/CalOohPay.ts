@@ -5,6 +5,7 @@ import yargs from 'yargs';
 import { hideBin } from 'yargs/helpers';
 
 import { CommandLineOptions } from './CommandLineOptions';
+import { ConfigLoader } from './config/ConfigLoader';
 import { FALLBACK_SCHEDULE_TIMEZONE } from './Constants';
 import { CsvWriter } from './CsvWriter';
 import { coerceSince, coerceUntil, toLocaTzIsoStringWithOffset } from './DateUtilities';
@@ -440,6 +441,10 @@ export async function calOohPay(
     const log = logger || new ConsoleLogger();
     log.table?.(maskCliOptions(cliOptions));
     
+    // Load compensation rates from config file or use defaults
+    const configLoader = new ConfigLoader();
+    const rates = configLoader.loadRates();
+    
     // Get API token from CLI option or environment variable
     const sanitisedEnvVars: Environment = sanitiseEnvVariable(process.env, cliOptions.key);
     
@@ -515,7 +520,7 @@ export async function calOohPay(
             const onCallUsers = extractOnCallUsersFromFinalSchedule(scheduleData.final_schedule, effectiveTimeZone);
             const listOfOnCallUsers = Object.values(onCallUsers);
 
-            const calculator = new OnCallPaymentsCalculator();
+            const calculator = new OnCallPaymentsCalculator(rates.weekdayRate, rates.weekendRate);
             const auditableRecords = calculator.getAuditableOnCallPaymentRecords(listOfOnCallUsers);
             
             // Track metrics for optional return
