@@ -231,18 +231,21 @@ describe('InputValidator', () => {
                 .toThrow('API token is required');
         });
 
-        it('should reject tokens that are too short', () => {
+        it('should reject tokens that are too short without revealing length', () => {
             expect(() => InputValidator.validateApiToken('short'))
-                .toThrow('API token appears too short');
+                .toThrow('API token appears invalid or incomplete');
             expect(() => InputValidator.validateApiToken('a'.repeat(10)))
-                .toThrow('API token appears too short');
+                .toThrow('API token appears invalid or incomplete');
         });
 
-        it('should provide helpful error messages', () => {
+        it('should provide helpful error messages without metadata leakage', () => {
             expect(() => InputValidator.validateApiToken(''))
                 .toThrow(/Set API_TOKEN environment variable/);
             expect(() => InputValidator.validateApiToken('short'))
                 .toThrow(/typically 20\+ characters/);
+            // Verify no token length is revealed in error message
+            expect(() => InputValidator.validateApiToken('abc123'))
+                .toThrow(/invalid or incomplete/);
         });
     });
 
