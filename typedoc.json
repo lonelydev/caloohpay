@@ -1,23 +1,38 @@
 {
   "$schema": "https://typedoc.org/schema.json",
-  "entryPoints": ["./src"],
-  "entryPointStrategy": "expand",
+  "entryPoints": ["./src/index.ts"],
+  "entryPointStrategy": "resolve",
   "out": "docs/api",
   "exclude": [
     "**/node_modules/**",
     "**/test/**",
-    "**/*.test.ts"
+    "**/*.test.ts",
+    "**/dist/**"
   ],
+
+  // 🧭 Enable source linking
+  "gitRevision": "main",
+  "sourceLinkTemplate": "https://github.com/lonelydev/caloohpay/blob/{gitRevision}/{path}#L{line}",
+
   "excludePrivate": true,
   "excludeProtected": false,
   "excludeInternal": true,
+  "excludeExternals": true,
   "readme": "README.md",
   "name": "CalOohPay API Documentation",
+  // 📦 Merge all files in one entry module (optional)
   "includeVersion": true,
-  "sort": ["source-order"],
+  // � Sort members in docs (alphabetical, source-order, etc.)
+  "sort": ["kind", "visibility", "alphabetical"],
   "navigation": {
     "includeCategories": true,
+    "includeFolders": true,
     "includeGroups": true
+  },
+  "navigationLinks": {
+    "Contributing": "https://github.com/lonelydev/caloohpay/blob/main/CONTRIBUTING.md",
+    "Security": "https://github.com/lonelydev/caloohpay/blob/main/docs/SECURITY.md",
+    "GitHub": "https://github.com/lonelydev/caloohpay"
   },
   "categorizeByGroup": true,
   "defaultCategory": "Other",
@@ -30,8 +45,11 @@
   "githubPages": true,
   "hideGenerator": false,
   "searchInComments": true,
-  "treatWarningsAsErrors": false,
+  "treatWarningsAsErrors": true,
+  "theme": "default",
   "lightHighlightTheme": "light-plus",
   "darkHighlightTheme": "dark-plus",
-  "highlightLanguages": ["ts", "js", "json", "csv", "bash"]
+  "highlightLanguages": ["ts", "js", "json", "csv", "bash"],
+  // 🧩 Enable TypeScript project config
+  "tsconfig": "tsconfig.json",
 }

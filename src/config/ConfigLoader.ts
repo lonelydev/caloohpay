@@ -34,7 +34,7 @@ export class ConfigLoader {
     /**
      * Configuration file name to search for.
      * @private
-     * @constant
+    
      */
     private static readonly CONFIG_FILENAME = '.caloohpay.json';
 

@@ -263,7 +263,7 @@ function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry, timeZone: 
  * 
  * @see {@link FinalSchedule}
  * @see {@link OnCallUser}
- * @see {@link getOnCallUserFromScheduleEntry}
+ * @see {@link OnCallPeriod}
  */
 export function extractOnCallUsersFromFinalSchedule(finalSchedule: FinalSchedule, timeZone: string): Record<string, OnCallUser> {
     const onCallUsers: Record<string, OnCallUser> = {};
