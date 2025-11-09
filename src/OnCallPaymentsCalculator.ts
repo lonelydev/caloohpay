@@ -44,13 +44,25 @@ import { InputValidator } from "./validation/InputValidator";
  * @example
  * ```typescript
  * // Using default rates
+ *
+ * const user = new OnCallUser(
+ *   'PXXXXXX',
+ *   'John Doe',
+ *   [
+ *     new OnCallPeriod(
+ *       new Date('2024-08-01T17:30:00Z'),
+ *       new Date('2024-08-05T09:00:00Z'),
+ *       'Europe/London'
+ *     )
+ *   ]
+ * );
  * const calculator = new OnCallPaymentsCalculator();
- * const amount = calculator.calculateOnCallPayment(user);
- * 
+ * const amount = calculator.calculateOnCallPayment(onCallUser);
+ *
  * // Using custom rates
  * const customCalculator = new OnCallPaymentsCalculator(60, 90);
- * const customAmount = customCalculator.calculateOnCallPayment(user);
- * 
+ * const customAmount = customCalculator.calculateOnCallPayment(onCallUser);
+ *
  * // Using rates from config file
  * const loader = new ConfigLoader();
  * const rates = loader.loadRates();
@@ -65,7 +77,7 @@ export class OnCallPaymentsCalculator {
      * Default compensation rate for weekday (Mon-Thu) OOH shifts.
      * Fixed at £50 per OOH weekday.
      * 
-     * @static
+    
      * @readonly
      */
     public static readonly WeekDayRate: number = WEEKDAY_RATE;
@@ -74,7 +86,7 @@ export class OnCallPaymentsCalculator {
      * Default compensation rate for weekend (Fri-Sun) OOH shifts.
      * Fixed at £75 per OOH weekend day.
      * 
-     * @static
+    
      * @readonly
      */
     public static readonly WeekEndRate: number = WEEKEND_RATE;

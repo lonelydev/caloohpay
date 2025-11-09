@@ -83,3 +83,4 @@ export type { OnCallCompensation } from './OnCallCompensation';
 export type { PagerdutySchedule } from './PagerdutySchedule';
 export type { ScheduleEntry } from './ScheduleEntry';
 export type { User } from './User';
+export type { UserOncall } from './UserOncall';

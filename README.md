@@ -27,7 +27,7 @@ In many organizations, engineers get compensated for going *on-call outside of w
 
 - **Node.js** (v14 or higher)
 - **npm** or **yarn**
-- **PagerDuty API User Token** ([How to get one](#-pagerduty-api-setup))
+- **PagerDuty API User Token** ([How to get one](#📟-pagerduty-api-setup))
 
 ## 🚀 Quick Start
 
@@ -90,7 +90,7 @@ const calculator = new OnCallPaymentsCalculator();
 const compensation = calculator.calculateOnCallPayment(user);
 ```
 
-**📚 [View Full API Documentation →](https://lonelydev.github.io/caloohpay/)**
+More details in [OnCallPaymentsCalculator](./docs/api/classes/OnCallPaymentsCalculator.html) documentation.
 
 ## 💰 Compensation Rates
 
@@ -121,17 +121,11 @@ The tool searches for this file in:
 2. Home directory `~/.caloohpay.json` (user-wide defaults)
 3. Built-in defaults if no config found
 
-**📚 [Full Configuration Guide →](https://lonelydev.github.io/caloohpay/#compensation-calculation)**
-
-Example config file: [.caloohpay.json.example](./.caloohpay.json.example)
-
-npm run dev
-npm run docs:serve
-npm run docs:watch
+Example config file: [.caloohpay.json.example](https://github.com/lonelydev/caloohpay/blob/main/.caloohpay.json.example)
 
 ## Development and contributing
 
-Development, testing, contributor workflow and git-hook guidance has moved to [CONTRIBUTING.md](CONTRIBUTING.md). Please read that document for detailed setup and contribution instructions, including how to run tests, lint, generate docs, and prepare a pull request.
+Development, testing, contributor workflow and git-hook guidance has moved to [CONTRIBUTING.md](https://github.com/lonelydev/caloohpay/blob/main/CONTRIBUTING.md). Please read that document for detailed setup and contribution instructions, including how to run tests, lint, generate docs, and prepare a pull request.
 
 Note on ESLint configuration: this project uses ESLint v9 with a flat config file located at `eslint.config.cjs` (instead of legacy `.eslintrc.json`). If you need to adjust lint rules or add new shareable configs, update `eslint.config.cjs` and run `npm run lint` to validate your changes.
 
@@ -165,7 +159,7 @@ Schedule IDs can be found in PagerDuty:
 2. Click on your schedule
 3. The ID is in the URL: `https://yourcompany.pagerduty.com/schedules/PQRSTUV`
 
-## 🔑 PagerDuty API Setup
+## 📟 PagerDuty API Setup
 
 To fetch schedule data from PagerDuty, you need an **API User Token** that provides the same permissions as your user account.
 
@@ -209,8 +203,6 @@ caloohpay -r "TEAM_A,TEAM_B" -o "./monthly-report.csv"
 caloohpay -r "PQRSTUV" -s "2024-01-01" -u "2024-01-31"
 ```
 
-**📚 [Complete CLI Documentation →](https://lonelydev.github.io/caloohpay/)**
-
 ## ✅ Current Features
 
 - ✅ **PagerDuty Integration**: Fetches schedules with automatic timezone detection
@@ -230,8 +222,6 @@ caloohpay -r "SCHEDULE_ID"
 caloohpay -r "SCHEDULE_ID" -t "America/New_York"
 ```
 
-**📚 [Complete Feature Guide & Timezone Details →](https://lonelydev.github.io/caloohpay/)**
-
 ## 🚧 Development Roadmap
 
 **Recently Completed:**
@@ -245,8 +235,6 @@ caloohpay -r "SCHEDULE_ID" -t "America/New_York"
 - Enhanced console output with colors
 - NPM package distribution
 - Automated monthly reporting
-
-**📚 [Full Roadmap & Feature Plans →](https://lonelydev.github.io/caloohpay/)**
 
 ## 📚 Technical References
 
@@ -266,7 +254,7 @@ This project is licensed under the ISC License - see the [LICENSE](LICENSE) file
 
 If you encounter any issues or have questions:
 
-1. Check the [troubleshooting section](#-troubleshooting)
+1. Check the [troubleshooting section](#🔧-troubleshooting)
 2. Search existing [issues](https://github.com/lonelydev/caloohpay/issues)
 3. Create a new issue with detailed information
 

@@ -8,6 +8,11 @@ CalOohPay is a command-line tool that automates the calculation of out-of-hours 
 
 ## 🔍 Quick Navigation
 
+### 📘 User Guides
+
+- **[API Usage Guide](guides/api-usage.md)** - Complete guide for using CalOohPay programmatically
+- **[Contributing Guide](guides/contributing.md)** - Development setup and contributor guidelines
+
 ### Core Modules
 
 - **[CalOohPay](CalOohPay/README.md)** - Main entry point and CLI orchestration
