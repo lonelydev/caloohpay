@@ -26,7 +26,6 @@
  * Compensation rate for out-of-hours weekday shifts (Monday-Thursday).
  * Fixed at £50 per OOH weekday.
  * 
-
  * @type {number}
  */
 export const WEEKDAY_RATE = 50;
@@ -37,7 +36,6 @@ export const WEEKDAY_RATE = 50;
  * 
  * Note: Friday is considered a weekend day for compensation purposes.
  * 
-
  * @type {number}
  */
 export const WEEKEND_RATE = 75;
@@ -46,7 +44,6 @@ export const WEEKEND_RATE = 75;
  * Default timezone used when no timezone is specified.
  * Uses UTC as a neutral baseline for global operations.
  * 
-
  * @type {string}
  */
 export const DEFAULT_TIMEZONE = 'UTC';
@@ -67,7 +64,6 @@ export const FALLBACK_SCHEDULE_TIMEZONE = 'Europe/London';
  * Example timezone identifiers for documentation and testing.
  * These represent common timezones used across different regions.
  * 
-
  * @type {ReadonlyArray<string>}
  * 
  * @see {@link https://en.wikipedia.org/wiki/List_of_tz_database_time_zones|IANA Time Zone Database}
@@ -84,7 +80,6 @@ export const EXAMPLE_TIMEZONES = [
  * Hour when the standard work day ends (5:30 PM in 24-hour format).
  * Used to determine if shifts qualify as out-of-hours.
  * 
-
  * @type {number}
  */
 export const END_OF_WORK_HOUR = 17;
@@ -92,7 +87,6 @@ export const END_OF_WORK_HOUR = 17;
 /**
  * Minute component of end-of-work time (17:30).
  * 
-
  * @type {number}
  */
 export const END_OF_WORK_MINUTE = 30;
@@ -101,7 +95,6 @@ export const END_OF_WORK_MINUTE = 30;
  * Minimum shift duration in hours to qualify as out-of-hours work.
  * Shifts shorter than this are not counted for compensation.
  * 
-
  * @type {number}
  */
 export const MIN_SHIFT_HOURS = 6;
@@ -110,7 +103,6 @@ export const MIN_SHIFT_HOURS = 6;
  * First day of the week range considered "weekday" for compensation.
  * Monday = 1 in Luxon's day numbering (1-7, where 1 = Monday, 7 = Sunday).
  * 
-
  * @type {number}
  */
 export const WEEKDAY_START = 1; // Monday
@@ -121,7 +113,6 @@ export const WEEKDAY_START = 1; // Monday
  * 
  * Note: Friday (5) is considered a weekend day for compensation purposes.
  * 
-
  * @type {number}
  */
 export const WEEKDAY_END = 4; // Thursday (inclusive)
@@ -130,7 +121,6 @@ export const WEEKDAY_END = 4; // Thursday (inclusive)
  * Conversion factor: milliseconds per hour.
  * Used for time duration calculations.
  * 
-
  * @type {number}
  */
 export const MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
@@ -138,7 +128,6 @@ export const MILLISECONDS_PER_HOUR = 60 * 60 * 1000;
 /**
  * Currency symbol used in CSV output and reports.
  * 
-
  * @type {string}
  */
 export const CURRENCY_SYMBOL = '£';
@@ -146,7 +135,6 @@ export const CURRENCY_SYMBOL = '£';
 /**
  * Currency name for documentation purposes.
  * 
-
  * @type {string}
  */
 export const CURRENCY_NAME = 'GBP';
