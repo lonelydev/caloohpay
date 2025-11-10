@@ -67,7 +67,6 @@ export interface RatesConfig {
      * Currency code for the compensation rates.
      * 
      * @type {string}
-    
      * @default 'GBP'
      * @remarks Should follow ISO 4217 currency codes (e.g., 'GBP', 'USD', 'EUR', 'JPY').
      */
@@ -112,7 +111,6 @@ export interface CalOohPayConfig {
  * These values maintain backward compatibility with the original
  * hard-coded rates from Constants.ts.
  * 
-
  * @type {RatesConfig}
  * 
  * @remarks
