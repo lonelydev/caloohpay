@@ -212,7 +212,7 @@ When opening an issue please include:
 
 - A clear title and summary
 - Steps to reproduce (commands, environment)
-- Expected vs actual behavior
+- Expected vs actual behaviour
 - Any relevant logs or stack traces
 
 ## Code of Conduct

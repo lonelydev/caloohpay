@@ -6,7 +6,7 @@ import { maskCliOptions } from '@src/logger/utils';
 /**
  * Test suite for type safety improvements
  * 
- * Validates that the type safety refactoring maintains correct behavior
+ * Validates that the type safety refactoring maintains correct behaviour
  * and handles edge cases properly.
  */
 describe('Type Safety Improvements', () => {

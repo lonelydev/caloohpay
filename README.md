@@ -90,7 +90,7 @@ const calculator = new OnCallPaymentsCalculator();
 const compensation = calculator.calculateOnCallPayment(user);
 ```
 
-More details in [OnCallPaymentsCalculator](./docs/api/classes/OnCallPaymentsCalculator.html) documentation.
+More details in [OnCallPaymentsCalculator](https://lonelydev.github.io/caloohpay/classes/OnCallPaymentsCalculator.OnCallPaymentsCalculator.htmll) documentation.
 
 ## 💰 Compensation Rates
 

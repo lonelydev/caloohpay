@@ -89,7 +89,7 @@ export function convertTimezone(date: Date | string, timeZoneId: string): DateTi
  * ensuring that calculations start at the exact beginning of the day in
  * the schedule's timezone.
  * 
- * ### Behavior
+ * ### behaviour
  * - Parses input as ISO string
  * - Sets time to 00:00:00.000 (start of day)
  * - Returns full ISO format with timezone
@@ -141,7 +141,7 @@ export function coerceSince(value: string): string {
  * ensuring that calculations include all shifts ending on the specified date,
  * even those ending at 23:59.
  * 
- * ### Behavior
+ * ### behaviour
  * - Parses input as ISO string
  * - Sets time to 23:59:59.999 (end of day)
  * - Returns full ISO format with timezone

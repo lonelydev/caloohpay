@@ -6,7 +6,7 @@ In the interest of fostering an open and welcoming environment, we as contributo
 
 ### Our standards
 
-Examples of behavior that contributes to a positive environment for our community include:
+Examples of behaviour that contributes to a positive environment for our community include:
 
 - Using welcoming and inclusive language
 - Being respectful of differing viewpoints and experiences
@@ -14,7 +14,7 @@ Examples of behavior that contributes to a positive environment for our communit
 - Focusing on what is best for the community
 - Showing empathy towards other community members
 
-Examples of unacceptable behavior by participants include:
+Examples of unacceptable behaviour by participants include:
 
 - The use of sexualized language or imagery and unwelcome sexual attention or advances
 - Trolling, insulting/derogatory comments, and personal or political attacks
@@ -23,7 +23,7 @@ Examples of unacceptable behavior by participants include:
 
 ### Enforcement
 
-Instances of abusive, harassing, or otherwise unacceptable behavior may be reported by contacting the project maintainers at the issue tracker: https://github.com/lonelydev/caloohpay/issues. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances.
+Instances of abusive, harassing, or otherwise unacceptable behaviour may be reported by contacting the project maintainers at the issue tracker: https://github.com/lonelydev/caloohpay/issues. All complaints will be reviewed and investigated and will result in a response that is deemed necessary and appropriate to the circumstances.
 
 ### Scope
 

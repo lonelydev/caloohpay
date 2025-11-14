@@ -44,13 +44,13 @@ This release brings comprehensive timezone handling to CalOohPay, making it perf
 
 ⚠️ **Important**: This is a major version with breaking changes
 
-- **--timeZoneId behavior changed**: Previously defaulted to local timezone, now optional and overrides schedule timezone from PagerDuty API
+- **--timeZoneId behaviour changed**: Previously defaulted to local timezone, now optional and overrides schedule timezone from PagerDuty API
 - **Default timezone source**: Now uses timezone from PagerDuty schedule instead of local system timezone
 - **OnCallPeriod constructor**: Now requires timezone parameter (defaults to 'UTC' if not provided)
 
 #### Migration Guide
 
-If you were relying on the old behavior where calculations used your local timezone:
+If you were relying on the old behaviour where calculations used your local timezone:
 
 **Before (v1.0.0):**
 ```bash
@@ -82,7 +82,7 @@ caloohpay -r "SCHEDULE_ID" -t "Europe/London"
 - OnCallPeriod constructor signature: added timezone parameter
 - DateUtilities functions now use Luxon instead of native Date
 - All date/time calculations are now timezone-aware
-- CLI examples updated to reflect new timezone behavior
+- CLI examples updated to reflect new timezone behaviour
 
 ### Fixed
 
@@ -147,7 +147,7 @@ First stable release of CalOohPay with core functionality for single-timezone te
 
 #### Use v1.0.0 if:
 - ✅ Your team works in a single timezone
-- ✅ You want stable, tested behavior
+- ✅ You want stable, tested behaviour
 - ✅ You don't need PagerDuty schedule timezone integration
 - ✅ You prefer simpler timezone handling
 
@@ -184,9 +184,9 @@ npm link
 
 1. **Backup your current setup** (optional but recommended)
 2. **Review the breaking changes** section above
-3. **Update your scripts** if you relied on local timezone behavior
+3. **Update your scripts** if you relied on local timezone behaviour
 4. **Test with a single schedule** before processing multiple schedules
-5. **Verify output** matches expected timezone behavior
+5. **Verify output** matches expected timezone behaviour
 
 ### Support
 
