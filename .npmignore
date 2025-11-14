@@ -1,0 +1,54 @@
+# Source files
+src/
+test/
+*.test.ts
+*.spec.ts
+
+# Config files
+tsconfig.json
+jest.config.js
+eslint.config.cjs
+.eslintrc.json
+.prettierrc
+typedoc.json
+
+# Git files
+.git/
+.gitignore
+.github/
+
+# Husky
+.husky/
+
+# Documentation source (keep generated docs)
+docs/guides/
+docs/index.md
+
+# Development files
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+.DS_Store
+.env
+.env.test
+.env.local
+
+# IDE
+.vscode/
+.idea/
+*.swp
+*.swo
+*~
+
+# Coverage
+coverage/
+.nyc_output/
+
+# Build artifacts (except dist)
+*.tsbuildinfo
+
+# Misc
+TODO.md
+CODE_SMELLS_*.md
+ASYNC_FIX_SUMMARY.md

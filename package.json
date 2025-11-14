@@ -11,14 +11,14 @@
     "typecheck": "tsc --noEmit",
     "lint": "eslint --ext .ts src test",
     "lint:fix": "eslint --ext .ts src test --fix",
-    "dev": "tsc -w",
-    "start": "node dist/src/CalOohPay.js",
-    "prebuild": "npm run clean && npm run typecheck",
-    "build": "tsc -p tsconfig.json",
-    "postbuild": "node scripts/make-executable.js dist/src/CalOohPay.js",
-    "test": "jest",
-    "prepare": "husky install",
+    "lint:ci": "eslint --ext .ts src test --max-warnings 0",
     "commitlint": "commitlint --edit",
+    "prebuild": "npm run clean && npm run typecheck",
+    "build": "npm run prebuild && tsc -p tsconfig.json",
+    "verify": "npm run lint && npm run test && npm run build",
+    "prepublishOnly": "npm run verify",
+    "postbuild": "node scripts/make-executable.js dist/src/CalOohPay.js",
+    "test": "jest --runInBand",
     "docs": "typedoc",
     "docs:watch": "typedoc --watch",
     "docs:serve": "npm run docs && npx http-server docs -p 8080 -o"
@@ -26,13 +26,20 @@
   "keywords": [
     "pagerduty",
     "on-call",
-    "payroll",
     "compensation",
+    "pay-calculator",
+    "out-of-hours",
+    "ooh",
     "cli",
-    "typescript",
-    "automation"
+    "automation",
+    "payroll",
+    "schedule",
+    "typescript"
   ],
-  "author": "lonelydev",
+  "author": {
+    "name": "lonelydev",
+    "url": "https://github.com/lonelydev"
+  },
   "license": "ISC",
   "description": "A CLI tool to calculate out-of-hours on-call compensation for engineering teams using PagerDuty schedules",
   "repository": {
@@ -65,10 +72,6 @@
     "punycode.js": "^2.3.1",
     "ts-jest": "^29.2.4",
     "typedoc": "^0.28.14",
-    "typedoc-plugin-markdown": "^4.9.0",
-    "typedoc-plugin-mdn-links": "^5.0.10",
-    "typedoc-plugin-mermaid": "^1.12.0",
-    "typedoc-plugin-pages": "^1.1.0",
     "typescript": "^5.9.3",
     "typescript-eslint": "^8.46.2"
   },
@@ -77,12 +80,5 @@
     "dotenv": "^16.4.5",
     "luxon": "^3.5.0",
     "yargs": "^17.7.2"
-  },
-  "overrides": {
-    "punycode": "npm:punycode.js@^2.3.1"
-  },
-  "resolutions": {
-    "eslint": "9.38.0",
-    "punycode": "npm:punycode.js@^2.3.1"
   }
 }
