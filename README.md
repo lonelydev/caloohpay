@@ -3,6 +3,8 @@
 [![TypeScript](https://img.shields.io/badge/TypeScript-007ACC?style=flat&logo=typescript&logoColor=white)](https://www.typescriptlang.org/)
 [![Node.js](https://img.shields.io/badge/Node.js-43853D?style=flat&logo=node.js&logoColor=white)](https://nodejs.org/)
 [![PagerDuty](https://img.shields.io/badge/PagerDuty-06AC38?style=flat&logo=pagerduty&logoColor=white)](https://www.pagerduty.com/)
+[![npm version](https://img.shields.io/npm/v/caloohpay.svg)](https://www.npmjs.com/package/caloohpay)
+[![License: ISC](https://img.shields.io/badge/License-ISC-blue.svg)](https://opensource.org/licenses/ISC)
 [![Buy Me A Coffee](https://img.shields.io/badge/Buy%20Me%20A%20Coffee-support-yellow?style=flat&logo=buy-me-a-coffee)](https://buymeacoffee.com/swcraftsperson)
 
 A command-line tool that automates the calculation of out-of-hours (OOH) on-call compensation for engineering teams using PagerDuty schedules.
@@ -33,18 +35,27 @@ In many organizations, engineers get compensated for going *on-call outside of w
 
 ### 1. Installation
 
+### Via npm (Recommended)
+
 ```bash
-# Clone the repository
+npm install -g caloohpay
+```
+
+### via npx 
+
+No installation required, run directly with npx:
+
+```bash
+npx caloohpay -r "SCHEDULE_ID"
+```
+
+### From Source
+
+```bash
 git clone https://github.com/lonelydev/caloohpay.git
 cd caloohpay
-
-# Install dependencies
 npm install
-
-# Build the project
 npm run build
-
-# Link globally for CLI usage
 npm link
 ```
 
