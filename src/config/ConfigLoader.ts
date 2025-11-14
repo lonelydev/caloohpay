@@ -52,7 +52,7 @@ export class ConfigLoader {
      * @throws {Error} If config file exists but contains invalid rate values
      * 
      * @remarks
-     * Silent fallback behavior:
+     * Silent fallback behaviour:
      * - Missing config file → Use defaults (no error)
      * - Invalid JSON → Use defaults (logs warning)
      * - Invalid rate values → Throws error (business logic violation)

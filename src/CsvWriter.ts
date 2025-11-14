@@ -113,7 +113,7 @@ export class CsvWriter {
      * ...
      * ```
      * 
-     * ### Append Behavior
+     * ### Append behaviour
      * - When `append=false`: Overwrites any existing file
      * - When `append=true`: Adds data to end of file with separator line
      * - Use append for combining multiple schedules into one report

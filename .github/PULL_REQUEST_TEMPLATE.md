@@ -11,7 +11,7 @@ Briefly describe the changes in this PR and the motivation. Keep it short — a 
 
 ## Changes
 
-- What changed (files, modules, behaviors)
+- What changed (files, modules, behaviours)
 - Any public API changes or breaking changes
 
 ## How to test

@@ -230,7 +230,7 @@ function getOnCallUserFromScheduleEntry(scheduleEntry: ScheduleEntry, timeZone: 
  * @returns A Record mapping user IDs to OnCallUser objects with their consolidated on-call periods
  * 
  * @remarks
- * Key behaviors:
+ * Key behaviours:
  * - Multiple schedule entries for the same user are consolidated into one OnCallUser
  * - Each unique user ID becomes a key in the returned Record
  * - If a user appears multiple times, their OnCallPeriods are accumulated

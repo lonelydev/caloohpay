@@ -11,7 +11,7 @@ import yargs from 'yargs';
  * - Error handling and resilience:
  *   - Network timeout and connection errors
  *   - API error responses (404, 401, 429, 500)
- *   - Retry behavior with exponential backoff
+ *   - Retry behaviour with exponential backoff
  *   - Partial failure scenarios
  *   - Data validation edge cases
  * 
@@ -234,7 +234,7 @@ describe('CalOohPay async operations', () => {
         });
     });
 
-    describe('Yargs parseSync() behavior', () => {
+    describe('Yargs parseSync() behaviour', () => {
         it('should synchronously parse command line arguments with parseSync()', () => {
             const args = ['--rota-ids', 'PXXXXXX', '--since', '2024-01-01', '--until', '2024-01-31'];
             
@@ -727,7 +727,7 @@ describe('CalOohPay async operations', () => {
             });
         });
 
-        describe('Retry behavior simulation', () => {
+        describe('Retry behaviour simulation', () => {
             it('should demonstrate exponential backoff retry pattern', async () => {
                 let attempts = 0;
                 const maxRetries = 3;
