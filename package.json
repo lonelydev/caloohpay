@@ -4,7 +4,7 @@
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
   "bin": {
-    "caloohpay": "./dist/src/CalOohPay.js"
+    "caloohpay": "dist/src/CalOohPay.js"
   },
   "scripts": {
     "clean": "rm -rf dist .tsbuildinfo",
@@ -44,7 +44,7 @@
   "description": "A CLI tool to calculate out-of-hours on-call compensation for engineering teams using PagerDuty schedules",
   "repository": {
     "type": "git",
-    "url": "https://github.com/lonelydev/caloohpay.git"
+    "url": "git+https://github.com/lonelydev/caloohpay.git"
   },
   "bugs": {
     "url": "https://github.com/lonelydev/caloohpay/issues"
