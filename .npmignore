@@ -23,6 +23,7 @@ typedoc.json
 # Documentation source (keep generated docs)
 docs/guides/
 docs/index.md
+docs/api
 
 # Development files
 *.log
