@@ -1,3 +1,20 @@
+/**
+ * On-Call Payment Calculator Tests
+ * 
+ * This test suite focuses on edge cases, timezone handling, and error validation
+ * for the OnCallPaymentsCalculator.
+ * 
+ * For basic browser-compatible functionality tests, see:
+ * @see {@link ./BrowserEnvironment.test.ts} - Browser/React/Next.js usage examples
+ * 
+ * This file covers:
+ * - Complex multi-period calculations
+ * - DST transitions across multiple timezones (UK, US, Australia)
+ * - Cross-timezone comparison scenarios
+ * - Detailed error handling and validation
+ * - Audit record generation
+ */
+
 import { describe, expect, test } from '@jest/globals';
 import { DateTime } from "luxon";
 
@@ -7,20 +24,8 @@ import { OnCallUser } from '@src/OnCallUser';
 
 const testTimeZone = 'Europe/London';
 
-describe('understanding luxon', () => {
-    test('should be able to use luxon to convert date to specific timezone', () => {
-        const luxonDate = DateTime.fromISO('2023-10-01T12:00:00+01:00', { zone: 'Europe/London' });
-        const timezone = luxonDate.zoneName;
-        const utcDate = luxonDate.setZone('UTC');
-        const offset = luxonDate.offset;
-        expect(offset).toBe(60);
-        expect(timezone).toBe('Europe/London');
-        expect(utcDate.toISO()).toBe('2023-10-01T11:00:00.000Z');
-    });
-});
-
-describe('should calculate the payment for an on call user', () => {
-    test('- when person continues to be on-call from end of Month to 12th of subsequent month', () => {
+describe('Multi-Period Payment Calculations', () => {
+    test('should calculate payment when person is on-call from end of month to 12th of next month', () => {
         const luxonSince = DateTime.fromISO('2024-07-31T23:00:00+01:00', { zone: 'Europe/London' });
         const luxonUntil = DateTime.fromISO('2024-08-12T10:00:00+01:00', { zone: 'Europe/London' });
         const since = luxonSince.toJSDate();
@@ -42,7 +47,7 @@ describe('should calculate the payment for an on call user', () => {
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(750);
     });
 
-    test('- when person starts to be on-call from start of Month 10am to 12th of that month', () => {
+    test('should calculate payment when person is on-call from start of month to 12th', () => {
         const luxonSince = DateTime.fromISO('2024-08-01T10:00:00+01:00', { zone: 'Europe/London' });
         const luxonUntil = DateTime.fromISO('2024-08-12T10:00:00+01:00', { zone: 'Europe/London' });
         const since = luxonSince.toJSDate();
@@ -63,7 +68,7 @@ describe('should calculate the payment for an on call user', () => {
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(700);
     });
 
-    test('- when person starts to be on-call from 28th of August 10am to end of August', () => {
+    test('should calculate payment for short period at end of month', () => {
 
         const since = DateTime.fromISO('2024-08-28T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate();
         const until = DateTime.fromISO('2024-08-31T23:59:59+01:00', { zone: 'Europe/London' }).toJSDate();
@@ -83,7 +88,7 @@ describe('should calculate the payment for an on call user', () => {
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(175);
     });
 
-    test('- when person starts to be on-call from 28th of Month 10am to 2nd of next month', () => {
+    test('should calculate payment for period spanning month boundary', () => {
         const since = DateTime.fromISO('2024-08-28T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate();
         const until = DateTime.fromISO('2024-09-02T10:00:00+01:00', { zone: 'Europe/London' }).toJSDate();
         const onCallUser = new OnCallUser(
@@ -104,7 +109,7 @@ describe('should calculate the payment for an on call user', () => {
         expect(calculator.calculateOnCallPayment(onCallUser)).toBe(325);
     });
 
-    test('- when multiple people are on-call from start of Month 10am to end of that month', () => {
+    test('should calculate payments for multiple team members with overlapping schedules', () => {
         const onCallUsers = [
             new OnCallUser(
                 '1PF7DNAV',
@@ -173,8 +178,8 @@ describe('should calculate the payment for an on call user', () => {
     });
 });
 
-describe('should be able to audit the payment for an on call user', () => {
-    test('- when multiple people are on-call from start of Month 10am to end of that month', () => {
+describe('Audit Records for Multiple Team Members', () => {
+    test('should generate detailed audit records for team with multiple periods', () => {
         const onCallUsers = [
             new OnCallUser(
                 '1PF7DNAV',
