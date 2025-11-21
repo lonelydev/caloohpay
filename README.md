@@ -85,23 +85,94 @@ caloohpay -r "PQRSTUV,PSTUVQR" -s "2024-01-01" -u "2024-01-31"
 
 #### Programmatic Usage
 
-CalOohPay can also be used as a library in your Node.js applications. See the [API Documentation](https://lonelydev.github.io/caloohpay/) for comprehensive guides and examples including:
+CalOohPay can be used as a library in both Node.js and browser environments.
 
-- Using custom compensation rates
-- Programmatic configuration
-- Advanced calculator usage
-- Integration examples
-
-Basic example:
+**Node.js** (with file system access and PagerDuty API):
 
 ```typescript
-import { OnCallPaymentsCalculator } from 'caloohpay';
+import { ConfigLoader, OnCallPaymentsCalculator } from 'caloohpay';
 
-const calculator = new OnCallPaymentsCalculator();
-const compensation = calculator.calculateOnCallPayment(user);
+const loader = new ConfigLoader();
+const rates = loader.loadRates();
+const calculator = new OnCallPaymentsCalculator(rates.weekdayRate, rates.weekendRate);
 ```
 
-More details in [OnCallPaymentsCalculator](https://lonelydev.github.io/caloohpay/classes/OnCallPaymentsCalculator.OnCallPaymentsCalculator.htmll) documentation.
+**Browser/Web Applications** (Next.js, React, Vue, etc.):
+
+```typescript
+import { OnCallUser, OnCallPeriod, OnCallPaymentsCalculator } from 'caloohpay/core';
+
+// Create on-call periods from your data
+const user = new OnCallUser('user-id', 'John Doe', [
+  new OnCallPeriod(
+    new Date('2024-08-01T18:00:00Z'),
+    new Date('2024-08-05T09:00:00Z'),
+    'Europe/London'
+  )
+]);
+
+// Calculate with custom rates
+const calculator = new OnCallPaymentsCalculator(60, 90);
+const amount = calculator.calculateOnCallPayment(user);
+console.log(`Compensation: $${amount}`);
+```
+
+**📚 [View Full API Documentation →](https://lonelydev.github.io/caloohpay/)**
+
+## 🌐 Browser Compatibility (New in v2.1.0)
+
+CalOohPay now works in web browsers! The core calculation engine is completely independent of Node.js.
+
+### Package Structure
+
+```typescript
+// 🌐 Browser-compatible core (zero Node.js dependencies)
+import { OnCallPaymentsCalculator, OnCallUser, OnCallPeriod, DEFAULT_RATES } from 'caloohpay/core';
+
+// 🖥️ Node.js-specific features (ConfigLoader, CsvWriter, PagerDuty API)
+import { ConfigLoader, CsvWriter, calOohPay } from 'caloohpay/node';
+
+// 📦 Everything (backward compatible, Node.js only)
+import { ConfigLoader, OnCallPaymentsCalculator } from 'caloohpay';
+```
+
+### Next.js / React Example
+
+```typescript
+'use client'; // Next.js 13+ App Router
+
+import { useState } from 'react';
+import { OnCallPaymentsCalculator, DEFAULT_RATES } from 'caloohpay/core';
+
+export default function CompensationCalculator() {
+  const [weekdayRate, setWeekdayRate] = useState(DEFAULT_RATES.weekdayRate);
+  const [weekendRate, setWeekendRate] = useState(DEFAULT_RATES.weekendRate);
+  
+  const calculator = new OnCallPaymentsCalculator(weekdayRate, weekendRate);
+  
+  // Use calculator.calculateOnCallPayment(user) with your data
+  
+  return (
+    <div>
+      <input value={weekdayRate} onChange={(e) => setWeekdayRate(Number(e.target.value))} />
+      <input value={weekendRate} onChange={(e) => setWeekendRate(Number(e.target.value))} />
+      {/* Your UI here */}
+    </div>
+  );
+}
+```
+
+**What works in browsers:**
+- ✅ Core calculation engine (`OnCallPaymentsCalculator`)
+- ✅ Models (`OnCallUser`, `OnCallPeriod`)
+- ✅ All constants and types
+- ✅ Date utilities and validation
+
+**Node.js only:**
+- ❌ ConfigLoader (uses `fs` module)
+- ❌ CsvWriter (uses `fs` module)
+- ❌ calOohPay function (uses PagerDuty API)
+- ❌ CLI tools
 
 ## 💰 Compensation Rates
 

@@ -7,23 +7,70 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.0] - 2025-11-21
+
+### 🌐 Browser Compatibility & Modular Architecture
+
+This release restructures CalOohPay to work in both Node.js and browser environments, making it perfect for web applications built with Next.js, React, Vue, or vanilla JavaScript.
+
 ### Added
 
-- **Configurable Compensation Rates**: Support for custom weekday and weekend rates via `.caloohpay.json` configuration file
-  - `ConfigLoader` class to load and validate configuration from file system
-  - `RatesConfig` interface defining rate structure (weekdayRate, weekendRate, currency)
-  - Support for project-level and user-level config file locations
-  - Automatic fallback to default rates (£50/£75) when no config file exists
-  - Comprehensive validation of rate values with helpful error messages
-- **Enhanced OnCallPaymentsCalculator**: Now accepts custom rates via constructor parameters while maintaining backward compatibility with default rates
-- **New Validation Methods**: Added `validatePositiveNumber()` and `validateNonEmptyString()` to InputValidator for configuration validation
-- Example configuration file: `.caloohpay.json.example`
+- **Browser-Compatible Core Module** (`caloohpay/core`)
+  - Pure calculation engine with zero Node.js dependencies
+  - Works in any JavaScript environment (browsers, Node.js, Deno, etc.)
+  - Exports: `OnCallPaymentsCalculator`, `OnCallUser`, `OnCallPeriod`, `DEFAULT_RATES`, constants, and utilities
+  - Perfect for React, Next.js, Vue, Angular, and other web frameworks
+
+- **Node.js-Specific Module** (`caloohpay/node`)
+  - File system-based configuration loading (`ConfigLoader`)
+  - CSV file writing (`CsvWriter`)
+  - PagerDuty API integration (`calOohPay`)
+  - All CLI helpers and Node.js utilities
+
+- **Package Exports Field**
+  - Modern package.json exports for better module resolution
+  - Three import paths: `caloohpay` (all), `caloohpay/core` (browser), `caloohpay/node` (Node.js)
+  - TypeScript type definitions for all export paths
 
 ### Changed
 
-- `OnCallPaymentsCalculator` constructor now accepts optional `weekdayRate` and `weekendRate` parameters
-- Updated programmatic API to support custom rates
-- Enhanced documentation with configuration guides and examples
+- **Main Index (`caloohpay`)**: Now re-exports from `caloohpay/node` for backward compatibility
+- **Package Description**: Updated to reflect browser compatibility
+- **Keywords**: Added `browser`, `nextjs`, `react`, `web` for better discoverability
+
+### Documentation
+
+- Updated package.json with comprehensive examples
+- Added browser usage examples in all export modules
+- Enhanced JSDoc comments with environment-specific guidance
+
+### Migration Guide for Existing Users
+
+No breaking changes! Existing code continues to work:
+
+```typescript
+// ✅ Still works (backward compatible)
+import { ConfigLoader, OnCallPaymentsCalculator } from 'caloohpay';
+```
+
+New users can choose the appropriate module:
+
+```typescript
+// 🌐 Browser/Web (new in v2.1.0)
+import { OnCallPaymentsCalculator, DEFAULT_RATES } from 'caloohpay/core';
+
+// 🖥️ Node.js (explicit)
+import { ConfigLoader, CsvWriter } from 'caloohpay/node';
+```
+
+### Technical Details
+
+- Separated browser-compatible code from Node.js-specific dependencies
+- Core module has no dependencies on `fs`, `path`, `process`, `@pagerduty/pdjs`, `yargs`, or `dotenv`
+- All type definitions properly exported for TypeScript users
+- Maintains full backward compatibility with v2.0.x
+
+---
 
 ## [2.0.0] - 2025-10-25
 
@@ -34,6 +81,7 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 This release brings comprehensive timezone handling to CalOohPay, making it perfect for distributed teams working across multiple timezones.
 
 **Key Highlights:**
+
 - Automatic timezone detection from PagerDuty schedules
 - Optional timezone override via CLI
 - Accurate OOH calculations respecting schedule timezones
@@ -53,11 +101,13 @@ This release brings comprehensive timezone handling to CalOohPay, making it perf
 If you were relying on the old behaviour where calculations used your local timezone:
 
 **Before (v1.0.0):**
+
 ```bash
 caloohpay -r "SCHEDULE_ID"  # Used local timezone
 ```
 
 **After (v2.0.0):**
+
 ```bash
 # Uses schedule's timezone from PagerDuty (recommended)
 caloohpay -r "SCHEDULE_ID"
@@ -145,13 +195,15 @@ First stable release of CalOohPay with core functionality for single-timezone te
 
 ### Choosing the Right Version
 
-#### Use v1.0.0 if:
+#### Use v1.0.0 if
+
 - ✅ Your team works in a single timezone
 - ✅ You want stable, tested behaviour
 - ✅ You don't need PagerDuty schedule timezone integration
 - ✅ You prefer simpler timezone handling
 
-#### Use v2.0.0 if:
+#### Use v2.0.0 if
+
 - ✅ Your team is distributed across multiple timezones
 - ✅ You want accurate OOH calculations per schedule timezone
 - ✅ You need PagerDuty timezone integration
@@ -191,6 +243,7 @@ npm link
 ### Support
 
 If you encounter issues with either version:
+
 - Check the version-specific documentation in the README
 - Review the [troubleshooting guide](README.md#-troubleshooting)
 - Create an issue on [GitHub](https://github.com/lonelydev/caloohpay/issues)

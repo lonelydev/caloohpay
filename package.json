@@ -1,8 +1,23 @@
 {
   "name": "caloohpay",
-  "version": "2.0.0",
+  "version": "2.1.0",
+  "description": "A CLI tool and library to calculate out-of-hours on-call compensation. Works in Node.js and browsers (Next.js, React, etc.)",
   "main": "dist/src/index.js",
   "types": "dist/src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./dist/src/index.d.ts",
+      "default": "./dist/src/index.js"
+    },
+    "./core": {
+      "types": "./dist/src/core.d.ts",
+      "default": "./dist/src/core.js"
+    },
+    "./node": {
+      "types": "./dist/src/node.d.ts",
+      "default": "./dist/src/node.js"
+    }
+  },
   "bin": {
     "caloohpay": "dist/src/CalOohPay.js"
   },
@@ -34,14 +49,17 @@
     "automation",
     "payroll",
     "schedule",
-    "typescript"
+    "typescript",
+    "browser",
+    "nextjs",
+    "react",
+    "web"
   ],
   "author": {
     "name": "lonelydev",
     "url": "https://github.com/lonelydev"
   },
   "license": "ISC",
-  "description": "A CLI tool to calculate out-of-hours on-call compensation for engineering teams using PagerDuty schedules",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/lonelydev/caloohpay.git"

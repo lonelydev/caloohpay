@@ -4,7 +4,40 @@ Welcome to the CalOohPay API documentation! This documentation is auto-generated
 
 ## 📚 About CalOohPay
 
-CalOohPay is a command-line tool that automates the calculation of out-of-hours (OOH) on-call compensation for engineering teams using PagerDuty schedules.
+CalOohPay is a command-line tool and library that automates the calculation of out-of-hours (OOH) on-call compensation for engineering teams using PagerDuty schedules.
+
+**New in v2.1.0**: CalOohPay now works in browsers! The core calculation engine is completely independent of Node.js, making it perfect for web applications built with Next.js, React, Vue, or any JavaScript framework.
+
+## 🌐 Package Structure (v2.1.0+)
+
+CalOohPay provides three import paths for different use cases:
+
+- **`caloohpay/core`** - Browser-compatible core (calculator, models, utilities) - zero Node.js dependencies
+- **`caloohpay/node`** - Node.js-specific features (ConfigLoader, CsvWriter, PagerDuty API)
+- **`caloohpay`** - Everything (backward compatible with v2.0.x, Node.js only)
+
+### Browser/Web Usage
+
+```typescript
+import { OnCallUser, OnCallPeriod, OnCallPaymentsCalculator, DEFAULT_RATES } from 'caloohpay/core';
+
+const user = new OnCallUser('id', 'John Doe', [
+  new OnCallPeriod(startDate, endDate, 'Europe/London')
+]);
+
+const calculator = new OnCallPaymentsCalculator(60, 90);
+const amount = calculator.calculateOnCallPayment(user);
+```
+
+### Node.js Usage
+
+```typescript
+import { ConfigLoader, CsvWriter, OnCallPaymentsCalculator } from 'caloohpay/node';
+
+const loader = new ConfigLoader();
+const rates = loader.loadRates();
+const calculator = new OnCallPaymentsCalculator(rates.weekdayRate, rates.weekendRate);
+```
 
 ## 🔍 Quick Navigation
 
