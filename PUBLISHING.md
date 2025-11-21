@@ -4,17 +4,86 @@ This document outlines the steps to publish CalOohPay to npm.
 
 ## Table of Contents
 
-- [Manual Release Process](#manual-release-process)
-- [Automated Release (Future)](#automated-release-future)
+- [Automated Release (Recommended)](#automated-release-recommended)
+- [Manual Release Process (Alternative)](#manual-release-process-alternative)
 - [NPM Token Setup](#npm-token-setup)
 - [Pre-Publishing Checklist](#pre-publishing-checklist)
 - [Troubleshooting](#troubleshooting)
 
-## Manual Release Process
+## Automated Release (Recommended)
 
-CalOohPay uses a semi-automated release script to streamline the publishing process.
+CalOohPay uses GitHub Actions to automatically publish to npm when you create a GitHub release.
 
 ### Quick Start
+
+```bash
+# 1. Update package.json version and CHANGELOG.md
+# 2. Commit your changes
+git add .
+git commit -m "chore: prepare release v2.1.0"
+
+# 3. Push to main branch
+git push origin main
+
+# 4. Create a GitHub release
+# Go to: https://github.com/lonelydev/caloohpay/releases/new
+# - Tag: v2.1.0
+# - Title: v2.1.0
+# - Description: Copy from CHANGELOG.md
+# - Click "Publish release"
+```
+
+The GitHub Actions workflow will automatically:
+1. Run all tests
+2. Run linting and type checking
+3. Build the package
+4. Publish to npm
+5. Create a summary with the npm package link
+
+### How It Works
+
+The automated publishing workflow (`.github/workflows/publish.yml`) triggers when you publish a GitHub release:
+
+1. **Trigger**: Publishing a GitHub release
+2. **Tests**: Runs `npm test`, `npm run lint`, `npm run typecheck`
+3. **Build**: Runs `npm run build`
+4. **Publish**: Uses `NPM_TOKEN` secret to publish to npm registry
+5. **Verification**: Checks package contents before publishing
+
+### Prerequisites
+
+- `NPM_TOKEN` must be configured in repository secrets (see [NPM Token Setup](#npm-token-setup))
+- All tests must pass
+- Version in `package.json` must match the release tag
+
+### Workflow File
+
+The automation is defined in `.github/workflows/publish.yml`:
+
+```yaml
+name: Publish to npm
+
+on:
+  release:
+    types: [published]
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - Checkout code
+      - Setup Node.js
+      - Install dependencies
+      - Run tests, lint, typecheck
+      - Build package
+      - Publish to npm (using NPM_TOKEN)
+```
+
+## Manual Release Process (Alternative)
+
+If you prefer not to use the automated GitHub Actions workflow, you can use the release script.
+
+### Using the Release Script
 
 ```bash
 # 1. Update package.json version and CHANGELOG.md
@@ -103,19 +172,9 @@ npm publish
 # 4. Create GitHub release (see step 4 above)
 ```
 
-## Automated Release (Future)
-
-We plan to add automated npm publishing via GitHub Actions. This will:
-
-- Trigger when a GitHub release is created
-- Automatically run tests, build, and publish to npm
-- Require `NPM_TOKEN` secret configured in repository settings
-
-See [NPM Token Setup](#npm-token-setup) below for configuration details.
-
 ## NPM Token Setup
 
-For automated publishing (or for contributors who need to publish), an npm authentication token is required.
+For automated publishing via GitHub Actions, an npm authentication token is required.
 
 ### For Repository Maintainers
 
