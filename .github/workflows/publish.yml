@@ -24,6 +24,58 @@ jobs:
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
       
+      - name: Validate release version
+        run: |
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          PACKAGE_VERSION=$(node -p "require('./package.json').version")
+          
+          # Extract version from tag (remove 'v' prefix if present)
+          TAG_VERSION="${RELEASE_TAG#v}"
+          
+          if [[ "$TAG_VERSION" != "$PACKAGE_VERSION" ]]; then
+            echo "❌ Version mismatch!"
+            echo "Release tag: $RELEASE_TAG (resolves to v$TAG_VERSION)"
+            echo "package.json version: $PACKAGE_VERSION"
+            echo ""
+            echo "Please ensure the release tag matches the version in package.json"
+            exit 1
+          fi
+          echo "✅ Version match confirmed: $PACKAGE_VERSION"
+      
+      - name: Validate code changes (not docs-only)
+        run: |
+          RELEASE_TAG="${{ github.event.release.tag_name }}"
+          
+          # Get the previous tag
+          PREVIOUS_TAG=$(git describe --tags --abbrev=0 "$RELEASE_TAG"^ 2>/dev/null || echo "")
+          
+          if [ -z "$PREVIOUS_TAG" ]; then
+            echo "ℹ️  First release detected - skipping code change validation"
+          else
+            # Check if only docs, tests, and CI were changed
+            CHANGED_FILES=$(git diff --name-only "$PREVIOUS_TAG" "$RELEASE_TAG" || git diff --name-only HEAD~1)
+            
+            # Filter for meaningful code changes (exclude docs, tests, CI, config)
+            CODE_CHANGES=$(echo "$CHANGED_FILES" | grep -v -E '^(docs/|test/|\.github/|README|CHANGELOG|\.eslintrc|\.prettierrc|tsconfig|jest\.config|commitlint|CONTRIBUTING|CODE_OF_CONDUCT|PUBLISHING|LICENSE|SECURITY)' || true)
+            
+            if [ -z "$CODE_CHANGES" ]; then
+              echo "⚠️  Warning: This release contains only documentation, tests, or CI changes"
+              echo "Changed files:"
+              echo "$CHANGED_FILES"
+              echo ""
+              echo "Consider if this warrants an npm publish. For docs-only changes,"
+              echo "you may want to create releases without publishing to npm."
+              echo ""
+              echo "If this IS intentional (e.g., docs in the package), comment this check or proceed."
+              # Note: Remove 'exit 1' below if you want to allow docs-only publishing
+              exit 1
+            fi
+            
+            echo "✅ Code changes detected (not docs-only)"
+            echo "Changed files:"
+            echo "$CODE_CHANGES"
+          fi
+      
       - name: Install dependencies
         run: npm ci
       
@@ -43,6 +95,32 @@ jobs:
         run: |
           echo "Checking package contents..."
           npm pack --dry-run
+          
+          # Verify key exports are present
+          echo ""
+          echo "Verifying compiled exports..."
+          
+          if [[ ! -f "dist/src/index.js" ]] || [[ ! -f "dist/src/index.d.ts" ]]; then
+            echo "❌ Main export files missing"
+            exit 1
+          fi
+          
+          if [[ ! -f "dist/src/core.js" ]] || [[ ! -f "dist/src/core.d.ts" ]]; then
+            echo "❌ Core export files missing"
+            exit 1
+          fi
+          
+          if [[ ! -f "dist/src/node.js" ]] || [[ ! -f "dist/src/node.d.ts" ]]; then
+            echo "❌ Node export files missing"
+            exit 1
+          fi
+          
+          if [[ ! -f "dist/src/CalOohPay.js" ]]; then
+            echo "❌ CLI executable missing"
+            exit 1
+          fi
+          
+          echo "✅ All package exports verified"
       
       - name: Publish to npm
         run: npm publish
@@ -53,8 +131,18 @@ jobs:
         run: |
           echo "## 🎉 Successfully Published to npm" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Release Details" >> $GITHUB_STEP_SUMMARY
           echo "**Package:** caloohpay" >> $GITHUB_STEP_SUMMARY
           echo "**Version:** ${{ github.event.release.tag_name }}" >> $GITHUB_STEP_SUMMARY
           echo "**Release:** ${{ github.event.release.name }}" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
-          echo "View on npm: https://www.npmjs.com/package/caloohpay" >> $GITHUB_STEP_SUMMARY
+          echo "### Validations Completed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Version tag matches package.json" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Code changes detected (not docs-only)" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Tests passed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Linting passed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Type checking passed" >> $GITHUB_STEP_SUMMARY
+          echo "- ✅ Package exports verified" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### View Package" >> $GITHUB_STEP_SUMMARY
+          echo "[🔗 View on npm](https://www.npmjs.com/package/caloohpay)" >> $GITHUB_STEP_SUMMARY
