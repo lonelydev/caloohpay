@@ -53,7 +53,11 @@ jobs:
             echo "ℹ️  First release detected - skipping code change validation"
           else
             # Check if only docs, tests, and CI were changed
-            CHANGED_FILES=$(git diff --name-only "$PREVIOUS_TAG" "$RELEASE_TAG" || git diff --name-only HEAD~1)
+            if ! CHANGED_FILES=$(git diff --name-only "$PREVIOUS_TAG" "$RELEASE_TAG"); then
+              echo "❌ Failed to compute diff between tags '$PREVIOUS_TAG' and '$RELEASE_TAG'."
+              echo "Ensure both tags exist and are reachable in the current repository history."
+              exit 1
+            fi
             
             # Filter for meaningful code changes (exclude docs, tests, CI, config)
             CODE_CHANGES=$(echo "$CHANGED_FILES" | grep -v -E '^(docs/|test/|\.github/|README|CHANGELOG|\.eslintrc|\.prettierrc|tsconfig|jest\.config|commitlint|CONTRIBUTING|CODE_OF_CONDUCT|PUBLISHING|LICENSE|SECURITY)' || true)
