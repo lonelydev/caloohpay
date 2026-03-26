@@ -66,9 +66,14 @@ jobs:
               echo "Consider if this warrants an npm publish. For docs-only changes,"
               echo "you may want to create releases without publishing to npm."
               echo ""
-              echo "If this IS intentional (e.g., docs in the package), comment this check or proceed."
-              # Note: Remove 'exit 1' below if you want to allow docs-only publishing
-              exit 1
+              echo "If this IS intentional (e.g., docs in the package), you can override this check"
+              echo "by setting the environment variable ALLOW_DOCS_ONLY_PUBLISH=true for this job."
+              if [ "${ALLOW_DOCS_ONLY_PUBLISH}" = "true" ]; then
+                echo "ℹ️  ALLOW_DOCS_ONLY_PUBLISH=true detected - proceeding with docs-only release."
+              else
+                echo "❌ Failing because no code changes were detected and ALLOW_DOCS_ONLY_PUBLISH is not set to 'true'."
+                exit 1
+              fi
             fi
             
             echo "✅ Code changes detected (not docs-only)"
