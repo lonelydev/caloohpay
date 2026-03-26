@@ -56,6 +56,26 @@ The automated publishing workflow (`.github/workflows/publish.yml`) triggers whe
 - All tests must pass
 - Version in `package.json` must match the release tag
 
+### Docs-Only Release Override
+
+The publish workflow blocks releases when the diff between the current tag and the previous tag contains only documentation, tests, CI, or config changes.
+
+If you intentionally want to publish a docs-only release, set the `ALLOW_DOCS_ONLY_PUBLISH` environment variable to `true` for the `publish` job in `.github/workflows/publish.yml`.
+
+Example:
+
+```yaml
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    env:
+      ALLOW_DOCS_ONLY_PUBLISH: 'true'
+```
+
+Use this only when the npm package should still be republished even though no code changes were detected.
+
+For normal releases, leave this unset so the workflow continues to fail fast on docs-only changes.
+
 ### Workflow File
 
 The automation is defined in `.github/workflows/publish.yml`:
