@@ -7,7 +7,7 @@ test/
 # Config files
 tsconfig.json
 jest.config.js
-eslint.config.cjs
+eslint.config.mjs
 .eslintrc.json
 .prettierrc
 typedoc.json
@@ -53,3 +53,8 @@ coverage/
 TODO.md
 CODE_SMELLS_*.md
 ASYNC_FIX_SUMMARY.md
+# Agent tooling
+AGENTS.md
+CLAUDE.md
+.claude/
+.env.example

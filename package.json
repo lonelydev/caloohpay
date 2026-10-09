@@ -28,6 +28,7 @@
     "lint:fix": "eslint --ext .ts src test --fix",
     "lint:ci": "eslint --ext .ts src test --max-warnings 0",
     "commitlint": "commitlint --edit",
+    "prepare": "husky",
     "prebuild": "npm run clean && npm run typecheck",
     "build": "npm run prebuild && tsc -p tsconfig.json",
     "verify": "npm run lint && npm run test && npm run build",

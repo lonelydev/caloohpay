@@ -211,7 +211,7 @@ Development, testing, contributor workflow and git-hook guidance has moved to [C
 
 Release and npm publishing guidance has moved to [PUBLISHING.md](https://github.com/lonelydev/caloohpay/blob/main/PUBLISHING.md), including how to intentionally allow a docs-only publish with the `ALLOW_DOCS_ONLY_PUBLISH=true` workflow environment variable.
 
-Note on ESLint configuration: this project uses ESLint v9 with a flat config file located at `eslint.config.cjs` (instead of legacy `.eslintrc.json`). If you need to adjust lint rules or add new shareable configs, update `eslint.config.cjs` and run `npm run lint` to validate your changes.
+Note on ESLint configuration: this project uses ESLint v9 with a flat config file located at `eslint.config.mjs` (instead of legacy `.eslintrc.json`). If you need to adjust lint rules or add new shareable configs, update `eslint.config.mjs` and run `npm run lint` to validate your changes.
 
 ## 🔧 Troubleshooting
 
