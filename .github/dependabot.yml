@@ -1,0 +1,28 @@
+version: 2
+updates:
+  - package-ecosystem: npm
+    directory: /
+    schedule:
+      interval: weekly
+    open-pull-requests-limit: 5
+    commit-message:
+      prefix: chore
+      prefix-development: chore
+      include: scope
+    groups:
+      # Minor and patch dev dependency bumps arrive as one PR instead of many
+      # that all edit package-lock.json and conflict with each other.
+      dev-dependencies:
+        dependency-type: development
+        update-types:
+          - minor
+          - patch
+    # Major bumps and production dependencies stay as individual PRs.
+
+  - package-ecosystem: github-actions
+    directory: /
+    schedule:
+      interval: monthly
+    commit-message:
+      prefix: ci
+      include: scope
