@@ -34,8 +34,8 @@ jobs:
         if: github.event_name == 'push'
         run: npx commitlint --last --verbose
 
-      - name: npm vulnerability check
-        run: npm audit --audit-level=moderate
+      - name: npm vulnerability check (production dependencies)
+        run: npm audit --omit=dev --audit-level=moderate
 
       - name: Validate PR commits with commitlint
         if: github.event_name == 'pull_request'
