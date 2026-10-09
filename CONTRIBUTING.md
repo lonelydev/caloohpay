@@ -67,7 +67,7 @@ npm test
 npm run lint
 ```
 
-Configuration note: ESLint uses a flat config file `eslint.config.cjs` (ESLint v9). If you need to change or add rules, edit `eslint.config.cjs`. Flat configs differ from legacy `.eslintrc` files (they are an array of config objects). For advanced or type-aware rules you may need to enable them in CI or adjust `parserOptions.project`.
+Configuration note: ESLint uses a flat config file `eslint.config.mjs` (ESLint v9). If you need to change or add rules, edit `eslint.config.mjs`. Flat configs differ from legacy `.eslintrc` files (they are an array of config objects). For advanced or type-aware rules you may need to enable them in CI or adjust `parserOptions.project`.
 
 Husky note: You may see a deprecation warning when committing about sourcing `_/husky.sh` in `.husky/pre-commit`. That message advises removing the two lines that source husky helper scripts prior to Husky v10; update `.husky/pre-commit` when upgrading Husky to v10 to avoid breakage.
 
@@ -88,7 +88,7 @@ Pre-commit and pre-push hooks are configured to help enforce these rules. If you
 Husky & Git hooks
 -----------------
 
-This repository uses Husky to manage Git hooks. The project uses the `husky install` flow (run automatically on install via the `prepare` script). To ensure hooks are available locally after cloning:
+This repository uses Husky to manage Git hooks. Hooks are installed automatically on `npm install` / `npm ci` via the `prepare` script (`husky`). To ensure hooks are available locally after cloning:
 
 ```bash
 # Install dependencies
@@ -98,7 +98,7 @@ npm install
 npm run prepare
 ```
 
-If you need to re-install or update hooks manually, run `npx husky install` or `npm run prepare`.
+If you need to re-install or update hooks manually, run `npm run prepare`.
 
 Note: The repo currently depends on Husky v9 but the pre-commit hook is written to remain compatible with future Husky v10 changes. If you upgrade Husky, make sure to run `npm run prepare` again and verify hooks.
 
@@ -156,7 +156,7 @@ flowchart LR
     A --> L["Logger<br/>src/logger/ConsoleLogger.ts"]
   end
 
-  A --> PD["PagerDuty Client<br/>src/pgapi.ts<br/> (pdjs)"]
+  A --> PD["PagerDuty Client<br/>src/CalOohPay.ts<br/> (@pagerduty/pdjs)"]
   PD --> S["PagerdutySchedule<br/>src/PagerdutySchedule.ts"]
   S --> F["FinalSchedule<br/>src/FinalSchedule.ts"]
   F --> Calc["OnCallPaymentsCalculator<br/>src/OnCallPaymentsCalculator.ts"]
@@ -166,7 +166,7 @@ flowchart LR
   L --> Out
 
   subgraph Dev["Developer tooling"]
-    ESL["ESLint<br/>eslint.config.cjs"]
+    ESL["ESLint<br/>eslint.config.mjs"]
     HUS["Husky (.husky)"]
     J["Tests: Jest"]
     TD["Docs: TypeDoc"]
