@@ -1,0 +1,23 @@
+name: Dependency audit
+permissions:
+  contents: read
+
+# Full audit including devDependencies. The CI workflow only gates pull requests on
+# production dependencies, so dev-only advisories surface here instead of blocking PRs.
+on:
+  schedule:
+    - cron: '0 7 * * 1'
+  workflow_dispatch:
+
+jobs:
+  audit:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: lts/*
+          cache: npm
+      - run: npm ci
+      - name: npm audit (all dependencies)
+        run: npm audit --audit-level=high
