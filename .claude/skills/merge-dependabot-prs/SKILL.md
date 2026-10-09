@@ -34,10 +34,21 @@ The `main` ruleset requires a PR and linear history but **no required status che
 
    Everything else: skip and record under "needs human".
 
-3. **Refresh.** Record `gh pr view N --json headRefOid`, then `gh pr comment N --body "@dependabot rebase"`. Poll every 30s (10 min max) until `headRefOid` changes and `mergeStateStatus` is not `DIRTY`/`BEHIND`. If it never changes because the PR is already up to date with `main`, continue.
-   - **Stop early if Dependabot refuses.** On each poll, read the newest comment: `gh pr view N --json comments --jq '.comments[-1] | select(.author.login=="dependabot") | .body'`. If it says the PR "can't be rebased" (for example because its `dependabot.yml` entry was deleted, or the PR was edited), don't wait out the timeout. Mark the PR "needs human: Dependabot cannot rebase; close it so Dependabot can recreate it" and move on. Never push to its branch yourself.
+3. **Refresh, only if needed.** CI on a PR is only meaningful if it ran against current `main`. Check first:
 
-4. **Gate.** `gh pr checks N --watch --fail-fast --interval 30`. Then verify with `gh pr checks N` that every check is `pass`.
+   ```bash
+   head=$(gh pr view N --json headRefOid --jq .headRefOid)
+   gh api repos/{owner}/{repo}/compare/main...$head --jq '.behind_by'
+   ```
+
+   `mergeStateStatus: CLEAN` alone does not mean up to date (a `CLEAN` PR can be many commits behind `main` with stale CI). Skip the rebase and go to step 4 only if `behind_by` is `0` **and** `mergeStateStatus` is `CLEAN`. Otherwise record `head` and the PR's comment count, then `gh pr comment N --body "@dependabot rebase"`.
+   - **Poll every 30s, 3 minutes max,** until `headRefOid` changes.
+   - **Any new Dependabot comment means it did not rebase; stop polling.** Read it: `gh pr view N --json comments --jq '.comments[-1] | select(.author.login=="dependabot") | .body'`.
+     - "can't be rebased" (its `dependabot.yml` entry was deleted, or the PR was edited): permanent. Mark "needs human: close it so Dependabot can recreate it".
+     - Any other error (for example "Something went wrong on our end"): transient. Retry the comment **once**, with another 3-minute poll. If it fails again, mark "needs human: Dependabot rebase failing".
+   - If the head never changes and there is no comment within 3 minutes, mark "needs human: rebase timed out". Never push to its branch yourself.
+
+4. **Gate.** `gh pr checks N --watch --fail-fast --interval 30` (give up after 20 minutes and mark "needs human: CI timed out"). Then verify with `gh pr checks N` that every check is `pass`.
    - On failure, find the failing step: `gh run view <run-id> --json jobs --jq '.jobs[].steps[] | select(.conclusion=="failure") | .name'`.
    - If the failing step is the same on `main` (`gh run list --branch main --workflow CI --limit 1`) or is `npm vulnerability check`, the failure is **systemic**: stop the whole loop and report. Fixing `main` comes first.
    - Otherwise mark this PR failed and continue; stop after two consecutive failures.
