@@ -35,6 +35,7 @@ The `main` ruleset requires a PR and linear history but **no required status che
    Everything else: skip and record under "needs human".
 
 3. **Refresh.** Record `gh pr view N --json headRefOid`, then `gh pr comment N --body "@dependabot rebase"`. Poll every 30s (10 min max) until `headRefOid` changes and `mergeStateStatus` is not `DIRTY`/`BEHIND`. If it never changes because the PR is already up to date with `main`, continue.
+   - **Stop early if Dependabot refuses.** On each poll, read the newest comment: `gh pr view N --json comments --jq '.comments[-1] | select(.author.login=="dependabot") | .body'`. If it says the PR "can't be rebased" (for example because its `dependabot.yml` entry was deleted, or the PR was edited), don't wait out the timeout. Mark the PR "needs human: Dependabot cannot rebase; close it so Dependabot can recreate it" and move on. Never push to its branch yourself.
 
 4. **Gate.** `gh pr checks N --watch --fail-fast --interval 30`. Then verify with `gh pr checks N` that every check is `pass`.
    - On failure, find the failing step: `gh run view <run-id> --json jobs --jq '.jobs[].steps[] | select(.conclusion=="failure") | .name'`.
