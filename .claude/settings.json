@@ -25,10 +25,18 @@
       "Bash(npm run verify)",
       "Bash(npm run docs)",
       "Bash(npx jest:*)",
-      "Bash(npx tsc --noEmit:*)"
+      "Bash(npx tsc --noEmit:*)",
+      "Bash(gh pr list:*)",
+      "Bash(gh pr view:*)",
+      "Bash(gh pr checks:*)",
+      "Bash(gh pr comment:*)",
+      "Bash(gh run view:*)",
+      "Bash(gh run list:*)"
     ],
     "deny": [
       "Read(./.env)",
+      "Bash(gh pr merge * --admin*)",
+      "Bash(gh pr merge --admin*)",
       "Bash(npm publish:*)",
       "Bash(./release-and-publish.sh:*)"
     ]
