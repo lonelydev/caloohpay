@@ -317,6 +317,10 @@ The token is stage-only and something ran `npm publish`. In CI the workflow must
 
 Check, in order: the `NPM_TOKEN` secret exists (`gh secret list`), the token has not expired (90 day maximum), and it is scoped to `caloohpay` with **Read and write (stage only)**. Create a new token, update the secret, then re-run the failed job (`gh run rerun <run-id> --failed`).
 
+### Workflow fails at "Stage package on npm" with a failing test
+
+`npm stage publish` runs `npm run verify` (via `prepublishOnly`) again, so a flaky test can fail it after the earlier test step passed. A rerun checks out the same tagged commit, so it only helps for a one-off flake. If it repeats, fix the test on `main`, delete the release and tag (`gh release delete vX.Y.Z --cleanup-tag --yes`), and create the release again on the new `main`. Nothing is published until you approve the staged version, so this is safe.
+
 ### The workflow is green but the new version is not on npm
 
 Expected: the workflow only stages the version. Approve it, see [Approving a Staged Release](#approving-a-staged-release).

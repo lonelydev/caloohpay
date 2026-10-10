@@ -49,7 +49,7 @@ Releasing = creating a GitHub release with tag `vX.Y.Z` on `main`. That triggers
    gh run watch <id> --exit-status
    ```
 
-   Give up watching after 15 minutes and report. A green run means the version is **staged, not live**.
+   Give up watching after 15 minutes and report. macOS has no `timeout` command, so instead of wrapping `gh run watch` use a bounded loop that polls `gh run view <id> --json status --jq .status` every 20s. A green run means the version is **staged, not live**.
 
 6. **Hand over for approval.** Tell the user the version is staged and how to approve it:
    - npmjs.com: open `caloohpay`, **Staged Packages** tab, review, **Approve** (2FA prompt); or
@@ -70,6 +70,7 @@ Releasing = creating a GitHub release with tag `vX.Y.Z` on `main`. That triggers
 
 The tag and release already exist. Don't delete them, force-push, or re-tag without asking. Read `gh run view <id> --log-failed` and report the failing step.
 
+- **Staging step fails with a test or lint error.** `npm stage publish` runs `prepublishOnly` (`npm run verify`: lint, the whole test suite, build) again, after the workflow's own test steps passed. A flaky test can therefore fail here and nothing is staged. Check the log for `Tests:` and `●` lines first. A rerun (`gh run rerun <id> --failed`) can help for a one-off flake, but it checks out the **tagged commit**, so it cannot pick up a fix merged later. If the failure repeats, fix it on `main`, then ask the user to delete the release and tag (`gh release delete vX.Y.Z --cleanup-tag --yes`, which you are not permitted to run) and recreate the release on the new `main`. This happened for v2.1.1 (a timer test asserting `>= 50` ms measured 49 ms). Nothing reaches npm until the user approves, so recreating is safe.
 - `E_STAGE_REQUIRED`: the workflow ran `npm publish` with the stage-only token; it must use `npm stage publish`.
 - Authentication error at the staging step: likely an expired or wrongly scoped `NPM_TOKEN`. The user creates a new token and updates the secret, then you re-run with `gh run rerun <id> --failed`.
 - A staged version that should not go live: only the user can discard it (`npm stage reject <stage-id>`, which needs 2FA).
