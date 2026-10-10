@@ -531,7 +531,8 @@ describe('CalOohPay async operations', () => {
                 const endTime = Date.now();
 
                 expect(result.data.schedule.name).toBe('Slow Schedule');
-                expect(endTime - startTime).toBeGreaterThanOrEqual(50);
+                // Node timers can fire up to ~1ms early relative to Date.now(), so allow a little slack.
+                expect(endTime - startTime).toBeGreaterThanOrEqual(45);
             });
 
             it('should handle consecutive timeout errors', async () => {
