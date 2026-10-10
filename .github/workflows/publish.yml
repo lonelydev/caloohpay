@@ -24,7 +24,14 @@ jobs:
           node-version: 'lts/*'
           cache: 'npm'
           registry-url: 'https://registry.npmjs.org'
-      
+
+      # `npm stage publish` needs npm >= 11.15.0 and Node >= 22.14.0. The npm bundled
+      # with the runner's Node LTS may be older, so install a new enough one.
+      - name: Install npm with staged publishing support
+        run: |
+          npm install -g 'npm@^11.15.0'
+          echo "node $(node --version), npm $(npm --version)"
+
       - name: Validate release version
         run: |
           RELEASE_TAG="${{ github.event.release.tag_name }}"
@@ -132,14 +139,17 @@ jobs:
           
           echo "✅ All package exports verified"
       
-      - name: Publish to npm
-        run: npm publish
+      # NPM_TOKEN is a stage-only granular token: it cannot run `npm publish`
+      # (npm rejects it with E_STAGE_REQUIRED). A maintainer approves the staged
+      # version with 2FA before it goes live.
+      - name: Stage package on npm
+        run: npm stage publish
         env:
           NODE_AUTH_TOKEN: ${{ secrets.NPM_TOKEN }}
       
       - name: Create summary
         run: |
-          echo "## 🎉 Successfully Published to npm" >> $GITHUB_STEP_SUMMARY
+          echo "## 📦 Staged on npm, awaiting approval" >> $GITHUB_STEP_SUMMARY
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### Release Details" >> $GITHUB_STEP_SUMMARY
           echo "**Package:** caloohpay" >> $GITHUB_STEP_SUMMARY
@@ -156,3 +166,10 @@ jobs:
           echo "" >> $GITHUB_STEP_SUMMARY
           echo "### View Package" >> $GITHUB_STEP_SUMMARY
           echo "[🔗 View on npm](https://www.npmjs.com/package/caloohpay)" >> $GITHUB_STEP_SUMMARY
+          echo "" >> $GITHUB_STEP_SUMMARY
+          echo "### Next step: approve with 2FA" >> $GITHUB_STEP_SUMMARY
+          echo "The version is **not live yet**. A maintainer must approve it, either on npmjs.com (package > Staged Packages > Approve) or with the CLI (npm 11.15.0 or later):" >> $GITHUB_STEP_SUMMARY
+          echo '```bash' >> $GITHUB_STEP_SUMMARY
+          echo "npm stage list caloohpay" >> $GITHUB_STEP_SUMMARY
+          echo "npm stage approve <stage-id>" >> $GITHUB_STEP_SUMMARY
+          echo '```' >> $GITHUB_STEP_SUMMARY
