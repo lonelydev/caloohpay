@@ -7,6 +7,26 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+## [2.1.1] - 2026-10-10
+
+Maintenance release. The calculation logic and public API are unchanged.
+
+### Changed
+
+- Updated the runtime dependency `dotenv` from `^16.4.5` to `^18.0.6`.
+- The CLI now loads `.env` quietly (`dotenv.config({ quiet: true })`). `dotenv` 17 and later print an `injected env (N) from .env` line to stderr on every run by default; this keeps CLI output exactly as it was in 2.1.0. `.env` loading itself is unchanged.
+- The npm package no longer includes AI-agent tooling files (`.claude/`, `AGENTS.md`, `CLAUDE.md`, `.env.example`).
+
+### Security
+
+- Production dependencies have no known vulnerabilities (`npm audit --omit=dev`).
+- Development-only dependencies were updated (Jest 30, `@commitlint/cli` 21, TypeDoc and others) to clear advisories. None of them are part of the published package.
+
+### Internal
+
+- CI now gates pull requests on production-dependency audit results, runs once per pull request, and a weekly full audit was added.
+- Added `AGENTS.md`, project skills and Dependabot grouped updates for contributors and AI coding agents.
+
 ## [2.1.0] - 2025-11-21
 
 ### 🌐 Browser Compatibility & Modular Architecture
@@ -252,5 +272,6 @@ If you encounter issues with either version:
 
 See the [Development Roadmap](README.md#-development-roadmap) for planned features.
 
+[2.1.1]: https://github.com/lonelydev/caloohpay/compare/v2.1.0...v2.1.1
 [2.0.0]: https://github.com/lonelydev/caloohpay/compare/v1.0.0...v2.0.0
 [1.0.0]: https://github.com/lonelydev/caloohpay/releases/tag/v1.0.0
