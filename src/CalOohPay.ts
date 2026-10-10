@@ -58,7 +58,8 @@ export interface CalOohPayResult {
     totalCompensation: number;
 }
 
-dotenv.config();
+// dotenv 17+ prints an "injected env" line to stderr on every call unless quiet.
+dotenv.config({ quiet: true });
 
 const yargsInstance = yargs(hideBin(process.argv));
 
