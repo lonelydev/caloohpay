@@ -18,7 +18,8 @@ Release flow is described in `PUBLISHING.md`; the publish workflow (`.github/wor
 5. **Docs-only?** Run `git diff --name-only <last-tag>..HEAD`. If only docs, tests or CI changed, tell the user the publish job will refuse unless `ALLOW_DOCS_ONLY_PUBLISH: 'true'` is set deliberately.
 6. **Gate**: `npm run verify` passes.
 7. **Package contents**: `npm pack --dry-run` lists only `dist/`, `README.md`, `LICENSE`, `package.json`, `postinstall.js` and similar. No `src/`, `test/`, `.env*`, `.claude/`, `AGENTS.md`.
-8. **Audit**: `npm audit --audit-level=moderate` (CI runs it).
+8. **Audit**: `npm audit --omit=dev --audit-level=moderate` (what CI gates on). The weekly audit workflow covers dev dependencies.
+9. **Publish token**: `gh secret list | grep NPM_TOKEN` must show the secret, otherwise the publish workflow fails after the tag and release are created. If it is missing, tell the user before they start a release.
 
 ## Report
 
