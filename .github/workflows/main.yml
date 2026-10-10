@@ -3,9 +3,11 @@ permissions:
   contents: read
   
 on:
+  # Pull requests are tested on the merge result via pull_request, so push only
+  # runs on main (post-merge) to avoid a duplicate run for every PR branch.
   push:
     branches:
-      - '**'
+      - 'main'
   pull_request:
     branches:
       - 'main'
