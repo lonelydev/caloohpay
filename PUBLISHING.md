@@ -31,14 +31,16 @@ git push origin main
 # - Title: v2.1.0
 # - Description: Copy from CHANGELOG.md
 # - Click "Publish release"
-```
 
+# 5. Approve the staged version with 2FA (see "Approving a Staged Release" below).
+#    The version is NOT live on npm until you do this.
+```
 The GitHub Actions workflow will automatically:
 1. Run all tests
 2. Run linting and type checking
 3. Build the package
-4. Publish to npm
-5. Create a summary with the npm package link
+4. Stage the package on npm (it is not live yet)
+5. Create a summary with the npm package link and the approval command
 
 ### How It Works
 
@@ -47,8 +49,23 @@ The automated publishing workflow (`.github/workflows/publish.yml`) triggers whe
 1. **Trigger**: Publishing a GitHub release
 2. **Tests**: Runs `npm test`, `npm run lint`, `npm run typecheck`
 3. **Build**: Runs `npm run build`
-4. **Publish**: Uses `NPM_TOKEN` secret to publish to npm registry
+4. **Stage**: Runs `npm stage publish` with the `NPM_TOKEN` secret. The version is uploaded but not public until a maintainer approves it
 5. **Verification**: Checks package contents before publishing
+
+### Approving a Staged Release
+
+`NPM_TOKEN` is a stage-only token, so the workflow can only *stage* a version. A maintainer approves it with 2FA, either:
+
+- on [npmjs.com](https://www.npmjs.com/): open the package, go to the **Staged Packages** tab and click **Approve**; or
+- with the CLI (npm 11.15.0 or later, Node 22.14.0 or later):
+
+```bash
+npm stage list caloohpay
+npm stage view <stage-id>      # optional: inspect before approving
+npm stage approve <stage-id>   # prompts for 2FA, then the version goes live
+```
+
+Use `npm stage reject <stage-id>` to discard a staged version. Afterwards confirm with `npm view caloohpay version`.
 
 ### Prerequisites
 
@@ -202,10 +219,12 @@ For automated publishing via GitHub Actions, an npm authentication token is requ
 
 1. Log in to [npmjs.com](https://www.npmjs.com/)
 2. Click your profile icon → "Access Tokens"
-3. Click "Generate New Token" → "Classic Token"
-4. Select token type:
-   - **Automation** - for GitHub Actions (read and publish)
-   - **Publish** - for CLI publishing from trusted environments
+3. Click "Generate New Token" → "Granular Access Token"
+4. Configure it:
+   - **Name**: for example `caloohpay-npm-publish`
+   - **Bypass two-factor authentication**: leave **off**. Staging never needs 2FA, and a stage-only token cannot publish directly anyway.
+   - **Packages and scopes**: **Read and write (stage only)**, restricted to the `caloohpay` package only. No organisation permissions.
+   - **Expiration**: at most 90 days. Set a reminder to rotate it; an expired token makes the workflow fail at the staging step.
 5. Copy the generated token (it won't be shown again)
 
 #### 2. Add Token to GitHub Repository
@@ -217,13 +236,17 @@ For automated publishing via GitHub Actions, an npm authentication token is requ
 5. Value: Paste the token from step 1
 6. Click **Add secret**
 
+To avoid leaving the token in shell history or chat, you can instead run `gh secret set NPM_TOKEN` in your own terminal; it prompts for the value.
+
 #### 3. Token Permissions
 
 The `NPM_TOKEN` should have:
 
-- **Read and Publish** access to the `caloohpay` package
-- For scoped packages: ensure the token has access to the organization
-- Recommended: Use an "Automation" token for GitHub Actions
+- **Read and write (stage only)** access to the `caloohpay` package, and nothing else
+- 2FA bypass **off**
+- An expiry of 90 days or less
+
+A stage-only token still keeps other package write permissions (such as moving dist-tags and deprecating versions), so keep its scope narrow. `npm publish` with this token fails with `E_STAGE_REQUIRED`; the workflow uses `npm stage publish`. npm plans to end direct publishing with bypass-2FA tokens in January 2027, so avoid those. [Trusted publishing](https://docs.npmjs.com/trusted-publishers) is an alternative that needs no stored token.
 
 ### For Local Development
 
@@ -285,6 +308,18 @@ rm caloohpay-*.tgz
 ```
 
 ## Troubleshooting
+
+### `E_STAGE_REQUIRED` Error
+
+The token is stage-only and something ran `npm publish`. In CI the workflow must use `npm stage publish`. If you publish by hand from your own logged-in session (for example `release-and-publish.sh`), use your own login, not the CI token.
+
+### Workflow fails at "Stage package on npm"
+
+Check, in order: the `NPM_TOKEN` secret exists (`gh secret list`), the token has not expired (90 day maximum), and it is scoped to `caloohpay` with **Read and write (stage only)**. Create a new token, update the secret, then re-run the failed job (`gh run rerun <run-id> --failed`).
+
+### The workflow is green but the new version is not on npm
+
+Expected: the workflow only stages the version. Approve it, see [Approving a Staged Release](#approving-a-staged-release).
 
 ### "Tag already exists" Error
 
