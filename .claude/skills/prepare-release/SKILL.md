@@ -19,7 +19,7 @@ Release flow is described in `PUBLISHING.md`; the publish workflow (`.github/wor
 6. **Gate**: `npm run verify` passes.
 7. **Package contents**: `npm pack --dry-run` lists only `dist/`, `README.md`, `LICENSE`, `package.json`, `postinstall.js` and similar. No `src/`, `test/`, `.env*`, `.claude/`, `AGENTS.md`.
 8. **Audit**: `npm audit --omit=dev --audit-level=moderate` (what CI gates on). The weekly audit workflow covers dev dependencies.
-9. **Publish token**: `gh secret list | grep NPM_TOKEN` must show the secret, otherwise the publish workflow fails after the tag and release are created. If it is missing, tell the user before they start a release.
+9. **Publish token**: `gh secret list | grep NPM_TOKEN` must show the secret, otherwise the publish workflow fails after the tag and release are created. If it is missing, tell the user before they start a release. The token should be **Read and write (stage only)**, scoped to `caloohpay`, with an expiry of at most 90 days (not visible to you, so ask), and `.github/workflows/publish.yml` must run `npm stage publish`. Remind the user that the release will need their 2FA approval before it is live.
 
 ## Report
 
